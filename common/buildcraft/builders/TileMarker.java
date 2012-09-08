@@ -10,15 +10,15 @@
 package buildcraft.builders;
 
 import buildcraft.BuildCraftBuilders;
-import buildcraft.api.APIProxy;
 import buildcraft.api.core.IAreaProvider;
 import buildcraft.api.core.LaserKind;
 import buildcraft.api.core.Position;
 import buildcraft.core.EntityBlock;
 import buildcraft.core.TileBuildCraft;
-import buildcraft.core.Utils;
 import buildcraft.core.network.PacketUpdate;
 import buildcraft.core.network.TileNetworkData;
+import buildcraft.core.proxy.CoreProxy;
+import buildcraft.core.utils.Utils;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.Packet;
 import net.minecraft.src.World;
@@ -88,19 +88,25 @@ public class TileMarker extends TileBuildCraft implements IAreaProvider {
 
 	private EntityBlock[] lasers;
 	private EntityBlock[] signals;
+	public @TileNetworkData boolean showSignals = false;
 
-	public void switchSignals() {
+	public void updateSignals() {
+		if (CoreProxy.proxy.isSimulating(worldObj)) {
+			showSignals = worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord);
+			sendNetworkUpdate();
+		}
+	}
+	
+	private void switchSignals(){
 		if (signals != null) {
 			for (EntityBlock b : signals) {
 				if (b != null) {
-					APIProxy.removeEntity(b);
+					CoreProxy.proxy.removeEntity(b);
 				}
 			}
-
 			signals = null;
 		}
-
-		if (worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord)) {
+		if(showSignals){
 			signals = new EntityBlock[6];
 			if (!origin.isSet() || !origin.vect[0].isSet()) {
 				signals[0] = Utils.createLaser(worldObj, new Position(xCoord, yCoord, zCoord), new Position(xCoord + maxSize - 1,
@@ -123,10 +129,6 @@ public class TileMarker extends TileBuildCraft implements IAreaProvider {
 						yCoord, zCoord), LaserKind.Blue);
 			}
 		}
-
-		if (APIProxy.isServerSide()) {
-			sendNetworkUpdate();
-		}
 	}
 
 	private Position initVectO, initVect[];
@@ -135,7 +137,7 @@ public class TileMarker extends TileBuildCraft implements IAreaProvider {
 	public void initialize() {
 		super.initialize();
 
-		switchSignals();
+		updateSignals();
 
 		if (initVectO != null) {
 			origin = new Origin();
@@ -153,7 +155,7 @@ public class TileMarker extends TileBuildCraft implements IAreaProvider {
 	}
 
 	public void tryConnection() {
-		if (APIProxy.isClient(worldObj)) {
+		if (CoreProxy.proxy.isRemote(worldObj)) {
 			return;
 		}
 
@@ -230,8 +232,8 @@ public class TileMarker extends TileBuildCraft implements IAreaProvider {
 		}
 
 		origin.vectO.getMarker(worldObj).createLasers();
-		switchSignals();
-		marker.switchSignals();
+		updateSignals();
+		marker.updateSignals();
 
 		return true;
 	}
@@ -240,7 +242,7 @@ public class TileMarker extends TileBuildCraft implements IAreaProvider {
 		if (lasers != null) {
 			for (EntityBlock entity : lasers) {
 				if (entity != null) {
-					APIProxy.removeEntity(entity);
+					CoreProxy.proxy.removeEntity(entity);
 				}
 			}
 		}
@@ -377,11 +379,11 @@ public class TileMarker extends TileBuildCraft implements IAreaProvider {
 				TileMarker mark = wrapper.getMarker(worldObj);
 
 				if (mark != null) {
-					mark.switchSignals();
+					mark.updateSignals();
 				}
 			}
 
-			markerOrigin.switchSignals();
+			markerOrigin.updateSignals();
 		}
 
 		if (signals != null) {
@@ -394,7 +396,7 @@ public class TileMarker extends TileBuildCraft implements IAreaProvider {
 
 		signals = null;
 
-		if (APIProxy.isServerSide() && markerOrigin != null && markerOrigin != this) {
+		if (CoreProxy.proxy.isSimulating(worldObj) && markerOrigin != null && markerOrigin != this) {
 			markerOrigin.sendNetworkUpdate();
 		}
 	}
@@ -460,9 +462,9 @@ public class TileMarker extends TileBuildCraft implements IAreaProvider {
 	}
 
 	@Override
-	public Packet getDescriptionPacket() {
+	public Packet getAuxillaryInfoPacket() {
 		if (origin.vectO.getMarker(worldObj) == this) {
-			return super.getDescriptionPacket();
+			return super.getAuxillaryInfoPacket();
 		} else {
 			return null;
 		}
@@ -484,15 +486,17 @@ public class TileMarker extends TileBuildCraft implements IAreaProvider {
 	@Override
 	public void postPacketHandling(PacketUpdate packet) {
 		super.postPacketHandling(packet);
+		
+		switchSignals();
 
 		if (origin.vectO.isSet()) {
-			origin.vectO.getMarker(worldObj).switchSignals();
+			origin.vectO.getMarker(worldObj).updateSignals();
 
 			for (TileWrapper w : origin.vect) {
 				TileMarker m = w.getMarker(worldObj);
 
 				if (m != null) {
-					m.switchSignals();
+					m.updateSignals();
 				}
 			}
 		}

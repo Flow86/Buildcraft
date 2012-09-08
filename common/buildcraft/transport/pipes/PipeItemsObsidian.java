@@ -10,21 +10,18 @@ package buildcraft.transport.pipes;
 
 import java.util.List;
 
-import buildcraft.api.APIProxy;
 import buildcraft.api.core.Orientations;
 import buildcraft.api.core.Position;
 import buildcraft.api.power.IPowerProvider;
 import buildcraft.api.power.IPowerReceptor;
 import buildcraft.api.power.PowerFramework;
-import buildcraft.api.power.PowerProvider;
 import buildcraft.api.transport.IPipedItem;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.EntityPassiveItem;
-import buildcraft.core.Utils;
+import buildcraft.core.proxy.CoreProxy;
+import buildcraft.core.utils.Utils;
 import buildcraft.transport.Pipe;
-import buildcraft.transport.PipeLogicObsidian;
 import buildcraft.transport.PipeTransportItems;
-import buildcraft.transport.TransportProxy;
 
 import net.minecraft.src.AxisAlignedBB;
 import net.minecraft.src.Entity;
@@ -104,6 +101,7 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 			p2.z += distance + 1;
 			break;
 		case ZNeg:
+		default:
 			p1.z -= (distance - 1);
 			p2.z -= distance;
 			break;
@@ -127,6 +125,7 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 			break;
 		case ZPos:
 		case ZNeg:
+		default:
 			p1.y += distance + 1;
 			p2.y -= distance;
 			p1.x += distance + 1;
@@ -137,7 +136,7 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 		Position min = p1.min(p2);
 		Position max = p1.max(p2);
 
-		return AxisAlignedBB.getBoundingBoxFromPool(min.x, min.y, min.z, max.x, max.y, max.z);
+		return AxisAlignedBB.getBoundingBox(min.x, min.y, min.z, max.x, max.y, max.z);
 	}
 
 	@Override
@@ -202,7 +201,7 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 	}
 
 	public void pullItemIntoPipe(Entity entity, int distance) {
-		if (APIProxy.isClient(worldObj))
+		if (CoreProxy.proxy.isRemote(worldObj))
 			return;
 
 		Orientations orientation = getOpenOrientation().reverse();
@@ -217,13 +216,13 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 
 			if (entity instanceof EntityItem) {
 				EntityItem item = (EntityItem) entity;
-				TransportProxy.obsidianPipePickup(worldObj, item, this.container);
+				CoreProxy.proxy.obsidianPipePickup(worldObj, item, this.container);
 
 				float energyUsed = powerProvider.useEnergy(distance, item.item.stackSize * distance, true);
 
 				if (distance == 0 || energyUsed / distance == item.item.stackSize) {
 					stack = item.item;
-					APIProxy.removeEntity(entity);
+					CoreProxy.proxy.removeEntity(entity);
 				} else
 					stack = item.item.splitStack((int) (energyUsed / distance));
 
@@ -235,7 +234,7 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 			} else if (entity instanceof EntityArrow) {
 				powerProvider.useEnergy(distance, distance, true);
 				stack = new ItemStack(Item.arrow, 1);
-				APIProxy.removeEntity(entity);
+				CoreProxy.proxy.removeEntity(entity);
 			}
 
 			IPipedItem passive = new EntityPassiveItem(worldObj, xCoord + 0.5, yCoord + Utils.getPipeFloorOf(stack),

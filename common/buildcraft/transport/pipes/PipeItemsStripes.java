@@ -8,12 +8,12 @@
 
 package buildcraft.transport.pipes;
 
+/*
 import java.util.ArrayList;
 import java.util.TreeMap;
 
 import buildcraft.BuildCraftBlockUtil;
 import buildcraft.BuildCraftTransport;
-import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.Orientations;
 import buildcraft.api.core.Position;
 import buildcraft.api.power.IPowerProvider;
@@ -94,13 +94,13 @@ public class PipeItemsStripes extends Pipe implements IItemTravelingHook, IPower
 
 		if (convertPipe(pipe, data))
 			BuildCraftTransport.pipeItemsStipes.onItemUse(new ItemStack(BuildCraftTransport.pipeItemsStipes),
-					BuildCraftAPI.getBuildCraftPlayer(worldObj), worldObj, (int) p.x, (int) p.y - 1, (int) p.z, 1);
+					CoreProxy.getBuildCraftPlayer(worldObj), worldObj, (int) p.x, (int) p.y - 1, (int) p.z, 1);
 		else if (worldObj.getBlockId((int) p.x, (int) p.y, (int) p.z) == 0)
-			data.item.getItemStack().getItem().onItemUse(data.item.getItemStack(), BuildCraftAPI.getBuildCraftPlayer(worldObj), worldObj, (int) p.x,
-					(int) p.y - 1, (int) p.z, 1);
+			data.item.getItemStack().getItem().tryPlaceIntoWorld(data.item.getItemStack(), CoreProxy.getBuildCraftPlayer(worldObj), worldObj, (int) p.x,
+					(int) p.y - 1, (int) p.z, 1, 0.0f, 0.0f, 0.0f);
 		else
-			data.item.getItemStack().getItem().onItemUse(data.item.getItemStack(), BuildCraftAPI.getBuildCraftPlayer(worldObj), worldObj, (int) p.x,
-					(int) p.y, (int) p.z, 1);
+			data.item.getItemStack().getItem().tryPlaceIntoWorld(data.item.getItemStack(), CoreProxy.getBuildCraftPlayer(worldObj), worldObj, (int) p.x,
+					(int) p.y, (int) p.z, 1, 0.0f, 0.0f, 0.0f);
 	}
 
 	@Override
@@ -154,3 +154,4 @@ public class PipeItemsStripes extends Pipe implements IItemTravelingHook, IPower
 
 	}
 }
+*/

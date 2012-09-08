@@ -1,8 +1,8 @@
-/** 
+/**
  * Copyright (c) SpaceToad, 2011
  * http://www.mod-buildcraft.com
- * 
- * BuildCraft is distributed under the terms of the Minecraft Mod Public 
+ *
+ * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
@@ -11,16 +11,8 @@ package buildcraft.builders;
 
 import java.util.ArrayList;
 
-import buildcraft.mod_BuildCraftBuilders;
-import buildcraft.api.APIProxy;
-import buildcraft.api.core.Orientations;
-import buildcraft.api.core.Position;
-import buildcraft.api.tools.IToolWrench;
-import buildcraft.core.DefaultProps;
-import buildcraft.core.GuiIds;
-import buildcraft.core.Utils;
-
 import net.minecraft.src.BlockContainer;
+import net.minecraft.src.CreativeTabs;
 import net.minecraft.src.EntityLiving;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.IBlockAccess;
@@ -29,9 +21,17 @@ import net.minecraft.src.ItemStack;
 import net.minecraft.src.Material;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.World;
-import net.minecraft.src.forge.ITextureProvider;
+import buildcraft.BuildCraftBuilders;
+import buildcraft.api.core.Orientations;
+import buildcraft.api.core.Position;
+import buildcraft.api.tools.IToolWrench;
+import buildcraft.core.DefaultProps;
+import buildcraft.core.GuiIds;
+import buildcraft.core.proxy.CoreProxy;
+import buildcraft.core.utils.Utils;
 
-public class BlockArchitect extends BlockContainer implements ITextureProvider {
+
+public class BlockArchitect extends BlockContainer {
 
 	int blockTextureSides;
 	int blockTextureFront;
@@ -42,6 +42,7 @@ public class BlockArchitect extends BlockContainer implements ITextureProvider {
 	public BlockArchitect(int i) {
 		super(i, Material.iron);
 		setHardness(0.5F);
+		setCreativeTab(CreativeTabs.tabRedstone);
 		blockTextureSides = 3 * 16 + 0;
 		blockTextureTopNeg = 3 * 16 + 1;
 		blockTextureTopPos = 3 * 16 + 2;
@@ -55,12 +56,12 @@ public class BlockArchitect extends BlockContainer implements ITextureProvider {
 	}
 
 	@Override
-	public TileEntity getBlockEntity() {
+	public TileEntity createNewTileEntity(World var1) {
 		return new TileArchitect();
 	}
 
 	@Override
-	public boolean blockActivated(World world, int i, int j, int k, EntityPlayer entityplayer) {
+	public boolean onBlockActivated(World world, int i, int j, int k, EntityPlayer entityplayer, int par6, float par7, float par8, float par9) {
 
 		// Drop through if the player is sneaking
 		if (entityplayer.isSneaking())
@@ -92,18 +93,18 @@ public class BlockArchitect extends BlockContainer implements ITextureProvider {
 			return true;
 		} else {
 
-			if (!APIProxy.isClient(world))
-				entityplayer.openGui(mod_BuildCraftBuilders.instance, GuiIds.ARCHITECT_TABLE, world, i, j, k);
+			if (!CoreProxy.proxy.isRemote(world))
+				entityplayer.openGui(BuildCraftBuilders.instance, GuiIds.ARCHITECT_TABLE, world, i, j, k);
 			return true;
 
 		}
 	}
 
 	@Override
-	public void onBlockRemoval(World world, int i, int j, int k) {
+	public void breakBlock(World world, int i, int j, int k, int par5, int par6) {
 		Utils.preDestroyBlock(world, i, j, k);
 
-		super.onBlockRemoval(world, i, j, k);
+		super.breakBlock(world, i, j, k, par5, par6);
 	}
 
 	@Override

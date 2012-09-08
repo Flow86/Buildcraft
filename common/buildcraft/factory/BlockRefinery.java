@@ -1,8 +1,8 @@
-/** 
+/**
  * Copyright (c) SpaceToad, 2011
  * http://www.mod-buildcraft.com
- * 
- * BuildCraft is distributed under the terms of the Minecraft Mod Public 
+ *
+ * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
@@ -11,19 +11,8 @@ package buildcraft.factory;
 
 import java.util.ArrayList;
 
-import buildcraft.BuildCraftCore;
-import buildcraft.mod_BuildCraftFactory;
-import buildcraft.api.APIProxy;
-import buildcraft.api.core.BuildCraftAPI;
-import buildcraft.api.core.Orientations;
-import buildcraft.api.core.Position;
-import buildcraft.api.liquids.LiquidManager;
-import buildcraft.api.liquids.LiquidStack;
-import buildcraft.api.tools.IToolWrench;
-import buildcraft.core.GuiIds;
-import buildcraft.core.Utils;
-
 import net.minecraft.src.BlockContainer;
+import net.minecraft.src.CreativeTabs;
 import net.minecraft.src.EntityLiving;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.Item;
@@ -31,6 +20,16 @@ import net.minecraft.src.ItemStack;
 import net.minecraft.src.Material;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.World;
+import buildcraft.BuildCraftCore;
+import buildcraft.BuildCraftFactory;
+import buildcraft.api.core.Orientations;
+import buildcraft.api.core.Position;
+import buildcraft.api.liquids.LiquidManager;
+import buildcraft.api.liquids.LiquidStack;
+import buildcraft.api.tools.IToolWrench;
+import buildcraft.core.GuiIds;
+import buildcraft.core.proxy.CoreProxy;
+import buildcraft.core.utils.Utils;
 
 public class BlockRefinery extends BlockContainer {
 
@@ -38,6 +37,7 @@ public class BlockRefinery extends BlockContainer {
 		super(i, Material.iron);
 
 		setHardness(0.5F);
+		setCreativeTab(CreativeTabs.tabRedstone);
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class BlockRefinery extends BlockContainer {
 	}
 
 	@Override
-	public TileEntity getBlockEntity() {
+	public TileEntity createNewTileEntity(World var1) {
 		return new TileRefinery();
 	}
 
@@ -75,7 +75,7 @@ public class BlockRefinery extends BlockContainer {
 	}
 
 	@Override
-	public boolean blockActivated(World world, int i, int j, int k, EntityPlayer entityplayer) {
+	public boolean onBlockActivated(World world, int i, int j, int k, EntityPlayer entityplayer, int par6, float par7, float par8, float par9) {
 		// Drop through if the player is sneaking
 		if (entityplayer.isSneaking())
 			return false;
@@ -119,8 +119,8 @@ public class BlockRefinery extends BlockContainer {
 			}
 		}
 
-		if (!APIProxy.isClient(world))
-			entityplayer.openGui(mod_BuildCraftFactory.instance, GuiIds.REFINERY, world, i, j, k);
+		if (!CoreProxy.proxy.isRemote(world))
+			entityplayer.openGui(BuildCraftFactory.instance, GuiIds.REFINERY, world, i, j, k);
 
 		return true;
 	}

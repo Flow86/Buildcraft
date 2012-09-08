@@ -9,26 +9,32 @@
 
 package buildcraft.core;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import buildcraft.api.APIProxy;
+import javax.management.RuntimeErrorException;
+
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteArrayDataOutput;
+
+import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
+
+import buildcraft.BuildCraftCore;
 import buildcraft.api.blueprints.BptSlotInfo;
 import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.Position;
-import buildcraft.core.BptSlot.Mode;
+import buildcraft.core.blueprints.BptBuilderBase;
+import buildcraft.core.blueprints.BptContext;
+import buildcraft.core.blueprints.BptSlot;
+import buildcraft.core.blueprints.BptSlot.Mode;
+import buildcraft.core.proxy.CoreProxy;
 
 import net.minecraft.src.Entity;
-import net.minecraft.src.ModLoader;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.World;
-import net.minecraft.src.forge.ISpawnHandler;
 
-public class EntityRobot extends Entity implements ISpawnHandler {
+public class EntityRobot extends Entity implements IEntityAdditionalSpawnData {
 
 	private Box box;
 	private int destX, destY, destZ;
@@ -77,14 +83,17 @@ public class EntityRobot extends Entity implements ISpawnHandler {
 		motionY = 0;
 		motionZ = 0;
 
-		setPosition(destX, destY, destZ);
-		
+		setLocationAndAngles(destX, destY, destZ, 0, 0);
+
 		laser = new EntityEnergyLaser(worldObj, new Position(posX, posY, posZ), new Position(posX, posY, posZ));
 		worldObj.spawnEntityInWorld(laser);
 	}
 
 	@Override
-	public void writeSpawnData(DataOutputStream data) throws IOException {
+	public void writeSpawnData(ByteArrayDataOutput data) {
+
+		if(box == null)
+			box = new Box();
 
 		data.writeInt(box.xMin);
 		data.writeInt(box.yMin);
@@ -95,7 +104,7 @@ public class EntityRobot extends Entity implements ISpawnHandler {
 	}
 
 	@Override
-	public void readSpawnData(DataInputStream data) throws IOException {
+	public void readSpawnData(ByteArrayDataInput data) {
 
 		box = new Box();
 		box.xMin = data.readInt();
@@ -135,7 +144,7 @@ public class EntityRobot extends Entity implements ISpawnHandler {
 			if (newDesination != null) {
 				setDestination(newDesination.i, newDesination.j, newDesination.k);
 			}
-		
+
 		}
 
 	}
@@ -197,27 +206,28 @@ public class EntityRobot extends Entity implements ISpawnHandler {
 				BptSlot target = a.slot;
 				if (wait <= 0) {
 
-					if (!APIProxy.isClient(worldObj)) {
-					
+					if (!CoreProxy.proxy.isRemote(worldObj)) {
+
 						if (target.mode == Mode.ClearIfInvalid) {
-	
+
 							if (!target.isValid(a.context))
 								worldObj.setBlockAndMetadataWithNotify(target.x, target.y, target.z, 0, 0);
-	
+
 						} else if (target.stackToUse != null) {
-	
+
 							worldObj.setBlockWithNotify(target.x, target.y, target.z, 0);
-							target.stackToUse.getItem().onItemUse(target.stackToUse,
-									BuildCraftAPI.getBuildCraftPlayer(worldObj), worldObj, target.x, target.y - 1,
-									target.z, 1);
+							throw new RuntimeErrorException(null, "NOT IMPLEMENTED");
+//							target.stackToUse.getItem().onItemUse(target.stackToUse,
+//									CoreProxy.getBuildCraftPlayer(worldObj), worldObj, target.x, target.y - 1,
+//									target.z, 1);
 						} else {
-	
+
 							try {
 								target.buildBlock(a.context);
 							} catch (Throwable t) {
 								// Defensive code against errors in implementers
 								t.printStackTrace();
-								ModLoader.getLogger().throwing("EntityRobot", "update", t);
+								BuildCraftCore.bcLog.throwing("EntityRobot", "update", t);
 							}
 						}
 					}
@@ -242,14 +252,17 @@ public class EntityRobot extends Entity implements ISpawnHandler {
 	}
 
 	private void updateLaser() {
-			
+
+		if(laser == null)
+			return;
+
 		if (targets.size() > 0) {
-			
+
 			Action a = targets.getFirst();
 			BptSlotInfo target = a.slot;
-			
+
 			if (target != null) {
-			
+
 				laser.setPositions(new Position(posX, posY, posZ), new Position(target.x + 0.5, target.y + 0.5, target.z + 0.5));
 				laser.show();
 			}
@@ -257,7 +270,7 @@ public class EntityRobot extends Entity implements ISpawnHandler {
 		else {
 			laser.hide();
 		}
-		
+
 		laser.pushPower(((float) targets.size()) / ((float) MAX_TARGETS) * 4F);
 	}
 
@@ -265,7 +278,7 @@ public class EntityRobot extends Entity implements ISpawnHandler {
 
 		if (slot != null) {
 			targets.add(new Action(slot, context));
-			
+
 		}
 	}
 

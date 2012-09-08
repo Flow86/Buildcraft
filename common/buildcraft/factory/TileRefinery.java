@@ -10,21 +10,20 @@
 package buildcraft.factory;
 
 import buildcraft.BuildCraftCore;
-import buildcraft.api.APIProxy;
-import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.Orientations;
 import buildcraft.api.core.SafeTimeTracker;
 import buildcraft.api.liquids.ILiquidTank;
 import buildcraft.api.liquids.ITankContainer;
+import buildcraft.api.liquids.LiquidManager;
 import buildcraft.api.liquids.LiquidStack;
 import buildcraft.api.liquids.LiquidTank;
 import buildcraft.api.power.IPowerProvider;
 import buildcraft.api.power.IPowerReceptor;
 import buildcraft.api.power.PowerFramework;
-import buildcraft.api.power.PowerProvider;
 import buildcraft.api.recipes.RefineryRecipe;
 import buildcraft.core.IMachine;
 import buildcraft.core.network.TileNetworkData;
+import buildcraft.core.proxy.CoreProxy;
 import net.minecraft.src.Container;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ICrafting;
@@ -36,7 +35,7 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 
 	private int[] filters = new int[2];
 
-	public static int LIQUID_PER_SLOT = BuildCraftAPI.BUCKET_VOLUME * 4;
+	public static int LIQUID_PER_SLOT = LiquidManager.BUCKET_VOLUME * 4;
 
 	public static class Slot {
 
@@ -166,9 +165,9 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 
 	@Override
 	public void updateEntity() {
-		if (APIProxy.isClient(worldObj)) {
+		if (CoreProxy.proxy.isRemote(worldObj)) {
 			simpleAnimationIterate();
-		} else if (APIProxy.isServerSide() && updateNetworkTime.markTimeIfDelay(worldObj, 2 * BuildCraftCore.updateFactor)) {
+		} else if (CoreProxy.proxy.isSimulating(worldObj) && updateNetworkTime.markTimeIfDelay(worldObj, 2 * BuildCraftCore.updateFactor)) {
 			sendNetworkUpdate();
 		}
 
@@ -234,10 +233,10 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 		if(liquid == null)
 			return true;
 		
-		if(liquid.isLiquidEqual(new LiquidStack(slot1.liquidId, slot1.quantity, 0))) {
+		if(new LiquidStack(slot1.liquidId, slot1.quantity, 0).containsLiquid(liquid)) {
 			slot1.quantity -= liquid.amount;
 			return true;
-		} else if(liquid.isLiquidEqual(new LiquidStack(slot2.liquidId, slot2.quantity, 0))) {
+		} else if(new LiquidStack(slot2.liquidId, slot2.quantity, 0).containsLiquid(liquid)) {
 			slot2.quantity -= liquid.amount;
 			return true;
 		}

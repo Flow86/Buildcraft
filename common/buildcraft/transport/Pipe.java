@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.Random;
 
 import buildcraft.BuildCraftTransport;
-import buildcraft.api.APIProxy;
-import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.Orientations;
 import buildcraft.api.core.SafeTimeTracker;
 import buildcraft.api.gates.Action;
@@ -28,15 +26,13 @@ import buildcraft.api.gates.ITriggerParameter;
 import buildcraft.api.gates.Trigger;
 import buildcraft.api.gates.TriggerParameter;
 import buildcraft.api.transport.IPipe;
-import buildcraft.core.ActionRedstoneOutput;
 import buildcraft.core.IDropControlInventory;
-import buildcraft.core.Utils;
-import buildcraft.core.network.IndexInPayload;
-import buildcraft.core.network.PacketPayload;
-import buildcraft.core.network.PacketUpdate;
-import buildcraft.core.network.TileNetworkData;
 import buildcraft.core.network.TilePacketWrapper;
+import buildcraft.core.triggers.ActionRedstoneOutput;
+import buildcraft.core.utils.Utils;
 import buildcraft.transport.Gate.GateConditional;
+import buildcraft.transport.pipes.PipeLogic;
+import buildcraft.transport.triggers.ActionSignalOutput;
 
 import net.minecraft.src.Entity;
 import net.minecraft.src.EntityItem;
@@ -47,7 +43,7 @@ import net.minecraft.src.TileEntity;
 import net.minecraft.src.World;
 
 public abstract class Pipe implements IPipe, IDropControlInventory {
-
+	
 	public int[] signalStrength = new int[] { 0, 0, 0, 0 };
 
 	public int xCoord;
@@ -60,23 +56,19 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 	public final PipeLogic logic;
 	public final int itemID;
 
-	private TilePacketWrapper networkPacket;
-
 	private boolean internalUpdateScheduled = false;
 
-	@TileNetworkData(intKind = TileNetworkData.UNSIGNED_BYTE)
 	public boolean[] wireSet = new boolean[] { false, false, false, false };
-
+	
 	public Gate gate;
 
 	@SuppressWarnings("rawtypes")
 	private static Map<Class, TilePacketWrapper> networkWrappers = new HashMap<Class, TilePacketWrapper>();
 
-	ITrigger[] activatedTriggers = new Trigger[8];
-	ITriggerParameter[] triggerParameters = new ITriggerParameter[8];
-	IAction[] activatedActions = new Action[8];
+	public ITrigger[] activatedTriggers = new Trigger[8];
+	public ITriggerParameter[] triggerParameters = new ITriggerParameter[8];
+	public IAction[] activatedActions = new Action[8];
 
-	@TileNetworkData(intKind = TileNetworkData.UNSIGNED_BYTE)
 	public boolean broadcastSignal[] = new boolean[] { false, false, false, false };
 	public boolean broadcastRedstone = false;
 
@@ -91,8 +83,6 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 			networkWrappers
 					.put(this.getClass(), new TilePacketWrapper(new Class[] { TileGenericPipe.class, this.transport.getClass(),
 							this.logic.getClass() }));
-
-		this.networkPacket = networkWrappers.get(this.getClass());
 
 	}
 
@@ -177,8 +167,7 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 		}
 
 		// Do not try to update gates client side.
-		if(APIProxy.isRemote())
-			return;
+		if (worldObj.isRemote) return;
 		
 		if (actionTracker.markTimeIfDelay(worldObj, 10))
 			resolveActions();
@@ -363,47 +352,6 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 
 	}
 
-	public PacketPayload getNetworkPacket() {
-		PacketPayload payload = networkPacket.toPayload(xCoord, yCoord, zCoord, new Object[] { container, transport, logic });
-
-		return payload;
-	}
-
-	/**
-	 * This is used by update packets and uses TileNetworkData. Should be
-	 * unified with description packets!
-	 * 
-	 * @param packet
-	 */
-	public void handlePacket(PacketUpdate packet) {
-		networkPacket.fromPayload(new Object[] { container, transport, logic }, packet.payload);
-	}
-
-	/**
-	 * This is used by description packets.
-	 * 
-	 * @param payload
-	 * @param index
-	 */
-	public void handleWirePayload(PacketPayload payload, IndexInPayload index) {
-		for (int i = index.intIndex; i < index.intIndex + 4; i++)
-			if (payload.intPayload[i] > 0)
-				wireSet[i - index.intIndex] = true;
-			else
-				wireSet[i - index.intIndex] = false;
-	}
-
-	/**
-	 * This is used by description packets.
-	 * 
-	 * @param payload
-	 * @param index
-	 */
-	public void handleGatePayload(PacketPayload payload, IndexInPayload index) {
-		gate = new GateVanilla(this);
-		gate.fromPayload(payload, index);
-	}
-
 	public boolean isPoweringTo(int l) {
 		if (!broadcastRedstone)
 			return false;
@@ -445,6 +393,18 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 	public boolean hasGate() {
 		return gate != null;
 	}
+	
+	protected void updateNeighbors(boolean needSelf) {
+		if (needSelf) {
+			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, BuildCraftTransport.genericPipeBlock.blockID);
+		}
+		worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord - 1, zCoord, BuildCraftTransport.genericPipeBlock.blockID);
+		worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord + 1, zCoord, BuildCraftTransport.genericPipeBlock.blockID);
+		worldObj.notifyBlocksOfNeighborChange(xCoord - 1, yCoord, zCoord, BuildCraftTransport.genericPipeBlock.blockID);
+		worldObj.notifyBlocksOfNeighborChange(xCoord + 1, yCoord, zCoord, BuildCraftTransport.genericPipeBlock.blockID);
+		worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord - 1, BuildCraftTransport.genericPipeBlock.blockID);
+		worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord + 1, BuildCraftTransport.genericPipeBlock.blockID);
+	}
 
 	public void onBlockRemoval() {
 		if (wireSet[IPipe.WireColor.Red.ordinal()])
@@ -466,6 +426,10 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 			if (container.hasFacade(direction)){
 				container.dropFacade(direction);
 			}
+		}
+		
+		if (broadcastRedstone) {
+			updateNeighbors(false); // self will update due to block id changing
 		}
 	}
 
@@ -526,10 +490,12 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
         triggerParameters = new ITriggerParameter[triggerParameters.length];
         activatedActions = new Action[activatedActions.length];
         broadcastSignal = new boolean[] { false, false, false, false };
+        if (broadcastRedstone) {
+        	updateNeighbors(true);
+        }
         broadcastRedstone = false;
 		//worldObj.markBlockNeedsUpdate(xCoord, yCoord, zCoord);
         container.scheduleRenderUpdate();
-        //worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, BuildCraftTransport.genericPipeBlock.blockID);
 	}
 
 	private void resolveActions() {
@@ -586,8 +552,7 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 
 		if (oldBroadcastRedstone != broadcastRedstone) {
 			container.scheduleRenderUpdate();
-			//worldObj.markBlockNeedsUpdate(xCoord, yCoord, zCoord);
-			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, BuildCraftTransport.genericPipeBlock.blockID);
+			updateNeighbors(true);
 		}
 
 		for (int i = 0; i < oldBroadcastSignal.length; ++i)
@@ -684,4 +649,6 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 	 * Called when TileGenericPipe.onChunkUnload is called
 	 */
 	public void onChunkUnload() {}
+	
 }
+

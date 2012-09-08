@@ -1,8 +1,8 @@
-/** 
+/**
  * Copyright (c) SpaceToad, 2011
  * http://www.mod-buildcraft.com
- * 
- * BuildCraft is distributed under the terms of the Minecraft Mod Public 
+ *
+ * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
@@ -11,17 +11,17 @@ package buildcraft.factory;
 
 import java.util.ArrayList;
 
-import buildcraft.mod_BuildCraftFactory;
-import buildcraft.api.APIProxy;
-import buildcraft.core.BlockBuildCraft;
-import buildcraft.core.GuiIds;
-import buildcraft.core.IItemPipe;
-
+import net.minecraft.src.CreativeTabs;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.Material;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.World;
+import buildcraft.BuildCraftFactory;
+import buildcraft.core.BlockBuildCraft;
+import buildcraft.core.GuiIds;
+import buildcraft.core.IItemPipe;
+import buildcraft.core.proxy.CoreProxy;
 
 public class BlockAutoWorkbench extends BlockBuildCraft {
 
@@ -33,6 +33,7 @@ public class BlockAutoWorkbench extends BlockBuildCraft {
 		topTexture = 2 * 16 + 11;
 		sideTexture = 2 * 16 + 12;
 		setHardness(1.0F);
+		setCreativeTab(CreativeTabs.tabDeco);
 	}
 
 	@Override
@@ -45,8 +46,8 @@ public class BlockAutoWorkbench extends BlockBuildCraft {
 	}
 
 	@Override
-	public boolean blockActivated(World world, int i, int j, int k, EntityPlayer entityplayer) {
-		super.blockActivated(world, i, j, k, entityplayer);
+	public boolean onBlockActivated(World world, int i, int j, int k, EntityPlayer entityplayer, int par6, float par7, float par8, float par9) {
+		super.onBlockActivated(world, i, j, k, entityplayer, par6, par7, par8, par9);
 
 		// Drop through if the player is sneaking
 		if (entityplayer.isSneaking())
@@ -58,14 +59,14 @@ public class BlockAutoWorkbench extends BlockBuildCraft {
 			}
 		}
 
-		if (!APIProxy.isClient(world))
-			entityplayer.openGui(mod_BuildCraftFactory.instance, GuiIds.AUTO_CRAFTING_TABLE, world, i, j, k);
+		if (!CoreProxy.proxy.isRemote(world))
+			entityplayer.openGui(BuildCraftFactory.instance, GuiIds.AUTO_CRAFTING_TABLE, world, i, j, k);
 
 		return true;
 	}
 
 	@Override
-	public TileEntity getBlockEntity() {
+	public TileEntity createNewTileEntity(World var1) {
 		return new TileAutoWorkbench();
 	}
 

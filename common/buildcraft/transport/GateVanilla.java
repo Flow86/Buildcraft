@@ -3,17 +3,15 @@ package buildcraft.transport;
 import java.util.LinkedList;
 
 import buildcraft.BuildCraftTransport;
-import buildcraft.mod_BuildCraftTransport;
-import buildcraft.api.APIProxy;
-import buildcraft.api.gates.Action;
 import buildcraft.api.gates.IAction;
 import buildcraft.api.gates.ITrigger;
-import buildcraft.api.gates.Trigger;
 import buildcraft.api.power.IPowerReceptor;
 import buildcraft.api.transport.IPipe;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.GuiIds;
-import buildcraft.core.Utils;
+import buildcraft.core.proxy.CoreProxy;
+import buildcraft.core.utils.Utils;
+import buildcraft.transport.triggers.ActionEnergyPulser;
 
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.Item;
@@ -64,8 +62,8 @@ public class GateVanilla extends Gate {
 	// GUI
 	@Override
 	public void openGui(EntityPlayer player) {
-		if (!APIProxy.isClient(player.worldObj))
-			player.openGui(mod_BuildCraftTransport.instance, GuiIds.GATES, pipe.worldObj, pipe.xCoord, pipe.yCoord, pipe.zCoord);
+		if (!CoreProxy.proxy.isRemote(player.worldObj))
+			player.openGui(BuildCraftTransport.instance, GuiIds.GATES, pipe.worldObj, pipe.xCoord, pipe.yCoord, pipe.zCoord);
 	}
 
 	// / UPDATING
@@ -116,7 +114,7 @@ public class GateVanilla extends Gate {
 
 	/**
 	 * Tries to add an energy pulser to gates that accept energy.
-	 * 
+	 *
 	 * @param pipe
 	 * @return
 	 */
@@ -132,7 +130,7 @@ public class GateVanilla extends Gate {
 
 	/**
 	 * Drops a gate item of the specified kind.
-	 * 
+	 *
 	 * @param kind
 	 * @param world
 	 * @param i
@@ -163,6 +161,7 @@ public class GateVanilla extends Gate {
 			gateDamage = 5;
 			break;
 		case OR_4:
+		default:
 			gateDamage = 6;
 			break;
 		}

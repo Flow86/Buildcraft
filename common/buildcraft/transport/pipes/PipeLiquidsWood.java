@@ -8,10 +8,10 @@
 
 package buildcraft.transport.pipes;
 
-import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.Orientations;
 import buildcraft.api.core.Position;
 import buildcraft.api.liquids.ITankContainer;
+import buildcraft.api.liquids.LiquidManager;
 import buildcraft.api.liquids.LiquidStack;
 import buildcraft.api.power.IPowerProvider;
 import buildcraft.api.power.IPowerReceptor;
@@ -20,9 +20,7 @@ import buildcraft.api.transport.PipeManager;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.network.TileNetworkData;
 import buildcraft.transport.Pipe;
-import buildcraft.transport.PipeLogicWood;
 import buildcraft.transport.PipeTransportLiquids;
-import net.minecraft.src.Block;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.World;
 
@@ -69,8 +67,8 @@ public class PipeLiquidsWood extends Pipe implements IPowerReceptor {
          if (!PipeManager.canExtractLiquids(this, w, (int) pos.x, (int) pos.y, (int) pos.z))
             return;
 
-         if (liquidToExtract <= BuildCraftAPI.BUCKET_VOLUME)
-            liquidToExtract += powerProvider.useEnergy(1, 1, true) * BuildCraftAPI.BUCKET_VOLUME;
+         if (liquidToExtract <= LiquidManager.BUCKET_VOLUME)
+            liquidToExtract += powerProvider.useEnergy(1, 1, true) * LiquidManager.BUCKET_VOLUME;
       }
 	}
 

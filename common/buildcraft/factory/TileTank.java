@@ -9,24 +9,24 @@
 package buildcraft.factory;
 
 import buildcraft.BuildCraftCore;
-import buildcraft.api.APIProxy;
-import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.Orientations;
 import buildcraft.api.core.SafeTimeTracker;
 import buildcraft.api.liquids.ILiquidTank;
 import buildcraft.api.liquids.ITankContainer;
+import buildcraft.api.liquids.LiquidManager;
 import buildcraft.api.liquids.LiquidStack;
 import buildcraft.api.liquids.LiquidTank;
 import buildcraft.core.TileBuildCraft;
 import buildcraft.core.network.PacketPayload;
 import buildcraft.core.network.PacketUpdate;
+import buildcraft.core.proxy.CoreProxy;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.TileEntity;
 
 public class TileTank extends TileBuildCraft implements ITankContainer
 {
 
-    public final ILiquidTank tank = new LiquidTank(BuildCraftAPI.BUCKET_VOLUME * 16);
+    public final ILiquidTank tank = new LiquidTank(LiquidManager.BUCKET_VOLUME * 16);
     public boolean hasUpdate = false;
     public SafeTimeTracker tracker = new SafeTimeTracker();
 
@@ -34,12 +34,12 @@ public class TileTank extends TileBuildCraft implements ITankContainer
     @Override
     public void updateEntity()
     {
-        if(APIProxy.isServerSide() && hasUpdate && tracker.markTimeIfDelay(worldObj, 2 * BuildCraftCore.updateFactor)) {
+        if(CoreProxy.proxy.isSimulating(worldObj) && hasUpdate && tracker.markTimeIfDelay(worldObj, 2 * BuildCraftCore.updateFactor)) {
             sendNetworkUpdate();
             hasUpdate = false;
         }
 
-        if(APIProxy.isRemote()) {
+        if(CoreProxy.proxy.isRemote(worldObj)) {
             return;
         }
 
@@ -82,9 +82,18 @@ public class TileTank extends TileBuildCraft implements ITankContainer
     public void readFromNBT(NBTTagCompound data)
     {
         super.readFromNBT(data);
-        LiquidStack liquid = new LiquidStack(0, 0, 0);
-        liquid.readFromNBT(data.getCompoundTag("tank"));
-        tank.setLiquid(liquid);
+        
+        if(data.hasKey("stored") && data.hasKey("liquidId"))
+        {
+	        LiquidStack liquid = new LiquidStack(data.getInteger("liquidId"), data.getInteger("stored"), 0);
+	        tank.setLiquid(liquid);
+        }
+        else
+        {        
+	        LiquidStack liquid = new LiquidStack(0, 0, 0);
+	        liquid.readFromNBT(data.getCompoundTag("tank"));
+	        tank.setLiquid(liquid);
+        }
     }
 
     @Override
@@ -161,7 +170,12 @@ public class TileTank extends TileBuildCraft implements ITankContainer
         }
 
         int used = below.tank.fill(tank.getLiquid(), true);
-        tank.drain(used, true);
+        if(used>0) {
+            hasUpdate= true; // not redundant because tank.drain operates on an ILiquidTank, not a tile
+            below.hasUpdate=true; // redundant because below.fill sets hasUpdate
+
+            tank.drain(used, true);
+        }
     }
 
     /* ITANKCONTAINER */
@@ -183,9 +197,14 @@ public class TileTank extends TileBuildCraft implements ITankContainer
         while(tankToFill != null && resource.amount > 0){
             int used = tankToFill.tank.fill(resource, doFill);
             resource.amount -= used;
+            if(used>0)
+                tankToFill.hasUpdate=true;
+
             totalUsed += used;
             tankToFill = getTankAbove(tankToFill);
         }
+        if(totalUsed>0)
+            hasUpdate= true;
         return totalUsed;
     }
 
@@ -198,12 +217,40 @@ public class TileTank extends TileBuildCraft implements ITankContainer
     @Override
     public LiquidStack drain(int tankIndex, int maxEmpty, boolean doDrain)
     {
-        return getBottomTank().tank.drain(maxEmpty, doDrain);
+        TileTank bottom=getBottomTank();
+    	bottom.hasUpdate=true;
+        return bottom.tank.drain(maxEmpty, doDrain);
     }
 
     @Override
     public ILiquidTank[] getTanks()
     {
-        return new ILiquidTank[]{tank};
+        ILiquidTank compositeTank = new LiquidTank(tank.getCapacity());
+
+        TileTank tile = getBottomTank();
+
+        int capacity = tank.getCapacity();
+
+        if(tile != null && tile.tank.getLiquid() != null) {
+            compositeTank.setLiquid(tile.tank.getLiquid().copy());
+        } else {
+            return new ILiquidTank[]{compositeTank};
+        }
+
+        tile = getTankAbove(tile);
+
+        while(tile != null){
+
+            if(tile.tank.getLiquid() == null || !compositeTank.getLiquid().isLiquidEqual(tile.tank.getLiquid()))
+                break;
+
+            compositeTank.getLiquid().amount += tile.tank.getLiquid().amount;
+            capacity += tile.tank.getCapacity();
+
+            tile = getTankAbove(tile);
+        }
+
+        compositeTank.setCapacity(capacity);
+        return new ILiquidTank[]{compositeTank};
     }
 }

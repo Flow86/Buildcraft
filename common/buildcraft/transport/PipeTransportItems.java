@@ -15,23 +15,24 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import cpw.mods.fml.common.network.PacketDispatcher;
+
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftTransport;
-import buildcraft.mod_BuildCraftTransport;
-import buildcraft.api.APIProxy;
 import buildcraft.api.core.Orientations;
 import buildcraft.api.core.Position;
 import buildcraft.api.gates.ITrigger;
+import buildcraft.api.inventory.ISpecialInventory;
 import buildcraft.api.transport.IPipeEntry;
 import buildcraft.api.transport.IPipedItem;
-import buildcraft.core.CoreProxy;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.EntityPassiveItem;
 import buildcraft.core.IMachine;
-import buildcraft.core.StackUtil;
-import buildcraft.core.Utils;
 import buildcraft.core.network.PacketIds;
 import buildcraft.core.network.PacketPipeTransportContent;
+import buildcraft.core.proxy.CoreProxy;
+import buildcraft.core.utils.StackUtil;
+import buildcraft.core.utils.Utils;
 
 import net.minecraft.src.EntityItem;
 import net.minecraft.src.IInventory;
@@ -92,10 +93,16 @@ public class PipeTransportItems extends PipeTransport {
 		if (container.pipe instanceof IPipeTransportItemsHook)
 			((IPipeTransportItemsHook) container.pipe).entityEntered(item, orientation);
 
-		if (APIProxy.isServerSide())
-			if (item.getSynchroTracker().markTimeIfDelay(worldObj, 6 * BuildCraftCore.updateFactor))
-				CoreProxy.sendToPlayers(createItemPacket(item, orientation), worldObj, xCoord, yCoord, zCoord,
-						DefaultProps.NETWORK_UPDATE_RANGE, mod_BuildCraftTransport.instance);
+		if (!worldObj.isRemote && item.getSynchroTracker().markTimeIfDelay(worldObj, 6 * BuildCraftCore.updateFactor)) {
+			int dimension = worldObj.provider.worldType;
+			PacketDispatcher.sendPacketToAllAround(xCoord, yCoord, zCoord, DefaultProps.NETWORK_UPDATE_RANGE, dimension, createItemPacket(item, orientation));
+		}
+
+//			for (Object player : MinecraftServer.getServer().getConfigurationManager().playerEntityList){
+//
+//			}
+//				CoreProxy.sendToPlayers(createItemPacket(item, orientation), worldObj, xCoord, yCoord, zCoord,
+//						DefaultProps.NETWORK_UPDATE_RANGE, mod_BuildCraftTransport.instance);
 
 		if (travelingEntities.size() > BuildCraftTransport.groupItemsTrigger) {
 			groupEntities();
@@ -250,7 +257,7 @@ public class PipeTransportItems extends PipeTransport {
 		} else if (tile instanceof IInventory) {
 			StackUtil utils = new StackUtil(data.item.getItemStack());
 
-			if (!APIProxy.isClient(worldObj))
+			if (!CoreProxy.proxy.isRemote(worldObj))
 				if (utils.checkAvailableSlot((IInventory) tile, true, data.orientation.reverse()) && utils.items.stackSize == 0)
 					data.item.remove();
 				else {
@@ -353,12 +360,12 @@ public class PipeTransportItems extends PipeTransport {
 		else {
 			int i;
 
-			if (APIProxy.isClient(worldObj) || APIProxy.isServerSide())
+			if (CoreProxy.proxy.isRemote(worldObj) || CoreProxy.proxy.isSimulating(worldObj))
 			{
 				i = Math.abs(data.item.getEntityId() + xCoord + yCoord + zCoord + data.item.getDeterministicRandomization())
 						% listOfPossibleMovements.size();
 				data.item.setDeterministicRandomization(data.item.getDeterministicRandomization() * 11);
-						
+
 			}
 			else
 				i = worldObj.rand.nextInt(listOfPossibleMovements.size());
@@ -371,7 +378,7 @@ public class PipeTransportItems extends PipeTransport {
 
 	/**
 	 * Handles a packet describing a stack of items inside a pipe.
-	 * 
+	 *
 	 * @param packet
 	 */
 	public void handleItemPacket(PacketPipeTransportContent packet) {
@@ -402,7 +409,7 @@ public class PipeTransportItems extends PipeTransport {
 
 	/**
 	 * Creates a packet describing a stack of items inside a pipe.
-	 * 
+	 *
 	 * @param item
 	 * @param orientation
 	 * @return
@@ -430,8 +437,11 @@ public class PipeTransportItems extends PipeTransport {
 
 	@Override
 	public boolean isPipeConnected(TileEntity tile) {
-		return tile instanceof TileGenericPipe || tile instanceof IPipeEntry || tile instanceof IInventory
-				|| (tile instanceof IMachine && ((IMachine) tile).manageSolids());
+		return tile instanceof TileGenericPipe
+			|| tile instanceof IPipeEntry
+			|| tile instanceof ISpecialInventory
+			|| (tile instanceof IInventory && ((IInventory)tile).getSizeInventory() > 0)
+			|| (tile instanceof IMachine && ((IMachine) tile).manageSolids());
 	}
 
 	@Override

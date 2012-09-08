@@ -1,32 +1,32 @@
-/** 
+/**
  * Copyright (c) SpaceToad, 2011
  * http://www.mod-buildcraft.com
- * 
- * BuildCraft is distributed under the terms of the Minecraft Mod Public 
+ *
+ * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
 
 package buildcraft.energy;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import buildcraft.BuildCraftCore;
-import buildcraft.mod_BuildCraftEnergy;
-import buildcraft.api.APIProxy;
-import buildcraft.api.core.Orientations;
-import buildcraft.api.tools.IToolWrench;
-import buildcraft.core.GuiIds;
-import buildcraft.core.IItemPipe;
-
 import net.minecraft.src.BlockContainer;
+import net.minecraft.src.CreativeTabs;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.Item;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.Material;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.World;
+import buildcraft.BuildCraftCore;
+import buildcraft.BuildCraftEnergy;
+import buildcraft.api.core.Orientations;
+import buildcraft.api.tools.IToolWrench;
+import buildcraft.core.GuiIds;
+import buildcraft.core.IItemPipe;
+import buildcraft.core.proxy.CoreProxy;
 
 public class BlockEngine extends BlockContainer {
 
@@ -34,6 +34,7 @@ public class BlockEngine extends BlockContainer {
 		super(i, Material.iron);
 
 		setHardness(0.5F);
+		setCreativeTab(CreativeTabs.tabRedstone);
 	}
 
 	@Override
@@ -52,23 +53,23 @@ public class BlockEngine extends BlockContainer {
 	}
 
 	@Override
-	public TileEntity getBlockEntity() {
+	public TileEntity createNewTileEntity(World var1) {
 		return new TileEngine();
 	}
 
 	@Override
-	public void onBlockRemoval(World world, int i, int j, int k) {
-		TileEngine engine = ((TileEngine) world.getBlockTileEntity(i, j, k));
+	public void breakBlock(World world, int x, int y, int z, int par5, int par6) {
+		TileEngine engine = ((TileEngine) world.getBlockTileEntity(x, y, z));
 
 		if (engine != null) {
 			engine.delete();
 		}
-
-		super.onBlockRemoval(world, i, j, k);
+		super.breakBlock(world, x, y, z, par5, par6);
 	}
 
 	@Override
-	public boolean blockActivated(World world, int i, int j, int k, EntityPlayer entityplayer) {
+	public boolean onBlockActivated(World world, int i, int j, int k, EntityPlayer entityplayer, int par6, float par7, float par8, float par9) {
+
 		TileEngine tile = (TileEngine) world.getBlockTileEntity(i, j, k);
 
 		// Drop through if the player is sneaking
@@ -91,13 +92,13 @@ public class BlockEngine extends BlockContainer {
 					return false;
 
 			if (tile.engine instanceof EngineStone) {
-				if (!APIProxy.isClient(tile.worldObj))
-					entityplayer.openGui(mod_BuildCraftEnergy.instance, GuiIds.ENGINE_STONE, world, i, j, k);
+				if (!CoreProxy.proxy.isRemote(tile.worldObj))
+					entityplayer.openGui(BuildCraftEnergy.instance, GuiIds.ENGINE_STONE, world, i, j, k);
 				return true;
 
 			} else if (tile.engine instanceof EngineIron) {
-				if (!APIProxy.isClient(tile.worldObj))
-					entityplayer.openGui(mod_BuildCraftEnergy.instance, GuiIds.ENGINE_IRON, world, i, j, k);
+				if (!CoreProxy.proxy.isRemote(tile.worldObj))
+					entityplayer.openGui(BuildCraftEnergy.instance, GuiIds.ENGINE_IRON, world, i, j, k);
 				return true;
 			}
 
@@ -107,8 +108,8 @@ public class BlockEngine extends BlockContainer {
 	}
 
 	@Override
-	public void onBlockPlaced(World world, int i, int j, int k, int l) {
-		TileEngine tile = (TileEngine) world.getBlockTileEntity(i, j, k);
+	public void updateBlockMetadata(World world, int x, int y, int z, int par5,	float par6, float par7, float par8) {
+		TileEngine tile = (TileEngine) world.getBlockTileEntity(x, y, z);
 		tile.orientation = Orientations.YPos.ordinal();
 		tile.switchOrientation();
 	}
@@ -119,7 +120,7 @@ public class BlockEngine extends BlockContainer {
 	}
 
 	@SuppressWarnings({ "all" })
-	// @Override (client only)
+	@Override
 	public void randomDisplayTick(World world, int i, int j, int k, Random random) {
 		TileEngine tile = (TileEngine) world.getBlockTileEntity(i, j, k);
 
@@ -141,7 +142,7 @@ public class BlockEngine extends BlockContainer {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void addCreativeItems(ArrayList itemList) {
+	public void getSubBlocks(int blockid, CreativeTabs par2CreativeTabs, List itemList) {
 		itemList.add(new ItemStack(this, 1, 0));
 		itemList.add(new ItemStack(this, 1, 1));
 		itemList.add(new ItemStack(this, 1, 2));

@@ -1,8 +1,8 @@
-/** 
+/**
  * Copyright (c) SpaceToad, 2011
  * http://www.mod-buildcraft.com
- * 
- * BuildCraft is distributed under the terms of the Minecraft Mod Public 
+ *
+ * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
@@ -10,15 +10,6 @@
 package buildcraft.builders;
 
 import java.util.ArrayList;
-
-import buildcraft.mod_BuildCraftBuilders;
-import buildcraft.api.APIProxy;
-import buildcraft.api.core.Orientations;
-import buildcraft.api.core.Position;
-import buildcraft.api.tools.IToolWrench;
-import buildcraft.core.DefaultProps;
-import buildcraft.core.GuiIds;
-import buildcraft.core.Utils;
 
 import net.minecraft.src.BlockContainer;
 import net.minecraft.src.EntityLiving;
@@ -28,9 +19,17 @@ import net.minecraft.src.ItemStack;
 import net.minecraft.src.Material;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.World;
-import net.minecraft.src.forge.ITextureProvider;
+import buildcraft.BuildCraftBuilders;
+import buildcraft.api.core.Orientations;
+import buildcraft.api.core.Position;
+import buildcraft.api.tools.IToolWrench;
+import buildcraft.core.DefaultProps;
+import buildcraft.core.GuiIds;
+import buildcraft.core.proxy.CoreProxy;
+import buildcraft.core.utils.Utils;
 
-public class BlockBuilder extends BlockContainer implements ITextureProvider {
+
+public class BlockBuilder extends BlockContainer {
 
 	int blockTextureTop;
 	int blockTextureSide;
@@ -45,7 +44,7 @@ public class BlockBuilder extends BlockContainer implements ITextureProvider {
 	}
 
 	@Override
-	public TileEntity getBlockEntity() {
+	public TileEntity createNewTileEntity(World var1) {
 		return new TileBuilder();
 	}
 
@@ -73,7 +72,7 @@ public class BlockBuilder extends BlockContainer implements ITextureProvider {
 	}
 
 	@Override
-	public boolean blockActivated(World world, int i, int j, int k, EntityPlayer entityplayer) {
+	public boolean onBlockActivated(World world, int i, int j, int k, EntityPlayer entityplayer, int par6, float par7, float par8, float par9) {
 
 		// Drop through if the player is sneaking
 		if (entityplayer.isSneaking())
@@ -105,8 +104,8 @@ public class BlockBuilder extends BlockContainer implements ITextureProvider {
 			return true;
 		} else {
 
-			if (!APIProxy.isClient(world))
-				entityplayer.openGui(mod_BuildCraftBuilders.instance, GuiIds.BUILDER, world, i, j, k);
+			if (!CoreProxy.proxy.isRemote(world))
+				entityplayer.openGui(BuildCraftBuilders.instance, GuiIds.BUILDER, world, i, j, k);
 			return true;
 
 		}
@@ -122,9 +121,9 @@ public class BlockBuilder extends BlockContainer implements ITextureProvider {
 	}
 
 	@Override
-	public void onBlockRemoval(World world, int i, int j, int k) {
-		Utils.preDestroyBlock(world, i, j, k);
-		super.onBlockRemoval(world, i, j, k);
+	public void breakBlock(World world, int x, int y, int z, int par5, int par6) {
+		Utils.preDestroyBlock(world, x, y, z);
+		super.breakBlock(world, x, y, z, par5, par6);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

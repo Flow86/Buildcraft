@@ -2,19 +2,18 @@ package buildcraft.factory;
 
 import java.util.LinkedList;
 
-import buildcraft.mod_BuildCraftSilicon;
 import buildcraft.api.core.Orientations;
 import buildcraft.api.recipes.AssemblyRecipe;
 import buildcraft.api.transport.IPipeConnection;
-import buildcraft.core.CoreProxy;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.IMachine;
-import buildcraft.core.StackUtil;
-import buildcraft.core.Utils;
 import buildcraft.core.network.PacketIds;
 import buildcraft.core.network.PacketUpdate;
 import buildcraft.core.network.TileNetworkData;
 import buildcraft.core.network.TilePacketWrapper;
+import buildcraft.core.proxy.CoreProxy;
+import buildcraft.core.utils.StackUtil;
+import buildcraft.core.utils.Utils;
 
 import net.minecraft.src.Container;
 import net.minecraft.src.EntityItem;
@@ -408,13 +407,14 @@ public class TileAssemblyTable extends TileEntity implements IMachine, IInventor
 				message.select = false;
 			}
 
-			PacketUpdate packet = new PacketUpdate(PacketIds.SELECTION_ASSEMBLY, selectionMessageWrapper.toPayload(xCoord,
+			PacketUpdate packet = new PacketUpdate(PacketIds.SELECTION_ASSEMBLY_SEND, selectionMessageWrapper.toPayload(xCoord,
 					yCoord, zCoord, message));
 			packet.posX = xCoord;
 			packet.posY = yCoord;
 			packet.posZ = zCoord;
-			CoreProxy.sendToPlayers(packet.getPacket(), worldObj, (int) player.posX, (int) player.posY, (int) player.posZ,
-					DefaultProps.NETWORK_UPDATE_RANGE, mod_BuildCraftSilicon.instance);
+			// FIXME: This needs to be switched over to new synch system.
+			CoreProxy.proxy.sendToPlayers(packet.getPacket(), worldObj, (int) player.posX, (int) player.posY, (int) player.posZ,
+					DefaultProps.NETWORK_UPDATE_RANGE);
 		}
 	}
 

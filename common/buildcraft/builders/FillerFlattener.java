@@ -12,6 +12,7 @@ package buildcraft.builders;
 import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.IBox;
 import buildcraft.core.DefaultProps;
+import buildcraft.core.proxy.CoreProxy;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.TileEntity;
 
@@ -63,8 +64,8 @@ public class FillerFlattener extends FillerPattern {
 		}
 
 		if (lastX != Integer.MAX_VALUE && stackToPlace != null) {
-			stackToPlace.getItem().onItemUse(stackToPlace, BuildCraftAPI.getBuildCraftPlayer(tile.worldObj), tile.worldObj,
-					lastX, lastY - 1, lastZ, 1);
+			stackToPlace.getItem().tryPlaceIntoWorld(stackToPlace, CoreProxy.proxy.getBuildCraftPlayer(tile.worldObj), tile.worldObj,
+					lastX, lastY - 1, lastZ, 1, 0.0f, 0.0f, 0.0f);
 		}
 
 		if (lastX != Integer.MAX_VALUE) {

@@ -10,21 +10,19 @@
 package buildcraft.transport;
 
 import buildcraft.BuildCraftCore;
-import buildcraft.mod_BuildCraftCore;
-import buildcraft.api.APIProxy;
-import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.Orientations;
 import buildcraft.api.core.SafeTimeTracker;
 import buildcraft.api.gates.ITrigger;
 import buildcraft.api.liquids.ILiquidTank;
 import buildcraft.api.liquids.ITankContainer;
+import buildcraft.api.liquids.LiquidManager;
 import buildcraft.api.liquids.LiquidStack;
 import buildcraft.api.liquids.LiquidTank;
 import buildcraft.api.transport.IPipeEntry;
-import buildcraft.core.CoreProxy;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.IMachine;
-import buildcraft.core.Utils;
+import buildcraft.core.proxy.CoreProxy;
+import buildcraft.core.utils.Utils;
 import buildcraft.transport.network.PacketLiquidUpdate;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.TileEntity;
@@ -130,7 +128,7 @@ public class PipeTransportLiquids extends PipeTransport implements ITankContaine
 	 * The amount of liquid contained by a pipe section. For simplicity, all
 	 * pipe sections are assumed to be of the same volume.
 	 */
-	public static int LIQUID_IN_PIPE = BuildCraftAPI.BUCKET_VOLUME / 4;
+	public static int LIQUID_IN_PIPE = LiquidManager.BUCKET_VOLUME / 4;
 	public static short INPUT_TTL = 60;	//100
 	public static short OUTPUT_TTL = 80;	//80
 	public static short OUTPUT_COOLDOWN = 30;	//30
@@ -180,7 +178,7 @@ public class PipeTransportLiquids extends PipeTransport implements ITankContaine
 
 	@Override
 	public void updateEntity() {
-		if (APIProxy.isClient(worldObj))
+		if (CoreProxy.proxy.isRemote(worldObj))
 			return;
 
 		moveLiquids();
@@ -215,13 +213,13 @@ public class PipeTransportLiquids extends PipeTransport implements ITankContaine
 		}
 
 
-		if (APIProxy.isServerSide())
+		if (CoreProxy.proxy.isSimulating(worldObj))
 			if (tracker.markTimeIfDelay(worldObj, 1 * BuildCraftCore.updateFactor)){
 
 				PacketLiquidUpdate packet = new PacketLiquidUpdate(xCoord, yCoord, zCoord);
 				packet.displayLiquid = this.renderCache;
-				CoreProxy.sendToPlayers(packet.getPacket(), worldObj, xCoord, yCoord, zCoord,
-						DefaultProps.NETWORK_UPDATE_RANGE, mod_BuildCraftCore.instance);
+				CoreProxy.proxy.sendToPlayers(packet.getPacket(), worldObj, xCoord, yCoord, zCoord,
+						DefaultProps.NETWORK_UPDATE_RANGE);
 			}
 
 		//this.container.synchronizeIfDelay(1 * BuildCraftCore.updateFactor);

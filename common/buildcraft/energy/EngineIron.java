@@ -9,7 +9,6 @@
 
 package buildcraft.energy;
 
-import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.Orientations;
 import buildcraft.api.fuels.IronEngineCoolant;
 import buildcraft.api.fuels.IronEngineFuel;
@@ -17,16 +16,15 @@ import buildcraft.api.liquids.LiquidManager;
 import buildcraft.api.liquids.LiquidStack;
 import buildcraft.api.liquids.LiquidTank;
 import buildcraft.core.DefaultProps;
-import buildcraft.core.Utils;
-import buildcraft.energy.ContainerEngine;
-import net.minecraft.src.Block;
+import buildcraft.core.utils.Utils;
+import buildcraft.energy.gui.ContainerEngine;
 import net.minecraft.src.ICrafting;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.NBTTagCompound;
 
 public class EngineIron extends Engine {
 
-	public static int MAX_LIQUID = BuildCraftAPI.BUCKET_VOLUME * 10;
+	public static int MAX_LIQUID = LiquidManager.BUCKET_VOLUME * 10;
 	public static int MAX_HEAT = 100000;
 	public static int COOLANT_THRESHOLD = 49000;
 
@@ -34,10 +32,10 @@ public class EngineIron extends Engine {
 
 	int burnTime = 0;
 	int liquidQty = 0;
-	int liquidId = 0;
+	public int liquidId = 0;
 
 	int coolantQty = 0;
-	int coolantId = 0;
+	public int coolantId = 0;
 
 	int heat = 0;
 
@@ -106,7 +104,7 @@ public class EngineIron extends Engine {
 					burnTime--;
 				} else {
 					liquidQty--;
-					burnTime = currentFuel.totalBurningTime / BuildCraftAPI.BUCKET_VOLUME;
+					burnTime = currentFuel.totalBurningTime / LiquidManager.BUCKET_VOLUME;
 				}
 
 				currentOutput = currentFuel.powerPerCycle;

@@ -13,22 +13,18 @@ import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.TileEntity;
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftTransport;
-import buildcraft.mod_BuildCraftCore;
-import buildcraft.api.APIProxy;
 import buildcraft.api.core.Orientations;
 import buildcraft.api.core.SafeTimeTracker;
 import buildcraft.api.gates.ITrigger;
 import buildcraft.api.power.IPowerReceptor;
-import buildcraft.core.CoreProxy;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.IMachine;
-import buildcraft.core.Utils;
-import buildcraft.core.network.TileNetworkData;
+import buildcraft.core.proxy.CoreProxy;
+import buildcraft.core.utils.Utils;
 import buildcraft.transport.network.PacketPowerUpdate;
 
 public class PipeTransportPower extends PipeTransport {
-	
-	@TileNetworkData(staticSize = 6)
+
 	public short[] displayPower = new short[] { 0, 0, 0, 0, 0, 0 };
 
 	public int[] powerQuery = new int[6];
@@ -54,7 +50,7 @@ public class PipeTransportPower extends PipeTransport {
 
 	@Override
 	public void updateEntity() {
-		if (APIProxy.isClient(worldObj))
+		if (CoreProxy.proxy.isRemote(worldObj))
 			return;
 
 		step();
@@ -145,20 +141,17 @@ public class PipeTransportPower extends PipeTransport {
 
 						if (nearbyTile.pipe == null)
 							continue;
-						
-						PipeTransportPower nearbyTransport = (PipeTransportPower) nearbyTile.pipe.transport;
 
+						PipeTransportPower nearbyTransport = (PipeTransportPower) nearbyTile.pipe.transport;
 						nearbyTransport.requestEnergy(Orientations.values()[i].reverse(), transferQuery[i]);
 					}
 				}
 
-		if (APIProxy.isServerSide())
-			if (tracker.markTimeIfDelay(worldObj, 2 * BuildCraftCore.updateFactor)){
-				
+		if (!worldObj.isRemote && tracker.markTimeIfDelay(worldObj, 2 * BuildCraftCore.updateFactor)) {
 				PacketPowerUpdate packet = new PacketPowerUpdate(xCoord, yCoord, zCoord);
 				packet.displayPower = displayPower;
-				CoreProxy.sendToPlayers(packet.getPacket(), worldObj, xCoord, yCoord, zCoord,
-						DefaultProps.NETWORK_UPDATE_RANGE, mod_BuildCraftCore.instance);
+				CoreProxy.proxy.sendToPlayers(packet.getPacket(), worldObj, xCoord, yCoord, zCoord,
+						DefaultProps.NETWORK_UPDATE_RANGE);
 			}
 
 	}
