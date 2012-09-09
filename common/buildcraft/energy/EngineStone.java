@@ -28,7 +28,7 @@ public class EngineStone extends Engine {
 		super(engine);
 
 		maxEnergy = 10000;
-		maxEnergyExtracted = 100;
+		maxEnergyExtracted = 1000;
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public class EngineStone extends Engine {
 		if (burnTime > 0) {
 			burnTime--;
 			currentOutput = 1;
-			addEnergy(1);
+			addEnergy(5);
 		}
 
 		if (burnTime == 0 && tile.isRedstonePowered) {
