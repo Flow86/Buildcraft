@@ -51,6 +51,16 @@ public class Utils {
 	public static final float pipeMaxPos = 0.75F;
 	public static float pipeNormalSpeed = 0.01F;
 
+	/**
+	 * Tries to add the passed stack to any valid inventories around the given coordinates.
+	 * @param stack
+	 * @param world
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param from
+	 * @return ItemStack representing what was added.
+	 */
 	public static ItemStack addToRandomInventory(ItemStack stack, World world, int x, int y, int z, Orientations from) {
 		LinkedList<ITransactor> possibleInventories = new LinkedList<ITransactor>();
 
@@ -198,6 +208,11 @@ public class Utils {
 		return world.getBlockTileEntity((int) tmp.x, (int) tmp.y, (int) tmp.z);
 	}
 
+	/**
+	 * Ensures that the given inventory is the full inventory, i.e. takes double chests into account.
+	 * @param inv
+	 * @return Modified inventory if double chest, unmodified otherwise.
+	 */
 	public static IInventory getInventory(IInventory inv) {
 		if (inv instanceof TileEntityChest) {
 			TileEntityChest chest = (TileEntityChest) inv;
@@ -367,7 +382,7 @@ public class Utils {
 	public static void preDestroyBlock(World world, int i, int j, int k) {
 		TileEntity tile = world.getBlockTileEntity(i, j, k);
 
-		if (tile instanceof IInventory && !CoreProxy.proxy.isRemote(world))
+		if (tile instanceof IInventory && !CoreProxy.proxy.isRenderWorld(world))
 			if (!(tile instanceof IDropControlInventory) || ((IDropControlInventory) tile).doDrop())
 				dropItems(world, (IInventory) tile, i, j, k);
 

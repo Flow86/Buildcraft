@@ -53,7 +53,7 @@ public class GateVanilla extends Gate {
 		// Load pulser if any
 		if (nbttagcompound.hasKey("Pulser")) {
 			NBTTagCompound nbttagcompoundP = nbttagcompound.getCompoundTag("Pulser");
-			pulser = new EnergyPulser((IPowerReceptor) pipe);
+			addEnergyPulser(pipe);
 			pulser.readFromNBT(nbttagcompoundP);
 		}
 
@@ -62,7 +62,7 @@ public class GateVanilla extends Gate {
 	// GUI
 	@Override
 	public void openGui(EntityPlayer player) {
-		if (!CoreProxy.proxy.isRemote(player.worldObj))
+		if (!CoreProxy.proxy.isRenderWorld(player.worldObj))
 			player.openGui(BuildCraftTransport.instance, GuiIds.GATES, pipe.worldObj, pipe.xCoord, pipe.yCoord, pipe.zCoord);
 	}
 

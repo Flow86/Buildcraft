@@ -37,6 +37,8 @@ public class CoreProxy {
 	@SidedProxy(clientSide="buildcraft.core.proxy.CoreProxyClient", serverSide="buildcraft.core.proxy.CoreProxy")
 	public static CoreProxy proxy;
 
+	public String getMinecraftVersion() { return "1.3.2"; }
+
 	/* INSTANCES */
 	public Object getClient() { return null; }	
 	public World getClientWorld() { return null; }
@@ -46,7 +48,7 @@ public class CoreProxy {
 		return !world.isRemote;
 	}
 
-	public boolean isRemote(World world) {
+	public boolean isRenderWorld(World world) {
 		return world.isRemote;
 	}
 

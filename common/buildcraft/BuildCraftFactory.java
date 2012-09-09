@@ -8,8 +8,6 @@
 
 package buildcraft;
 
-import java.lang.reflect.Method;
-
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
@@ -21,6 +19,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import buildcraft.core.DefaultProps;
+import buildcraft.core.Version;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.factory.BlockAutoWorkbench;
 import buildcraft.factory.BlockFrame;
@@ -45,7 +44,6 @@ import buildcraft.factory.TilePump;
 import buildcraft.factory.TileQuarry;
 import buildcraft.factory.TileRefinery;
 import buildcraft.factory.TileTank;
-import buildcraft.factory.gui.GuiAutoCrafting;
 import buildcraft.factory.network.PacketHandlerFactory;
 import buildcraft.silicon.TileLaser;
 import net.minecraft.src.Block;
@@ -54,7 +52,7 @@ import net.minecraft.src.ItemStack;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
-@Mod(name="BuildCraft Factory", version=DefaultProps.VERSION, useMetadata = false, modid = "BuildCraft|Factory", dependencies = DefaultProps.DEPENDENCY_CORE)
+@Mod(name="BuildCraft Factory", version=Version.VERSION, useMetadata = false, modid = "BuildCraft|Factory", dependencies = DefaultProps.DEPENDENCY_CORE)
 @NetworkMod(channels = {DefaultProps.NET_CHANNEL_NAME}, packetHandler = PacketHandlerFactory.class, clientSideRequired = true, serverSideRequired = true)
 public class BuildCraftFactory {
 
@@ -77,16 +75,8 @@ public class BuildCraftFactory {
 	public static BuildCraftFactory instance;
 
 	@PostInit
-	public void postInit(FMLPostInitializationEvent evt)
-	{
-		try {
-			Class<?> neiRenderer = Class.forName("codechicken.nei.DefaultOverlayRenderer");
-			Method method = neiRenderer.getMethod("registerGuiOverlay", Class.class, String.class, int.class, int.class);
-			method.invoke(null, GuiAutoCrafting.class, "crafting", 5, 11);
-			BuildCraftCore.bcLog.fine("NEI detected, adding NEI overlay");
-		} catch (Exception e) {
-			BuildCraftCore.bcLog.fine("NEI not detected.");
-		}
+	public void postInit(FMLPostInitializationEvent evt) {
+		FactoryProxy.proxy.initializeNEIIntegration();
 	}
 	@Init
 	public void load(FMLInitializationEvent evt) {
