@@ -1,5 +1,10 @@
 <project name="Buildcraft" basedir="../" default="main">
-    <typedef file="src/antlib.xml"/>
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="/usr/share/java/ant-contrib.jar"/>
+            <pathelement location="/usr/share/java/commons-httpclient.jar"/>
+        </classpath>
+    </taskdef>
     <property environment="env" />
     <!-- Properties -->
 
