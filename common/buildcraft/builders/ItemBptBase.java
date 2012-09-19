@@ -15,6 +15,7 @@ import buildcraft.BuildCraftBuilders;
 import buildcraft.core.ItemBuildCraft;
 import buildcraft.core.blueprints.BptBase;
 
+import net.minecraft.src.CreativeTabs;
 import net.minecraft.src.Entity;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.World;
@@ -26,6 +27,7 @@ public abstract class ItemBptBase extends ItemBuildCraft {
 
 		maxStackSize = 1;
 		iconIndex = 5 * 16 + 0;
+		this.setTabToDisplayOn(CreativeTabs.tabMisc);
 	}
 
 	@SuppressWarnings({ "all" })
