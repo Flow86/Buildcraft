@@ -19,6 +19,7 @@ import buildcraft.api.power.PowerFramework;
 import buildcraft.api.transport.PipeManager;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.network.TileNetworkData;
+import buildcraft.core.RedstonePowerFramework;
 import buildcraft.transport.Pipe;
 import buildcraft.transport.PipeTransportLiquids;
 import net.minecraft.src.TileEntity;
@@ -135,5 +136,12 @@ public class PipeLiquidsWood extends Pipe implements IPowerReceptor {
 	@Override
 	public int powerRequest() {
 		return getPowerProvider().getMaxEnergyReceived();
+	}
+	
+	@Override
+	public boolean canConnectRedstone() {	
+		if(PowerFramework.currentFramework instanceof RedstonePowerFramework)
+			return true;
+		return super.canConnectRedstone();
 	}
 }

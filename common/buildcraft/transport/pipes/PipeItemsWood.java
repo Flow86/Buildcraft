@@ -18,6 +18,7 @@ import buildcraft.api.transport.IPipedItem;
 import buildcraft.api.transport.PipeManager;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.EntityPassiveItem;
+import buildcraft.core.RedstonePowerFramework;
 import buildcraft.core.utils.Utils;
 import buildcraft.transport.Pipe;
 import buildcraft.transport.PipeTransportItems;
@@ -221,4 +222,10 @@ public class PipeItemsWood extends Pipe implements IPowerReceptor {
 		return getPowerProvider().getMaxEnergyReceived();
 	}
 
+	@Override
+	public boolean canConnectRedstone() {	
+		if(PowerFramework.currentFramework instanceof RedstonePowerFramework)
+			return true;
+		return super.canConnectRedstone();
+	}
 }
