@@ -19,7 +19,7 @@
 
 	<property name="mcp.version"         value="72"/>
 	<property name="forge.version"       value="4.1.4.287"/>
-	<property name="bc.version"          value="3.1.8"/>
+	<property name="bc.version"          value="3.2.0"/>
 
 	<available property="forge-exists" file="${download.dir}/minecraftforge-src-${forge.version}.zip"/>
 	<condition property="should-download-ant-contrib">
