@@ -144,6 +144,9 @@
 			<arg value="install.sh" />
 		</exec>
 
+	</target>
+	
+	<target name="copy-src">
 		<!-- Copy BC source -->
 		<copy todir="${mcpsrc.dir}">
 			<fileset dir="${src.dir}/common">
@@ -154,10 +157,9 @@
 				<filter token="BUILD_NUMBER" value="${build.number}" />
 			</filterset>
 		</copy>
-
 	</target>
 
-	<target name="compile" depends="setup">
+	<target name="compile" depends="setup,copy-src">
 
 		<!-- Recompile -->
 		<exec dir="${mcp.dir}" executable="cmd" osfamily="windows">
