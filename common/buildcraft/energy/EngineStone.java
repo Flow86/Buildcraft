@@ -27,8 +27,8 @@ public class EngineStone extends Engine {
 	public EngineStone(TileEngine engine) {
 		super(engine);
 
-		maxEnergy = 10000;
-		maxEnergyExtracted = 100;
+		maxEnergy = 50000;
+		maxEnergyExtracted = 10000;
 	}
 
 	@Override
