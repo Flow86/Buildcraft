@@ -73,7 +73,7 @@ public class EngineStone extends Engine {
 		if (burnTime > 0) {
 			burnTime--;
 			currentOutput = 1;
-			addEnergy(1);
+			addEnergy(15);
 		}
 
 		if (burnTime == 0 && tile.isRedstonePowered) {
