@@ -10,7 +10,6 @@
 package buildcraft.builders;
 
 import buildcraft.BuildCraftBuilders;
-import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.IBox;
 import buildcraft.api.filler.IFillerPattern;
 import buildcraft.core.proxy.CoreProxy;
@@ -63,7 +62,7 @@ public abstract class FillerPattern implements IFillerPattern {
 					if(!BlockUtil.canChangeBlock(world, x, y, z)){
 						return false;
 					}
-					if (BuildCraftAPI.softBlock(world.getBlockId(x, y, z))) {
+					if (BlockUtil.isSoftBlock(world, x, y, z)) {
 						xSlot = x;
 						ySlot = y;
 						zSlot = z;
@@ -99,7 +98,7 @@ public abstract class FillerPattern implements IFillerPattern {
 					if(!BlockUtil.canChangeBlock(world, x, y, z)){
 						return false;
 					}
-					if (!BuildCraftAPI.softBlock(world.getBlockId(x, y, z))) {
+					if (!BlockUtil.isSoftBlock(world, x, y, z)) {
 						found = true;
 						lastX = x;
 						lastY = y;

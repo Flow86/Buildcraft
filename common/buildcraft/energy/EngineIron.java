@@ -9,12 +9,12 @@
 
 package buildcraft.energy;
 
-import buildcraft.api.core.Orientations;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.liquids.LiquidContainerRegistry;
+import net.minecraftforge.liquids.LiquidStack;
+import net.minecraftforge.liquids.LiquidTank;
 import buildcraft.api.fuels.IronEngineCoolant;
 import buildcraft.api.fuels.IronEngineFuel;
-import buildcraft.api.liquids.LiquidManager;
-import buildcraft.api.liquids.LiquidStack;
-import buildcraft.api.liquids.LiquidTank;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.utils.Utils;
 import buildcraft.energy.gui.ContainerEngine;
@@ -26,7 +26,7 @@ import net.minecraft.src.NBTTagCompound;
 
 public class EngineIron extends Engine {
 
-	public static int MAX_LIQUID = LiquidManager.BUCKET_VOLUME * 10;
+	public static int MAX_LIQUID = LiquidContainerRegistry.BUCKET_VOLUME * 10;
 	public static int MAX_HEAT = 100000;
 	public static int COOLANT_THRESHOLD = 49000;
 
@@ -106,7 +106,7 @@ public class EngineIron extends Engine {
 					burnTime--;
 				} else {
 					liquidQty--;
-					burnTime = currentFuel.totalBurningTime / LiquidManager.BUCKET_VOLUME;
+					burnTime = currentFuel.totalBurningTime / LiquidContainerRegistry.BUCKET_VOLUME;
 				}
 
 				currentOutput = currentFuel.powerPerCycle;
@@ -130,16 +130,16 @@ public class EngineIron extends Engine {
 			LiquidStack liquid = null;
 			if (Block.ice.blockID == itemInInventory.itemID && heat > COOLANT_THRESHOLD)
 			{
-				liquid = LiquidManager.getLiquidForFilledItem(new ItemStack(Item.bucketWater));
+				liquid = LiquidContainerRegistry.getLiquidForFilledItem(new ItemStack(Item.bucketWater));
 			}
 			else
 			{
-				liquid = LiquidManager.getLiquidForFilledItem(itemInInventory);
+				liquid = LiquidContainerRegistry.getLiquidForFilledItem(itemInInventory);
 			}
 
 			if (liquid != null) {
-				if (fill(Orientations.Unknown, liquid, false) == liquid.amount) {
-					fill(Orientations.Unknown, liquid, true);
+				if (fill(ForgeDirection.UNKNOWN, liquid, false) == liquid.amount) {
+					fill(ForgeDirection.UNKNOWN, liquid, true);
 					tile.setInventorySlotContents(0, Utils.consumeItem(itemInInventory));
 				}
 			}
@@ -166,7 +166,9 @@ public class EngineIron extends Engine {
 
 		}
 
-		if (heat <= 0 && penaltyCooling > 0) {
+		if (heat <= 0) heat = 0;
+
+		if (heat == 0 && penaltyCooling > 0) {
 			penaltyCooling--;
 		}
 	}
@@ -239,24 +241,34 @@ public class EngineIron extends Engine {
 	public void getGUINetworkData(int i, int j) {
 		switch (i) {
 		case 0:
-			energy = j / 10;
+			int iEnergy = Math.round(energy * 10);
+			iEnergy = (iEnergy & 0xff00) | (j & 0xff);
+			energy = iEnergy / 10;
 			break;
 		case 1:
-			currentOutput = j / 10;
+			iEnergy = Math.round(energy * 10);
+			iEnergy = (iEnergy & 0xff) | ((j & 0xff) << 8);
+			energy = iEnergy / 10;
 			break;
 		case 2:
-			heat = j;
+			currentOutput = j / 10;
 			break;
 		case 3:
-			liquidQty = j;
+			heat = (heat & 0xff00) | (j & 0xff);
 			break;
 		case 4:
-			liquidId = j;
+			heat = (heat & 0xff) | ((j & 0xff) << 8 );
 			break;
 		case 5:
-			coolantQty = j;
+			liquidQty = j;
 			break;
 		case 6:
+			liquidId = j;
+			break;
+		case 7:
+			coolantQty = j;
+			break;
+		case 8:
 			coolantId = j;
 			break;
 		}
@@ -264,13 +276,15 @@ public class EngineIron extends Engine {
 
 	@Override
 	public void sendGUINetworkData(ContainerEngine containerEngine, ICrafting iCrafting) {
-		iCrafting.updateCraftingInventoryInfo(containerEngine, 0, Math.round(energy * 10));
-		iCrafting.updateCraftingInventoryInfo(containerEngine, 1, Math.round(currentOutput * 10));
-		iCrafting.updateCraftingInventoryInfo(containerEngine, 2, heat);
-		iCrafting.updateCraftingInventoryInfo(containerEngine, 3, liquidQty);
-		iCrafting.updateCraftingInventoryInfo(containerEngine, 4, liquidId);
-		iCrafting.updateCraftingInventoryInfo(containerEngine, 5, coolantQty);
-		iCrafting.updateCraftingInventoryInfo(containerEngine, 6, coolantId);
+		iCrafting.sendProgressBarUpdate(containerEngine, 0, Math.round(energy * 10) & 0xff);
+		iCrafting.sendProgressBarUpdate(containerEngine, 1, (Math.round(energy * 10) & 0xff00) >> 8 );
+		iCrafting.sendProgressBarUpdate(containerEngine, 2, Math.round(currentOutput * 10));
+		iCrafting.sendProgressBarUpdate(containerEngine, 3, heat & 0xff);
+		iCrafting.sendProgressBarUpdate(containerEngine, 4, (heat & 0xff00) >> 8);
+		iCrafting.sendProgressBarUpdate(containerEngine, 5, liquidQty);
+		iCrafting.sendProgressBarUpdate(containerEngine, 6, liquidId);
+		iCrafting.sendProgressBarUpdate(containerEngine, 7, coolantQty);
+		iCrafting.sendProgressBarUpdate(containerEngine, 8, coolantId);
 	}
 
 	@Override
@@ -284,7 +298,7 @@ public class EngineIron extends Engine {
 	}
 
 	/* ITANKCONTAINER */
-	public int fill(Orientations from, LiquidStack resource, boolean doFill) {
+	public int fill(ForgeDirection from, LiquidStack resource, boolean doFill) {
 
 		// Handle coolant
 		if (IronEngineCoolant.getCoolantForLiquid(resource) != null)
@@ -318,7 +332,7 @@ public class EngineIron extends Engine {
 		return res;
 	}
 
-	private int fillCoolant(Orientations from, LiquidStack resource, boolean doFill) {
+	private int fillCoolant(ForgeDirection from, LiquidStack resource, boolean doFill) {
 		int res = 0;
 
 		if (coolantQty > 0 && coolantId != resource.itemID)

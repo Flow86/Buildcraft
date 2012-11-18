@@ -9,7 +9,6 @@
 
 package buildcraft.builders;
 
-import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.IBox;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.proxy.CoreProxy;
@@ -50,7 +49,7 @@ public class FillerFlattener extends FillerPattern {
 						return true;
 					}
 					if (!blockedColumns[x - xMin][z - zMin]) {
-						if (!BuildCraftAPI.softBlock(tile.worldObj.getBlockId(x, y, z))) {
+						if (!BlockUtil.isSoftBlock(tile.worldObj, x, y, z)) {
 							blockedColumns[x - xMin][z - zMin] = true;
 						} else {
 							found = true;

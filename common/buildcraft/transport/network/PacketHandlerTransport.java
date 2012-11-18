@@ -12,7 +12,6 @@ import net.minecraft.src.TileEntity;
 import net.minecraft.src.World;
 import buildcraft.core.network.PacketCoordinates;
 import buildcraft.core.network.PacketIds;
-import buildcraft.core.network.PacketNBT;
 import buildcraft.core.network.PacketSlotChange;
 import buildcraft.core.network.PacketUpdate;
 import buildcraft.transport.PipeTransportItems;
@@ -108,7 +107,7 @@ public class PacketHandlerTransport implements IPacketHandler {
 	 * @param packet
 	 */
 	private void onGateActions(EntityPlayer player, PacketUpdate packet) {
-		Container container = player.craftingInventory;
+		Container container = player.openContainer;
 
 		if (!(container instanceof ContainerGateInterface))
 			return;
@@ -122,7 +121,7 @@ public class PacketHandlerTransport implements IPacketHandler {
 	 * @param packet
 	 */
 	private void onGateTriggers(EntityPlayer player, PacketUpdate packet) {
-		Container container = player.craftingInventory;
+		Container container = player.openContainer;
 
 		if (!(container instanceof ContainerGateInterface))
 			return;
@@ -136,7 +135,7 @@ public class PacketHandlerTransport implements IPacketHandler {
 	 * @param packet
 	 */
 	private void onGateSelection(EntityPlayer player, PacketUpdate packet) {
-		Container container = player.craftingInventory;
+		Container container = player.openContainer;
 
 		if (!(container instanceof ContainerGateInterface))
 			return;
@@ -249,10 +248,10 @@ public class PacketHandlerTransport implements IPacketHandler {
 	 * @param packet
 	 */
 	private void onGateSelectionChange(EntityPlayer playerEntity, PacketUpdate packet) {
-		if (!(playerEntity.craftingInventory instanceof ContainerGateInterface))
+		if (!(playerEntity.openContainer instanceof ContainerGateInterface))
 			return;
 
-		((ContainerGateInterface) playerEntity.craftingInventory).handleSelectionChange(packet);
+		((ContainerGateInterface) playerEntity.openContainer).handleSelectionChange(packet);
 	}
 
 	/**
@@ -262,10 +261,10 @@ public class PacketHandlerTransport implements IPacketHandler {
 	 * @param packet
 	 */
 	private void onGateSelectionRequest(EntityPlayer playerEntity, PacketCoordinates packet) {
-		if (!(playerEntity.craftingInventory instanceof ContainerGateInterface))
+		if (!(playerEntity.openContainer instanceof ContainerGateInterface))
 			return;
 
-		((ContainerGateInterface) playerEntity.craftingInventory).sendSelection(playerEntity);
+		((ContainerGateInterface) playerEntity.openContainer).sendSelection(playerEntity);
 	}
 
 	/**
@@ -275,10 +274,10 @@ public class PacketHandlerTransport implements IPacketHandler {
 	 * @param packet
 	 */
 	private void onGateInitRequest(EntityPlayer playerEntity, PacketCoordinates packet) {
-		if (!(playerEntity.craftingInventory instanceof ContainerGateInterface))
+		if (!(playerEntity.openContainer instanceof ContainerGateInterface))
 			return;
 
-		((ContainerGateInterface) playerEntity.craftingInventory).handleInitRequest(playerEntity);
+		((ContainerGateInterface) playerEntity.openContainer).handleInitRequest(playerEntity);
 	}
 
 	/**

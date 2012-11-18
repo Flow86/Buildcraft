@@ -144,17 +144,19 @@ public class CoreProxyClient extends CoreProxy {
 	}
 
 	private EntityPlayer createNewPlayer(World world) {
-		return new EntityPlayer(world) {
+		EntityPlayer player = new EntityPlayer(world) {
 			@Override public void sendChatToPlayer(String var1) {}
 			@Override
 			public boolean canCommandSenderUseCommand(int var1, String var2) {
 				return false;
 			}
 			@Override
-			public ChunkCoordinates func_82114_b() {
+			public ChunkCoordinates getPlayerCoordinates() {
 				return null;
 			}
 		};
+		player.username = "[BuildCraft]";
+		return player;
 	}
 
 	@Override

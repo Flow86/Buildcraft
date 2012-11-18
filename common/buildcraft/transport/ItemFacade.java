@@ -2,21 +2,18 @@ package buildcraft.transport;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import cpw.mods.fml.common.Side;
 import cpw.mods.fml.common.asm.SideOnly;
 
 import buildcraft.BuildCraftTransport;
-import buildcraft.api.core.Orientations;
+import net.minecraftforge.common.ForgeDirection;
 import buildcraft.api.recipes.AssemblyRecipe;
 import buildcraft.core.ItemBuildCraft;
 import buildcraft.core.proxy.CoreProxy;
@@ -25,7 +22,6 @@ import net.minecraft.src.Block;
 import net.minecraft.src.CreativeTabs;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.Item;
-import net.minecraft.src.ItemBlock;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.World;
@@ -79,11 +75,11 @@ public class ItemFacade extends ItemBuildCraft {
 		TileGenericPipe pipeTile = (TileGenericPipe)tile;
 
 		if (player.isSneaking()) { //Strip facade
-			if (!pipeTile.hasFacade(Orientations.dirs()[side])) return false;
-			pipeTile.dropFacade(Orientations.dirs()[side]);
+			if (!pipeTile.hasFacade(ForgeDirection.VALID_DIRECTIONS[side])) return false;
+			pipeTile.dropFacade(ForgeDirection.VALID_DIRECTIONS[side]);
 			return true;
 		} else {
-			if (((TileGenericPipe)tile).addFacade(Orientations.values()[side], ItemFacade.getBlockId(stack.getItemDamage()), ItemFacade.getMetaData(stack.getItemDamage()))){
+			if (((TileGenericPipe)tile).addFacade(ForgeDirection.values()[side], ItemFacade.getBlockId(stack.getItemDamage()), ItemFacade.getMetaData(stack.getItemDamage()))){
 				if (!player.capabilities.isCreativeMode)
 					stack.stackSize--;
 				return true;

@@ -8,19 +8,20 @@
 
 package buildcraft.core.utils;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import buildcraft.BuildCraftCore;
-
 import buildcraft.BuildCraftEnergy;
-import buildcraft.BuildCraftFactory;
+import buildcraft.api.core.BuildCraftAPI;
+
 import net.minecraft.src.Block;
+import net.minecraft.src.EntityItem;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.World;
 
 public class BlockUtil {
 
-	public static ArrayList<ItemStack> getItemStackFromBlock(World world, int i, int j, int k) {
+	public static List<ItemStack> getItemStackFromBlock(World world, int i, int j, int k) {
 		Block block = Block.blocksList[world.getBlockId(i, j, k)];
 
 		if (block == null)
@@ -34,14 +35,28 @@ public class BlockUtil {
 	public static void breakBlock(World world, int x, int y, int z) {
 		int blockId = world.getBlockId(x, y, z);
 
-		if (blockId != 0 && BuildCraftCore.dropBrokenBlocks)
-			Block.blocksList[blockId].dropBlockAsItem(world, x, y, z, world.getBlockMetadata(x, y, z), 0);
+		if (blockId != 0 && BuildCraftCore.dropBrokenBlocks && !world.isRemote && world.getGameRules().getGameRuleBooleanValue("doTileDrops")) {
+			List<ItemStack> items = Block.blocksList[blockId].getBlockDropped(world, x, y, z, world.getBlockMetadata(x, y, z), 0);
+
+			for (ItemStack item : items) {
+				float var = 0.7F;
+				double dx = world.rand.nextFloat() * var + (1.0F - var) * 0.5D;
+				double dy = world.rand.nextFloat() * var + (1.0F - var) * 0.5D;
+				double dz = world.rand.nextFloat() * var + (1.0F - var) * 0.5D;
+				EntityItem entityitem = new EntityItem(world, x + dx, y + dy, z + dz, item);
+
+				entityitem.lifespan = BuildCraftCore.itemLifespan;
+				entityitem.delayBeforeCanPickup = 10;
+
+				world.spawnEntityInWorld(entityitem);
+			}
+		}
 
 		world.setBlockWithNotify(x, y, z, 0);
 	}
 
 	public static boolean canChangeBlock(World world, int x, int y, int z) {
-		if(world.isAirBlock(x, y, z)){
+		if(world.isAirBlock(x, y, z)) {
 			return true;
 		}
 
@@ -64,5 +79,15 @@ public class BlockUtil {
 		}
 
 		return true;
+	}
+        
+	public static boolean isSoftBlock(World world, int x, int y, int z){
+		if(world.isAirBlock(x, y, z)) {
+			return true;
+		}
+
+		int blockId = world.getBlockId(x, y, z);
+
+		return BuildCraftAPI.softBlocks[blockId] || Block.blocksList[blockId] == null;
 	}
 }

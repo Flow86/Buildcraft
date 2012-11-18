@@ -16,8 +16,9 @@ import java.util.TreeMap;
 import cpw.mods.fml.common.Side;
 import cpw.mods.fml.common.asm.SideOnly;
 
+import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftTransport;
-import buildcraft.api.core.Orientations;
+import net.minecraftforge.common.ForgeDirection;
 import buildcraft.api.tools.IToolWrench;
 import buildcraft.api.transport.IPipe;
 import buildcraft.core.BlockIndex;
@@ -51,7 +52,7 @@ public class BlockGenericPipe extends BlockContainer {
 
 	@Override
 	public int getRenderType() {
-		return TransportProxyClient.pipeModel;
+		return TransportProxy.pipeModel;
 	}
 
 	@Override
@@ -110,32 +111,32 @@ public class BlockGenericPipe extends BlockContainer {
 		if (tileG != null) {
 			float facadeThickness = PipeWorldRenderer.facadeThickness;
 
-			if (tileG.hasFacade(Orientations.XPos)) {
+			if (tileG.hasFacade(ForgeDirection.EAST)) {
 				setBlockBounds(1 - facadeThickness, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
 				super.addCollidingBlockToList(world, i, j, k, axisalignedbb, arraylist, par7Entity);
 			}
 
-			if (tileG.hasFacade(Orientations.XNeg)) {
+			if (tileG.hasFacade(ForgeDirection.WEST)) {
 				setBlockBounds(0.0F, 0.0F, 0.0F, facadeThickness, 1.0F, 1.0F);
 				super.addCollidingBlockToList(world, i, j, k, axisalignedbb, arraylist, par7Entity);
 			}
 
-			if (tileG.hasFacade(Orientations.YPos)) {
+			if (tileG.hasFacade(ForgeDirection.UP)) {
 				setBlockBounds(0.0F, 1 - facadeThickness, 0.0F,  1.0F, 1.0F, 1.0F);
 				super.addCollidingBlockToList(world, i, j, k, axisalignedbb, arraylist, par7Entity);
 			}
 
-			if (tileG.hasFacade(Orientations.YNeg)) {
+			if (tileG.hasFacade(ForgeDirection.DOWN)) {
 				setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, facadeThickness, 1.0F);
 				super.addCollidingBlockToList(world, i, j, k, axisalignedbb, arraylist, par7Entity);
 			}
 
-			if (tileG.hasFacade(Orientations.ZPos)) {
+			if (tileG.hasFacade(ForgeDirection.SOUTH)) {
 				setBlockBounds(0.0F, 0.0F, 1 - facadeThickness,  1.0F, 1.0F, 1.0F);
 				super.addCollidingBlockToList(world, i, j, k, axisalignedbb, arraylist, par7Entity);
 			}
 
-			if (tileG.hasFacade(Orientations.ZNeg)) {
+			if (tileG.hasFacade(ForgeDirection.NORTH)) {
 				setBlockBounds(0.0F, 0.0F, 0.0F,  1.0F, 1.0F, facadeThickness);
 				super.addCollidingBlockToList(world, i, j, k, axisalignedbb, arraylist, par7Entity);
 			}
@@ -151,40 +152,40 @@ public class BlockGenericPipe extends BlockContainer {
 		TileEntity tile1 = world.getBlockTileEntity(i, j, k);
 		TileGenericPipe tileG = (TileGenericPipe) tile1;
 
-		if (Utils.checkPipesConnections(world, tile1, i - 1, j, k) || (tileG != null && tileG.hasFacade(Orientations.XNeg)))
+		if (Utils.checkPipesConnections(world, tile1, i - 1, j, k) || (tileG != null && tileG.hasFacade(ForgeDirection.WEST)))
 			xMin = 0.0F;
 
-		if (Utils.checkPipesConnections(world, tile1, i + 1, j, k) || (tileG != null && tileG.hasFacade(Orientations.XPos)))
+		if (Utils.checkPipesConnections(world, tile1, i + 1, j, k) || (tileG != null && tileG.hasFacade(ForgeDirection.EAST)))
 			xMax = 1.0F;
 
-		if (Utils.checkPipesConnections(world, tile1, i, j - 1, k) || (tileG != null && tileG.hasFacade(Orientations.YNeg)))
+		if (Utils.checkPipesConnections(world, tile1, i, j - 1, k) || (tileG != null && tileG.hasFacade(ForgeDirection.DOWN)))
 			yMin = 0.0F;
 
-		if (Utils.checkPipesConnections(world, tile1, i, j + 1, k) || (tileG != null && tileG.hasFacade(Orientations.YPos)))
+		if (Utils.checkPipesConnections(world, tile1, i, j + 1, k) || (tileG != null && tileG.hasFacade(ForgeDirection.UP)))
 			yMax = 1.0F;
 
-		if (Utils.checkPipesConnections(world, tile1, i, j, k - 1) || (tileG != null && tileG.hasFacade(Orientations.ZNeg)))
+		if (Utils.checkPipesConnections(world, tile1, i, j, k - 1) || (tileG != null && tileG.hasFacade(ForgeDirection.NORTH)))
 			zMin = 0.0F;
 
-		if (Utils.checkPipesConnections(world, tile1, i, j, k + 1) || (tileG != null && tileG.hasFacade(Orientations.ZPos)))
+		if (Utils.checkPipesConnections(world, tile1, i, j, k + 1) || (tileG != null && tileG.hasFacade(ForgeDirection.SOUTH)))
 			zMax = 1.0F;
 
 		if (tileG != null) {
-			if (tileG.hasFacade(Orientations.XPos) || tileG.hasFacade(Orientations.XNeg)) {
+			if (tileG.hasFacade(ForgeDirection.EAST) || tileG.hasFacade(ForgeDirection.WEST)) {
 				yMin = 0.0F;
 				yMax = 1.0F;
 				zMin = 0.0F;
 				zMax = 1.0F;
 			}
 
-			if (tileG.hasFacade(Orientations.YPos) || tileG.hasFacade(Orientations.YNeg)) {
+			if (tileG.hasFacade(ForgeDirection.UP) || tileG.hasFacade(ForgeDirection.DOWN)) {
 				xMin = 0.0F;
 				xMax = 1.0F;
 				zMin = 0.0F;
 				zMax = 1.0F;
 			}
 
-			if (tileG.hasFacade(Orientations.ZPos) || tileG.hasFacade(Orientations.ZNeg)) {
+			if (tileG.hasFacade(ForgeDirection.SOUTH) || tileG.hasFacade(ForgeDirection.NORTH)) {
 				xMin = 0.0F;
 				xMax = 1.0F;
 				yMin = 0.0F;
@@ -330,8 +331,8 @@ public class BlockGenericPipe extends BlockContainer {
 
 
 	@Override
-	public void updateBlockMetadata(World world, int x, int y, int z, int par5,	float par6, float par7, float par8) {
-		super.updateBlockMetadata(world, x, y, z, par5, par6, par7, par8);
+	public void func_85105_g(World world, int x, int y, int z, int par5) {
+		super.func_85105_g(world, x, y, z, par5);
 		Pipe pipe = getPipe(world, x, y, z);
 
 		if (isValid(pipe))
@@ -360,7 +361,9 @@ public class BlockGenericPipe extends BlockContainer {
 			} else if (entityplayer.getCurrentEquippedItem() == null) {
 
 				// Fall through the end of the test
-
+			} else if (entityplayer.getCurrentEquippedItem().itemID == Item.sign.shiftedIndex){
+				// Sign will be placed anyway, so lets show the sign gui
+				return false;
 			} else if (entityplayer.getCurrentEquippedItem().getItem() instanceof ItemPipe)
 				return false;
 			else if (entityplayer.getCurrentEquippedItem().getItem() instanceof IToolWrench) {
@@ -518,7 +521,7 @@ public class BlockGenericPipe extends BlockContainer {
 	}
 
 	@Override
-	public boolean isPoweringTo(IBlockAccess iblockaccess, int x, int y, int z, int l) {
+	public boolean isProvidingStrongPower(IBlockAccess iblockaccess, int x, int y, int z, int l) {
 		Pipe pipe = getPipe(iblockaccess, x, y, z);
 
 		if (isValid(pipe))
@@ -533,7 +536,7 @@ public class BlockGenericPipe extends BlockContainer {
 	}
 
 	@Override
-	public boolean isIndirectlyPoweringTo(IBlockAccess world, int i, int j, int k, int l) {
+	public boolean isProvidingWeakPower(IBlockAccess world, int i, int j, int k, int l) {
 		Pipe pipe = getPipe(world, i, j, k);
 
 		if (isValid(pipe))
@@ -579,7 +582,7 @@ public class BlockGenericPipe extends BlockContainer {
 			if (pipe != null) {
 				return pipe.getConstructor(int.class).newInstance(key);
 			} else {
-				System.err.printf("[BuildCraft] Detected pipe with unknown key (" + key + "). Did you remove a buildcraft addon?\n");
+				BuildCraftCore.bcLog.warning("Detected pipe with unknown key (" + key + "). Did you remove a buildcraft addon?");
 			}
 
 		} catch (Throwable t) {

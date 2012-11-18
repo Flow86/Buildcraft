@@ -1,8 +1,8 @@
-/** 
+/**
  * Copyright (c) SpaceToad, 2011
  * http://www.mod-buildcraft.com
- * 
- * BuildCraft is distributed under the terms of the Minecraft Mod Public 
+ *
+ * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
@@ -134,7 +134,7 @@ public class TileFiller extends TileBuildCraft implements ISidedInventory, IPowe
 			}
 
 			if (done) {
-				worldObj.markBlockNeedsUpdate(xCoord, yCoord, zCoord);
+				worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 				sendNetworkUpdate();
 			}
 		}
@@ -175,7 +175,7 @@ public class TileFiller extends TileBuildCraft implements ISidedInventory, IPowe
 		}
 
 		if (worldObj != null) {
-			worldObj.markBlockNeedsUpdate(xCoord, yCoord, zCoord);
+			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 		}
 
 		if (currentPattern == null) {
@@ -307,7 +307,7 @@ public class TileFiller extends TileBuildCraft implements ISidedInventory, IPowe
 		super.handleDescriptionPacket(packet);
 
 		currentPattern = FillerManager.registry.getPattern(currentPatternId);
-		worldObj.markBlockNeedsUpdate(xCoord, yCoord, zCoord);
+		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 
 		if (!initialized && box.isInitialized()) {
 			box.createLasers(worldObj, LaserKind.Stripes);
@@ -321,7 +321,7 @@ public class TileFiller extends TileBuildCraft implements ISidedInventory, IPowe
 		super.handleUpdatePacket(packet);
 
 		currentPattern = FillerManager.registry.getPattern(currentPatternId);
-		worldObj.markBlockNeedsUpdate(xCoord, yCoord, zCoord);
+		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 
 		if (!initialized && box.isInitialized()) {
 			box.createLasers(worldObj, LaserKind.Stripes);
@@ -395,7 +395,7 @@ public class TileFiller extends TileBuildCraft implements ISidedInventory, IPowe
 	public int getStartInventorySide(ForgeDirection side) {
 		if(side == ForgeDirection.UP)
 			return 0;
-		return 9;  
+		return 9;
 	}
 
 	/**

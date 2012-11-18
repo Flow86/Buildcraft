@@ -9,10 +9,11 @@
 
 package buildcraft.factory;
 
-import java.util.ArrayList;
+import java.util.List;
 
+import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftFactory;
-import buildcraft.api.core.Orientations;
+import net.minecraftforge.common.ForgeDirection;
 import buildcraft.api.power.IPowerProvider;
 import buildcraft.api.power.IPowerReceptor;
 import buildcraft.api.power.PowerFramework;
@@ -61,7 +62,7 @@ public class TileMiningWell extends TileMachine implements IMachine, IPowerRecep
 
 		int blockId = world.getBlockId(xCoord, depth, zCoord);
 
-		ArrayList<ItemStack> stacks = BlockUtil.getItemStackFromBlock(worldObj, xCoord, depth, zCoord);
+		List<ItemStack> stacks = BlockUtil.getItemStackFromBlock(worldObj, xCoord, depth, zCoord);
 
 		world.setBlockWithNotify(xCoord, depth, zCoord, BuildCraftFactory.plainPipeBlock.blockID);
 
@@ -75,12 +76,12 @@ public class TileMiningWell extends TileMachine implements IMachine, IPowerRecep
 
 		for (ItemStack stack : stacks) {
 
-			ItemStack added = Utils.addToRandomInventory(stack, worldObj, xCoord, yCoord, zCoord, Orientations.Unknown);
+			ItemStack added = Utils.addToRandomInventory(stack, worldObj, xCoord, yCoord, zCoord, ForgeDirection.UNKNOWN);
 			stack.stackSize -= added.stackSize;
 			if (stack.stackSize <= 0)
 				continue;
 
-			if (Utils.addToRandomPipeEntry(this, Orientations.Unknown, stack) && stack.stackSize <= 0) {
+			if (Utils.addToRandomPipeEntry(this, ForgeDirection.UNKNOWN, stack) && stack.stackSize <= 0) {
 				return;
 			}
 
@@ -92,6 +93,9 @@ public class TileMiningWell extends TileMachine implements IMachine, IPowerRecep
 			float f2 = world.rand.nextFloat() * 0.8F + 0.1F;
 
 			EntityItem entityitem = new EntityItem(world, xCoord + f, yCoord + f1 + 0.5F, zCoord + f2, stack);
+
+			entityitem.lifespan = BuildCraftCore.itemLifespan;
+			entityitem.delayBeforeCanPickup = 10;
 
 			float f3 = 0.05F;
 			entityitem.motionX = (float) world.rand.nextGaussian() * f3;
@@ -127,7 +131,7 @@ public class TileMiningWell extends TileMachine implements IMachine, IPowerRecep
 	}
 
 	@Override
-	public boolean isPipeConnected(Orientations with) {
+	public boolean isPipeConnected(ForgeDirection with) {
 		return true;
 	}
 

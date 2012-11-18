@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import buildcraft.api.core.Orientations;
+import net.minecraftforge.common.ForgeDirection;
 import buildcraft.core.IMachine;
 import buildcraft.core.network.PacketIds;
 import buildcraft.core.network.PacketSlotChange;
@@ -25,7 +25,6 @@ import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NBTTagList;
 import net.minecraft.src.SlotCrafting;
 import net.minecraft.src.TileEntity;
-import net.minecraft.src.World;
 
 public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInventory, ILaserTarget, IMachine {
 	private final class InternalInventoryCraftingContainer extends Container {
@@ -88,7 +87,7 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 		}
 
 		@Override
-		public ChunkCoordinates func_82114_b() {
+		public ChunkCoordinates getPlayerCoordinates() {
 			return null;
 		}
 	}
@@ -312,7 +311,7 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 					return;
 				}
 			}
-			craftSlot.func_82870_a(internalPlayer, craftResult.getStackInSlot(0));
+			craftSlot.onPickupFromSlot(internalPlayer, craftResult.getStackInSlot(0));
 			for (int i=0; i<tempStorage.length; i++) {
 				if (tempStorage[i]!=null && tempStorage[i].stackSize<=0) tempStorage[i]=null;
 			}
@@ -326,14 +325,11 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 				}
 			}
 			for (ItemStack output : outputs) {
-				System.out.printf("Output stack is %s\n",output);
-				boolean putToPipe = Utils.addToRandomPipeEntry(this, Orientations.YPos, output);
+				boolean putToPipe = Utils.addToRandomPipeEntry(this, ForgeDirection.UP, output);
 				if (!putToPipe)
 				{
-					System.out.println(output);
 					for (int i = 0; i < storageSlots.length; i++)
 					{
-						System.out.printf("%d: %s %s\n", i,output, storageSlots[i]);
 						if (output.stackSize <= 0) {
 							break;
 						}
@@ -346,15 +342,12 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 								output.stackSize = 0;
 							}
 						} else if (storageSlots[i] == null) {
-							System.out.println(output);
 							storageSlots[i] = output.copy();
-							System.out.println(storageSlots[i]+":"+output);
 							output.stackSize = 0;
-							System.out.println(storageSlots[i]+":"+output);
 						}
 					}
 					if (output.stackSize > 0) {
-						output = Utils.addToRandomInventory(output, worldObj, xCoord, yCoord, zCoord, Orientations.Unknown);
+						output = Utils.addToRandomInventory(output, worldObj, xCoord, yCoord, zCoord, ForgeDirection.UNKNOWN);
 					}
 					if (output.stackSize > 0) {
 						Utils.dropItems(worldObj, output, xCoord, yCoord, zCoord);
@@ -373,7 +366,7 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 	}
 
 	private void updateCraftingResults() {
-		craftResult.setInventorySlotContents(0, CraftingManager.getInstance().func_82787_a(internalInventoryCrafting, worldObj));
+		craftResult.setInventorySlotContents(0, CraftingManager.getInstance().findMatchingRecipe(internalInventoryCrafting, worldObj));
 		onInventoryChanged();
 	}
 
@@ -458,10 +451,10 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 		{
 			lRecentEnergy += (int)(recentEnergy[i] * 100.0 / (float)(recentEnergy.length - 1));
 		}
-		iCrafting.updateCraftingInventoryInfo(container, 1, currentStored & 0xFFFF);
-		iCrafting.updateCraftingInventoryInfo(container, 3, (currentStored >>> 16) & 0xFFFF);
-		iCrafting.updateCraftingInventoryInfo(container, 4, lRecentEnergy & 0xFFFF);
-		iCrafting.updateCraftingInventoryInfo(container, 5, (lRecentEnergy >>> 16) & 0xFFFF);
+		iCrafting.sendProgressBarUpdate(container, 1, currentStored & 0xFFFF);
+		iCrafting.sendProgressBarUpdate(container, 3, (currentStored >>> 16) & 0xFFFF);
+		iCrafting.sendProgressBarUpdate(container, 4, lRecentEnergy & 0xFFFF);
+		iCrafting.sendProgressBarUpdate(container, 5, (lRecentEnergy >>> 16) & 0xFFFF);
 	}
 
 }

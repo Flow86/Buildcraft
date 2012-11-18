@@ -11,11 +11,12 @@ package buildcraft.core;
 
 import java.util.TreeMap;
 
-import buildcraft.api.core.Orientations;
+import net.minecraftforge.common.ForgeDirection;
 import buildcraft.api.core.Position;
 import buildcraft.api.core.SafeTimeTracker;
 import buildcraft.api.transport.IPassiveItemContribution;
 import buildcraft.api.transport.IPipedItem;
+import buildcraft.BuildCraftCore;
 import buildcraft.core.proxy.CoreProxy;
 
 import net.minecraft.src.EntityItem;
@@ -293,7 +294,7 @@ public class EntityPassiveItem implements IPipedItem {
 	 * @see net.minecraft.src.buildcraft.api.IPipedItem#toEntityItem(net.minecraft.src.buildcraft.api.Orientations)
 	 */
 	@Override
-	public EntityItem toEntityItem(Orientations dir) {
+	public EntityItem toEntityItem(ForgeDirection dir) {
 		if (!CoreProxy.proxy.isRenderWorld(worldObj)) {
 			if (getItemStack().stackSize <= 0) {
 				return null;
@@ -304,6 +305,9 @@ public class EntityPassiveItem implements IPipedItem {
 
 			EntityItem entityitem = new EntityItem(worldObj, position.x, position.y, position.z, getItemStack());
 
+			entityitem.lifespan = BuildCraftCore.itemLifespan;
+			entityitem.delayBeforeCanPickup = 10;
+
 			float f3 = 0.00F + worldObj.rand.nextFloat() * 0.04F - 0.02F;
 			entityitem.motionX = (float) worldObj.rand.nextGaussian() * f3 + motion.x;
 			entityitem.motionY = (float) worldObj.rand.nextGaussian() * f3 + motion.y;
@@ -311,7 +315,6 @@ public class EntityPassiveItem implements IPipedItem {
 			worldObj.spawnEntityInWorld(entityitem);
 			remove();
 
-			entityitem.delayBeforeCanPickup = 20;
 			return entityitem;
 		} else {
 			return null;

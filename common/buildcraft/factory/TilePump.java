@@ -14,11 +14,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import buildcraft.BuildCraftCore;
-import buildcraft.api.core.Orientations;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.liquids.ITankContainer;
+import net.minecraftforge.liquids.LiquidContainerRegistry;
+import net.minecraftforge.liquids.LiquidStack;
 import buildcraft.api.core.Position;
-import buildcraft.api.liquids.ITankContainer;
-import buildcraft.api.liquids.LiquidManager;
-import buildcraft.api.liquids.LiquidStack;
 import buildcraft.api.power.IPowerProvider;
 import buildcraft.api.power.IPowerReceptor;
 import buildcraft.api.power.PowerFramework;
@@ -95,7 +95,7 @@ public class TilePump extends TileMachine implements IMachine, IPowerReceptor {
 								worldObj.setBlockWithNotify(index.i, index.j, index.k, 0);
 							}
 
-							internalLiquid = internalLiquid += LiquidManager.BUCKET_VOLUME;
+							internalLiquid = internalLiquid += LiquidContainerRegistry.BUCKET_VOLUME;
 
 							if (CoreProxy.proxy.isSimulating(worldObj)) {
 								sendNetworkUpdate();
@@ -125,13 +125,13 @@ public class TilePump extends TileMachine implements IMachine, IPowerReceptor {
 
 		if (internalLiquid >= 0) {
 			for (int i = 0; i < 6; ++i) {
-				Position p = new Position(xCoord, yCoord, zCoord, Orientations.values()[i]);
+				Position p = new Position(xCoord, yCoord, zCoord, ForgeDirection.values()[i]);
 				p.moveForwards(1);
 
 				TileEntity tile = worldObj.getBlockTileEntity((int) p.x, (int) p.y, (int) p.z);
 
 				if(tile instanceof ITankContainer) {
-					internalLiquid -= ((ITankContainer)tile).fill(p.orientation.reverse(), new LiquidStack(liquidId, internalLiquid), true);
+					internalLiquid -= ((ITankContainer)tile).fill(p.orientation.getOpposite(), new LiquidStack(liquidId, internalLiquid), true);
 					if(internalLiquid <= 0)
 						break;
 				}

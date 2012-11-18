@@ -9,10 +9,10 @@
 
 package buildcraft.transport;
 
-import buildcraft.api.core.Orientations;
-import buildcraft.api.liquids.LiquidStack;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.liquids.LiquidStack;
 
 public interface IPipeTransportLiquidsHook {
 
-	public int fill(Orientations from, LiquidStack resource, boolean doFill);
+	public int fill(ForgeDirection from, LiquidStack resource, boolean doFill);
 }

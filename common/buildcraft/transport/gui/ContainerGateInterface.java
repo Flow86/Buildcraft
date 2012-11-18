@@ -12,7 +12,7 @@ package buildcraft.transport.gui;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import buildcraft.api.core.Orientations;
+import net.minecraftforge.common.ForgeDirection;
 import buildcraft.api.core.Position;
 import buildcraft.api.gates.ActionManager;
 import buildcraft.api.gates.IAction;
@@ -69,7 +69,7 @@ public class ContainerGateInterface extends BuildCraftContainer {
 			if (ptile instanceof IOverrideDefaultTriggers)
 				_potentialTriggers.addAll( ((IOverrideDefaultTriggers)ptile).getTriggers());
 
-			for (Orientations o : Orientations.dirs()) {
+			for (ForgeDirection o : ForgeDirection.VALID_DIRECTIONS) {
 				Position pos = new Position(pipe.xCoord, pipe.yCoord, pipe.zCoord, o);
 				pos.moveForwards(1.0);
 				TileEntity tile = pipe.worldObj.getBlockTileEntity((int) pos.x, (int) pos.y, (int) pos.z);
@@ -108,7 +108,7 @@ public class ContainerGateInterface extends BuildCraftContainer {
 
 	/**
 	 * Clears list of potential actions and refills it according to packet.
-	 * 
+	 *
 	 * @param packet
 	 */
 	public void updateActions(PacketUpdate packet) {
@@ -123,7 +123,7 @@ public class ContainerGateInterface extends BuildCraftContainer {
 
 	/**
 	 * Clears list of potential triggers and refills it according to packet.
-	 * 
+	 *
 	 * @param packet
 	 */
 	public void updateTriggers(PacketUpdate packet) {
@@ -136,7 +136,7 @@ public class ContainerGateInterface extends BuildCraftContainer {
 
 	/**
 	 * Sets the currently selected actions and triggers according to packet.
-	 * 
+	 *
 	 * @param packet
 	 */
 	public void setSelection(PacketUpdate packet) {
@@ -260,7 +260,7 @@ public class ContainerGateInterface extends BuildCraftContainer {
 
 	/**
 	 * Sends the list of potential actions to the client
-	 * 
+	 *
 	 * @param player
 	 */
 	private void sendActions(EntityPlayer player) {
@@ -281,7 +281,7 @@ public class ContainerGateInterface extends BuildCraftContainer {
 
 	/**
 	 * Sends the list of potential triggers to the client
-	 * 
+	 *
 	 * @param player
 	 */
 	private void sendTriggers(EntityPlayer player) {
@@ -302,7 +302,7 @@ public class ContainerGateInterface extends BuildCraftContainer {
 
 	/**
 	 * Sends the current selection on the gate to the client.
-	 * 
+	 *
 	 * @param player
 	 */
 	public void sendSelection(EntityPlayer player) {

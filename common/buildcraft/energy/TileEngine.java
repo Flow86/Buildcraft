@@ -13,13 +13,14 @@ import java.util.LinkedList;
 
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftEnergy;
-import buildcraft.api.core.Orientations;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.liquids.ILiquidTank;
+import net.minecraftforge.liquids.ITankContainer;
+import net.minecraftforge.liquids.LiquidStack;
+import net.minecraftforge.liquids.LiquidTank;
 import buildcraft.api.core.Position;
 import buildcraft.api.gates.IOverrideDefaultTriggers;
 import buildcraft.api.gates.ITrigger;
-import buildcraft.api.liquids.ITankContainer;
-import buildcraft.api.liquids.LiquidStack;
-import buildcraft.api.liquids.LiquidTank;
 import buildcraft.api.power.IPowerProvider;
 import buildcraft.api.power.IPowerReceptor;
 import buildcraft.api.power.PowerFramework;
@@ -71,7 +72,7 @@ public class TileEngine extends TileBuildCraft implements IPowerReceptor, IInven
 				createEngineIfNeeded();
 			}
 
-			engine.orientation = Orientations.values()[orientation];
+			engine.orientation = ForgeDirection.values()[orientation];
 			provider.configure(0, engine.minEnergyReceived(), engine.maxEnergyReceived(), 1, engine.maxEnergy);
 			checkRedstonePower();
 		}
@@ -124,7 +125,7 @@ public class TileEngine extends TileBuildCraft implements IPowerReceptor, IInven
 							receptor.getPowerProvider().getMaxEnergyReceived(), true);
 
 					if (extracted > 0) {
-						receptor.getPowerProvider().receiveEnergy(extracted, engine.orientation.reverse());
+						receptor.getPowerProvider().receiveEnergy(extracted, engine.orientation.getOpposite());
 					}
 				}
 			} else if (engine.progress >= 1) {
@@ -169,14 +170,14 @@ public class TileEngine extends TileBuildCraft implements IPowerReceptor, IInven
 
 			engine = newEngine(kind);
 
-			engine.orientation = Orientations.values()[orientation];
+			engine.orientation = ForgeDirection.values()[orientation];
 			worldObj.notifyBlockChange(xCoord, yCoord, zCoord, BuildCraftEnergy.engineBlock.blockID);
 		}
 	}
 
 	public void switchOrientation() {
 		for (int i = orientation + 1; i <= orientation + 6; ++i) {
-			Orientations o = Orientations.values()[i % 6];
+			ForgeDirection o = ForgeDirection.values()[i % 6];
 
 			Position pos = new Position(xCoord, yCoord, zCoord, o);
 
@@ -189,7 +190,7 @@ public class TileEngine extends TileBuildCraft implements IPowerReceptor, IInven
 					engine.orientation = o;
 				}
 				orientation = o.ordinal();
-				worldObj.markBlockNeedsUpdate(xCoord, yCoord, zCoord);
+				worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 				worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, worldObj.getBlockId(xCoord, yCoord, zCoord));
 				break;
 			}
@@ -227,7 +228,7 @@ public class TileEngine extends TileBuildCraft implements IPowerReceptor, IInven
 		if (engine != null) {
 			engine.progress = nbttagcompound.getFloat("progress");
 			engine.energy = nbttagcompound.getFloat("energyF");
-			engine.orientation = Orientations.values()[orientation];
+			engine.orientation = ForgeDirection.values()[orientation];
 		}
 
 		if (engine != null) {
@@ -425,7 +426,7 @@ public class TileEngine extends TileBuildCraft implements IPowerReceptor, IInven
 	}
 
 	@Override
-	public boolean isPipeConnected(Orientations with) {
+	public boolean isPipeConnected(ForgeDirection with) {
 		if (engine instanceof EngineWood) {
 			return false;
 		}
@@ -444,7 +445,7 @@ public class TileEngine extends TileBuildCraft implements IPowerReceptor, IInven
 
 	/* ILIQUIDCONTAINER */
 	@Override
-	public int fill(Orientations from, LiquidStack resource, boolean doFill) {
+	public int fill(ForgeDirection from, LiquidStack resource, boolean doFill) {
 		if (engine instanceof EngineIron) {
 			return ((EngineIron) engine).fill(from, resource, doFill);
 		} else {
@@ -459,7 +460,7 @@ public class TileEngine extends TileBuildCraft implements IPowerReceptor, IInven
 	}
 
 	@Override
-	public LiquidStack drain(Orientations from, int maxDrain, boolean doDrain) {
+	public LiquidStack drain(ForgeDirection from, int maxDrain, boolean doDrain) {
 		return null;
 	}
 	@Override
@@ -468,12 +469,13 @@ public class TileEngine extends TileBuildCraft implements IPowerReceptor, IInven
 	}
 
 	@Override
-	public LiquidTank[] getTanks() {
+	public LiquidTank[] getTanks(ForgeDirection direction) {
 		if (engine == null) {
 			return new LiquidTank[0];
 		} else {
 			return engine.getLiquidSlots();
 		}
 	}
+	@Override public ILiquidTank getTank(ForgeDirection direction, LiquidStack type) { return null; }
 
 }

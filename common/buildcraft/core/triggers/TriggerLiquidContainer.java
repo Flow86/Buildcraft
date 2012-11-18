@@ -11,11 +11,13 @@ package buildcraft.core.triggers;
 
 import buildcraft.api.gates.ITriggerParameter;
 import buildcraft.api.gates.Trigger;
-import buildcraft.api.liquids.ILiquidTank;
-import buildcraft.api.liquids.ITankContainer;
-import buildcraft.api.liquids.LiquidManager;
 import buildcraft.core.DefaultProps;
 import net.minecraft.src.TileEntity;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.liquids.ILiquidTank;
+import net.minecraftforge.liquids.ITankContainer;
+import net.minecraftforge.liquids.LiquidContainerRegistry;
+import net.minecraftforge.liquids.LiquidStack;
 
 public class TriggerLiquidContainer extends Trigger {
 
@@ -71,48 +73,62 @@ public class TriggerLiquidContainer extends Trigger {
 		if (tile instanceof ITankContainer) {
 			ITankContainer container = (ITankContainer) tile;
 
-			int seachedLiquidId = 0;
+			LiquidStack searchedLiquid = null;
 
 			if (parameter != null && parameter.getItem() != null)
-				seachedLiquidId = LiquidManager.getLiquidIDForFilledItem(parameter.getItem());
+				searchedLiquid = LiquidContainerRegistry.getLiquidForFilledItem(parameter.getItem());
+				
+			if(searchedLiquid != null)
+				searchedLiquid.amount = 1;
 
-			ILiquidTank[] liquids = container.getTanks();
+			ILiquidTank[] liquids = container.getTanks(ForgeDirection.UNKNOWN);
 
 			if (liquids == null || liquids.length == 0)
 				return false;
 
 			switch (state) {
 			case Empty:
-
-				if (liquids != null && liquids.length > 0) {
-					for (ILiquidTank c : liquids)
-						if (c.getLiquid() != null && c.getLiquid().amount != 0)
+				for (ILiquidTank c : liquids) {
+					if (searchedLiquid != null) {
+						LiquidStack drained = c.drain(1, false);
+						if (drained != null && searchedLiquid.isLiquidEqual(drained))
 							return false;
+					} else if (c.getLiquid() != null && c.getLiquid().amount > 0) {
+						return false;
+					}
+				}
 
-					return true;
-				} else
-					return false;
+				return true;
 			case Contains:
-				for (ILiquidTank c : liquids)
-					if (c.getLiquid() != null && c.getLiquid().amount != 0)
-						if (seachedLiquidId == 0 || seachedLiquidId == c.getLiquid().itemID)
+				for (ILiquidTank c : liquids) {
+					if (c.getLiquid() != null && c.getLiquid().amount != 0) {
+						if (searchedLiquid == null || searchedLiquid.isLiquidEqual(c.getLiquid()))
 							return true;
+					}
+				}
 
 				return false;
 
 			case Space:
-				for (ILiquidTank c : liquids)
-					if (c.getLiquid() == null || c.getLiquid().amount == 0)
-						return true;
-					else if (c.getLiquid().amount < c.getCapacity())
-						if (seachedLiquidId == 0 || seachedLiquidId == c.getLiquid().itemID)
+				for (ILiquidTank c : liquids) {
+					if (searchedLiquid != null) {
+						if (c.fill(searchedLiquid, false) > 0)
 							return true;
+					} else if (c.getLiquid() == null || c.getLiquid().amount < c.getCapacity()) {
+						return true;
+					}
+				}
 
 				return false;
 			case Full:
-				for (ILiquidTank c : liquids)
-					if (c.getLiquid() == null || c.getLiquid().amount < c.getCapacity())
+				for (ILiquidTank c : liquids) {
+					if (searchedLiquid != null) {
+						if(c.fill(searchedLiquid, false) > 0)
+							return false;
+					} else if (c.getLiquid() == null || c.getLiquid().amount < c.getCapacity()) {
 						return false;
+					}
+				}
 
 				return true;
 			}

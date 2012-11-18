@@ -9,8 +9,8 @@
 
 package buildcraft.energy;
 
-import buildcraft.api.core.Orientations;
-import buildcraft.api.liquids.LiquidTank;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.liquids.LiquidTank;
 import buildcraft.core.network.TileNetworkData;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.energy.gui.ContainerEngine;
@@ -26,7 +26,7 @@ public abstract class Engine {
 	public @TileNetworkData
 	float progress;
 	public @TileNetworkData
-	Orientations orientation;
+	ForgeDirection orientation;
 	public float energy;
 	public @TileNetworkData
 	EnergyStage energyStage = EnergyStage.Blue;
@@ -67,8 +67,10 @@ public abstract class Engine {
 
 	public void update() {
 		if (!tile.isRedstonePowered) {
-			if (energy > 1) {
+			if (energy >= 1) {
 				energy -= 1;
+			} else if (energy < 1) {
+				energy = 0;
 			}
 		}
 	}

@@ -13,7 +13,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Random;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -140,7 +139,7 @@ public class CoreProxy {
 
 	public String playerName() { return ""; }
 	private EntityPlayer createNewPlayer(World world) {
-		return new EntityPlayer(world) {
+		EntityPlayer player = new EntityPlayer(world) {
 
 			@Override
 			public void sendChatToPlayer(String var1) {
@@ -152,11 +151,13 @@ public class CoreProxy {
 			}
 
 			@Override
-			public ChunkCoordinates func_82114_b() {
+			public ChunkCoordinates getPlayerCoordinates() {
 				return null;
 			}
 
 		};
+		player.username = "[BuildCraft]";
+		return player;
 	}
 
 	public EntityPlayer getBuildCraftPlayer(World world) {

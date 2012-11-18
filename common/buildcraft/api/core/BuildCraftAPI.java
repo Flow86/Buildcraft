@@ -15,16 +15,15 @@ import net.minecraft.src.World;
 public class BuildCraftAPI {
 
 	@Deprecated
-	// To be removed, see LiquidManager
+	// To be removed, see LiquidContainerRegistry
 	public static final int BUCKET_VOLUME = 1000;
 	public static final int LAST_ORIGINAL_BLOCK = 122;
 	public static final int LAST_ORIGINAL_ITEM = 126;
 
 	public static final boolean[] softBlocks = new boolean[Block.blocksList.length];
-	/**
-	 * Return true if the block given in parameter is pass through (e.g. air,
-	 * water...)
-	 */
+        
+	@Deprecated
+	// To be removed
 	public static boolean softBlock(int blockId) {
 		return blockId == 0 || softBlocks[blockId] || Block.blocksList[blockId] == null;
 	}

@@ -2,27 +2,19 @@ package buildcraft.silicon.gui;
 
 import java.util.Iterator;
 
-import cpw.mods.fml.common.Side;
-import cpw.mods.fml.common.asm.SideOnly;
-
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ICrafting;
-import net.minecraft.src.IInventory;
 import net.minecraft.src.InventoryPlayer;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.Slot;
 import buildcraft.core.gui.BuildCraftContainer;
-import buildcraft.factory.gui.ContainerAutoWorkbench.SlotAutoCrafting;
 import buildcraft.silicon.TileAssemblyAdvancedWorkbench;
-import buildcraft.silicon.TileAssemblyTable;
 
 public class ContainerAssemblyAdvancedWorkbench extends BuildCraftContainer {
-	private InventoryPlayer player;
 	private TileAssemblyAdvancedWorkbench workbench;
 
 	public ContainerAssemblyAdvancedWorkbench(InventoryPlayer playerInventory, TileAssemblyAdvancedWorkbench table) {
 		super(table.getSizeInventory());
-		this.player = playerInventory;
 		this.workbench = table;
 //		addSlotToContainer(new SlotAutoCrafting(inventoryplayer.player, tile, craftResult, 0, 124, 35));
 //		for (int k = 0; k < 3; k++) {
@@ -64,7 +56,7 @@ public class ContainerAssemblyAdvancedWorkbench extends BuildCraftContainer {
 	        while (var4.hasNext())
 	        {
 	            ICrafting var5 = (ICrafting)var4.next();
-	            var5.updateCraftingInventorySlot(this, -i-1, workbench.getCraftingSlots().getStackInSlot(i));
+	            var5.sendSlotContents(this, -i-1, workbench.getCraftingSlots().getStackInSlot(i));
 	        }
 		}
         Iterator var4 = this.crafters.iterator();
@@ -72,7 +64,7 @@ public class ContainerAssemblyAdvancedWorkbench extends BuildCraftContainer {
         while (var4.hasNext())
         {
             ICrafting var5 = (ICrafting)var4.next();
-            var5.updateCraftingInventorySlot(this, -10, workbench.getOutputSlot());
+            var5.sendSlotContents(this, -10, workbench.getOutputSlot());
         }
 		for (int i = 0; i < crafters.size(); i++)
 			workbench.sendGUINetworkData(this, (ICrafting) crafters.get(i));

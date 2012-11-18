@@ -9,8 +9,8 @@
 
 package buildcraft.transport.pipes;
 
-import buildcraft.api.core.Orientations;
-import buildcraft.api.liquids.LiquidStack;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.liquids.LiquidStack;
 import buildcraft.core.DefaultProps;
 import buildcraft.transport.IPipeTransportLiquidsHook;
 import buildcraft.transport.Pipe;
@@ -28,19 +28,19 @@ public class PipeLiquidsSandstone extends Pipe implements IPipeTransportLiquidsH
 	}
 	
 	@Override
-	public int getTextureIndex(Orientations direction) {
+	public int getTextureIndex(ForgeDirection direction) {
 		 return 9 * 16 + 15;
 	}
 
 
 	@Override
-	public int fill(Orientations from, LiquidStack resource, boolean doFill) {
+	public int fill(ForgeDirection from, LiquidStack resource, boolean doFill) {
 		if (container.tileBuffer == null || container.tileBuffer[from.ordinal()] == null)
 			return 0;
 		
 		if (!(container.tileBuffer[from.ordinal()].getTile() instanceof TileGenericPipe)) 
 			return 0;
 		
-		return ((PipeTransportLiquids)this.transport).getTanks()[from.ordinal()].fill(resource, doFill);
+		return ((PipeTransportLiquids)this.transport).getTanks(ForgeDirection.UNKNOWN)[from.ordinal()].fill(resource, doFill);
 	}
 }

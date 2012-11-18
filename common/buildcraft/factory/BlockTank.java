@@ -12,9 +12,9 @@ package buildcraft.factory;
 import java.util.ArrayList;
 
 import buildcraft.BuildCraftCore;
-import buildcraft.api.core.Orientations;
-import buildcraft.api.liquids.LiquidManager;
-import buildcraft.api.liquids.LiquidStack;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.liquids.LiquidContainerRegistry;
+import net.minecraftforge.liquids.LiquidStack;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.utils.Utils;
 
@@ -55,7 +55,7 @@ public class BlockTank extends BlockContainer {
 	public TileEntity createNewTileEntity(World var1) {
 		return new TileTank();
 	}
-	
+
 	@Override
 	public String getTextureFile() {
 		return DefaultProps.TEXTURE_BLOCKS;
@@ -93,13 +93,13 @@ public class BlockTank extends BlockContainer {
 		ItemStack current = entityplayer.inventory.getCurrentItem();
 		if (current != null) {
 
-			LiquidStack liquid = LiquidManager.getLiquidForFilledItem(current);
+			LiquidStack liquid = LiquidContainerRegistry.getLiquidForFilledItem(current);
 
 			TileTank tank = (TileTank) world.getBlockTileEntity(i, j, k);
 
 			// Handle filled containers
 			if (liquid != null) {
-				int qty = tank.fill(Orientations.Unknown, liquid, true);
+				int qty = tank.fill(ForgeDirection.UNKNOWN, liquid, true);
 
 				if (qty != 0 && !BuildCraftCore.debugMode && !entityplayer.capabilities.isCreativeMode) {
 					entityplayer.inventory.setInventorySlotContents(entityplayer.inventory.currentItem,
@@ -111,12 +111,12 @@ public class BlockTank extends BlockContainer {
 			// Handle empty containers
 			} else {
 
-				LiquidStack available = tank.getTanks()[0].getLiquid();
+				LiquidStack available = tank.getTanks(ForgeDirection.UNKNOWN)[0].getLiquid();
                 if(available != null){
-                    ItemStack filled = LiquidManager.fillLiquidContainer(available, current);
+                    ItemStack filled = LiquidContainerRegistry.fillLiquidContainer(available, current);
 
-                    liquid = LiquidManager.getLiquidForFilledItem(filled);
-                   
+                    liquid = LiquidContainerRegistry.getLiquidForFilledItem(filled);
+
                     if(liquid != null) {
 			if (!BuildCraftCore.debugMode && !entityplayer.capabilities.isCreativeMode){
                         if(current.stackSize > 1) {
@@ -131,7 +131,7 @@ public class BlockTank extends BlockContainer {
                             entityplayer.inventory.setInventorySlotContents(entityplayer.inventory.currentItem, filled);
                         }
 			}
-                        tank.drain(Orientations.Unknown, liquid.amount, true);
+                        tank.drain(ForgeDirection.UNKNOWN, liquid.amount, true);
                         return true;
                     }
                 }

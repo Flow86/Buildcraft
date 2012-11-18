@@ -1,8 +1,8 @@
-/** 
+/**
  * Copyright (c) SpaceToad, 2011
  * http://www.mod-buildcraft.com
- * 
- * BuildCraft is distributed under the terms of the Minecraft Mod Public 
+ *
+ * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
@@ -10,13 +10,13 @@
 package buildcraft.factory;
 
 import buildcraft.BuildCraftCore;
-import buildcraft.api.core.Orientations;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.liquids.ILiquidTank;
+import net.minecraftforge.liquids.ITankContainer;
+import net.minecraftforge.liquids.LiquidContainerRegistry;
+import net.minecraftforge.liquids.LiquidStack;
+import net.minecraftforge.liquids.LiquidTank;
 import buildcraft.api.core.SafeTimeTracker;
-import buildcraft.api.liquids.ILiquidTank;
-import buildcraft.api.liquids.ITankContainer;
-import buildcraft.api.liquids.LiquidManager;
-import buildcraft.api.liquids.LiquidStack;
-import buildcraft.api.liquids.LiquidTank;
 import buildcraft.api.power.IPowerProvider;
 import buildcraft.api.power.IPowerReceptor;
 import buildcraft.api.power.PowerFramework;
@@ -35,7 +35,7 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 
 	private int[] filters = new int[2];
 
-	public static int LIQUID_PER_SLOT = LiquidManager.BUCKET_VOLUME * 4;
+	public static int LIQUID_PER_SLOT = LiquidContainerRegistry.BUCKET_VOLUME * 4;
 
 	public static class Slot {
 
@@ -44,7 +44,7 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 		@TileNetworkData
 		public int quantity = 0;
 
-		public int fill(Orientations from, int amount, int id, boolean doFill) {
+		public int fill(ForgeDirection from, int amount, int id, boolean doFill) {
 			if (quantity != 0 && liquidId != id) {
 				return 0;
 			} else if (quantity + amount <= LIQUID_PER_SLOT) {
@@ -167,6 +167,8 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 	public void updateEntity() {
 		if (CoreProxy.proxy.isRenderWorld(worldObj)) {
 			simpleAnimationIterate();
+			return;
+
 		} else if (CoreProxy.proxy.isSimulating(worldObj) && updateNetworkTime.markTimeIfDelay(worldObj, 2 * BuildCraftCore.updateFactor)) {
 			sendNetworkUpdate();
 		}
@@ -192,30 +194,27 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 			return;
 		}
 
+		if (!containsInput(currentRecipe.ingredient1) || !containsInput(currentRecipe.ingredient2)) {
+			decreaseAnimation();
+			return;
+		}
+
 		isActive = true;
 
 		if (powerProvider.getEnergyStored() >= currentRecipe.energy) {
 			increaseAnimation();
 		} else {
 			decreaseAnimation();
-			return;
 		}
 
 		if (!time.markTimeIfDelay(worldObj, currentRecipe.delay)) {
 			return;
 		}
 
-		if (!containsInput(currentRecipe.ingredient1)
-				|| !containsInput(currentRecipe.ingredient2)) {
-			decreaseAnimation();
-			return;
-		}
-
 		float energyUsed = powerProvider.useEnergy(currentRecipe.energy, currentRecipe.energy, true);
 
 		if (energyUsed != 0) {
-			if (consumeInput(currentRecipe.ingredient1)
-					&& consumeInput(currentRecipe.ingredient2)) {
+			if (consumeInput(currentRecipe.ingredient1) && consumeInput(currentRecipe.ingredient2)) {
 				result.liquidId = currentRecipe.result.itemID;
 				result.quantity += currentRecipe.result.amount;
 			}
@@ -225,14 +224,14 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 	private boolean containsInput(LiquidStack liquid) {
 		if(liquid == null)
 			return true;
-		
+
 		return new LiquidStack(slot1.liquidId, slot1.quantity, 0).containsLiquid(liquid) || new LiquidStack(slot2.liquidId, slot2.quantity, 0).containsLiquid(liquid);
 	}
 
 	private boolean consumeInput(LiquidStack liquid) {
 		if(liquid == null)
 			return true;
-		
+
 		if(new LiquidStack(slot1.liquidId, slot1.quantity, 0).containsLiquid(liquid)) {
 			slot1.quantity -= liquid.amount;
 			return true;
@@ -240,7 +239,7 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 			slot2.quantity -= liquid.amount;
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -381,13 +380,13 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 	}
 
 	public void sendGUINetworkData(Container container, ICrafting iCrafting) {
-		iCrafting.updateCraftingInventoryInfo(container, 0, filters[0]);
-		iCrafting.updateCraftingInventoryInfo(container, 1, filters[1]);
+		iCrafting.sendProgressBarUpdate(container, 0, filters[0]);
+		iCrafting.sendProgressBarUpdate(container, 1, filters[1]);
 	}
 
 	/* ITANKCONTAINER */
 	@Override
-	public int fill(Orientations from, LiquidStack resource, boolean doFill) {
+	public int fill(ForgeDirection from, LiquidStack resource, boolean doFill) {
 		int used = 0;
 
 		if (filters[0] != 0 || filters[1] != 0) {
@@ -418,7 +417,7 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 	}
 
 	@Override
-	public LiquidStack drain(Orientations from, int maxEmpty, boolean doDrain) {
+	public LiquidStack drain(ForgeDirection from, int maxEmpty, boolean doDrain) {
 		return drain(2, maxEmpty, doDrain);
 	}
 
@@ -449,12 +448,18 @@ public class TileRefinery extends TileMachine implements ITankContainer, IPowerR
 	}
 
 	@Override
-	public ILiquidTank[] getTanks() {
+	public ILiquidTank[] getTanks(ForgeDirection direction) {
 		return new ILiquidTank[] {
 				new LiquidTank(slot1.liquidId, slot1.quantity, LIQUID_PER_SLOT),
 				new LiquidTank(slot2.liquidId, slot2.quantity, LIQUID_PER_SLOT),
 				new LiquidTank(result.liquidId, result.quantity, LIQUID_PER_SLOT),
 		};
+	}
+
+	@Override
+	public ILiquidTank getTank(ForgeDirection direction, LiquidStack type) {
+    	// TODO Auto-generated method stub
+		return null;
 	}
 
 }

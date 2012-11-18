@@ -9,11 +9,12 @@
 
 package buildcraft.transport.triggers;
 
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.liquids.ILiquidTank;
+import net.minecraftforge.liquids.LiquidContainerRegistry;
+import net.minecraftforge.liquids.LiquidStack;
 import buildcraft.api.gates.ITriggerParameter;
 import buildcraft.api.gates.Trigger;
-import buildcraft.api.liquids.ILiquidTank;
-import buildcraft.api.liquids.LiquidManager;
-import buildcraft.api.liquids.LiquidStack;
 import buildcraft.core.DefaultProps;
 import buildcraft.transport.EntityData;
 import buildcraft.transport.ITriggerPipe;
@@ -99,16 +100,16 @@ public class TriggerPipeContents extends Trigger implements ITriggerPipe {
 			LiquidStack searchedLiquid = null;
 
 			if (parameter != null && parameter.getItem() != null)
-				searchedLiquid = LiquidManager.getLiquidForFilledItem(parameter.getItem());
+				searchedLiquid = LiquidContainerRegistry.getLiquidForFilledItem(parameter.getItem());
 
 			if (kind == Kind.Empty) {
-				for (ILiquidTank b : transportLiquids.getTanks())
+				for (ILiquidTank b : transportLiquids.getTanks(ForgeDirection.UNKNOWN))
 					if (b.getLiquid() != null && b.getLiquid().amount != 0)
 						return false;
 
 				return true;
 			} else {
-				for (ILiquidTank b : transportLiquids.getTanks())
+				for (ILiquidTank b : transportLiquids.getTanks(ForgeDirection.UNKNOWN))
 					if (b.getLiquid() != null && b.getLiquid().amount != 0)
 						if (searchedLiquid == null || searchedLiquid.isLiquidEqual(b.getLiquid()))
 							return true;

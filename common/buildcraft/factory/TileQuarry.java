@@ -9,21 +9,19 @@
 
 package buildcraft.factory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 
+import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftFactory;
-import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.core.IAreaProvider;
 import buildcraft.api.core.LaserKind;
-import buildcraft.api.core.Orientations;
+import net.minecraftforge.common.ForgeDirection;
 import buildcraft.api.power.IPowerProvider;
 import buildcraft.api.power.IPowerReceptor;
 import buildcraft.api.power.PowerFramework;
@@ -43,10 +41,8 @@ import buildcraft.core.utils.BlockUtil;
 import buildcraft.core.utils.Utils;
 
 import net.minecraft.src.AxisAlignedBB;
-import net.minecraft.src.Block;
 import net.minecraft.src.ChunkCoordIntPair;
 import net.minecraft.src.EntityItem;
-import net.minecraft.src.EntityLiving;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.NBTTagCompound;
@@ -79,7 +75,7 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 
 	boolean isDigging = false;
 
-	public static int MAX_ENERGY = 7000;
+	public static int MAX_ENERGY = 15000;
 
 	public TileQuarry() {
 		powerProvider = PowerFramework.currentFramework.createPowerProvider();
@@ -155,7 +151,7 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 		}
 		super.updateEntity();
 		if (inProcess) {
-			float energyToUse = 2 + powerProvider.getEnergyStored() / 1000;
+			float energyToUse = 2 + powerProvider.getEnergyStored() / 500;
 
 			float energy = powerProvider.useEnergy(energyToUse, energyToUse, true);
 
@@ -222,8 +218,8 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 	}
 
 	protected void dig() {
-		powerProvider.configure(20, 30, 200, 50, MAX_ENERGY);
-		if (powerProvider.useEnergy(30, 30, true) != 30) {
+		powerProvider.configure(20, 30, 500, 50, MAX_ENERGY);
+		if (powerProvider.useEnergy(60, 60, true) != 60) {
 			return;
 		}
 
@@ -288,11 +284,9 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 					if (!blockedColumns[searchX][searchZ]) {
 						int bx = box.xMin + searchX + 1, by = searchY, bz = box.zMin + searchZ + 1;
 
-						int blockId = worldObj.getBlockId(bx, by, bz);
-
 						if (!BlockUtil.canChangeBlock(worldObj, bx, by, bz)) {
 							blockedColumns[searchX][searchZ] = true;
-						} else if (isQuarriableBlock(blockId, bx, by + 1, bz)) {
+						} else if (!BlockUtil.isSoftBlock(worldObj, bx, by, bz)) {
 							if (doSet) {
 								setTarget(bx, by + 1, bz);
 							}
@@ -375,12 +369,12 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 
 		int blockId = worldObj.getBlockId(i, j, k);
 
-		if (isQuarriableBlock(blockId, i, j, k)) {
+		if (isQuarriableBlock(i, j, k)) {
 			powerProvider.getTimeTracker().markTime(worldObj);
 
 			// Share this with mining well!
 
-			ArrayList<ItemStack> stacks = BlockUtil.getItemStackFromBlock(worldObj, i, j, k);
+			List<ItemStack> stacks = BlockUtil.getItemStackFromBlock(worldObj, i, j, k);
 
 			if (stacks != null) {
 				for (ItemStack s : stacks) {
@@ -396,7 +390,7 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 
 		// Collect any lost items laying around
 		double[] head = getHead();
-		AxisAlignedBB axis = AxisAlignedBB.getBoundingBox(head[0] - 1.5, head[1], head[2] - 1.5,	head[0] + 2.5, head[1] + 2.5, head[2] + 2.5);
+		AxisAlignedBB axis = AxisAlignedBB.getBoundingBox(head[0] - 2, head[1] - 2, head[2] - 2, head[0] + 3, head[1] + 3, head[2] + 3);
 		List result = worldObj.getEntitiesWithinAABB(EntityItem.class, axis);
 		for (int ii = 0; ii < result.size(); ii++) {
 			if (result.get(ii) instanceof EntityItem) {
@@ -413,12 +407,12 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 
 	private void mineStack(ItemStack stack) {
 		// First, try to add to a nearby chest
-		ItemStack added = Utils.addToRandomInventory(stack, worldObj, xCoord, yCoord, zCoord, Orientations.Unknown);
+		ItemStack added = Utils.addToRandomInventory(stack, worldObj, xCoord, yCoord, zCoord, ForgeDirection.UNKNOWN);
 		stack.stackSize -= added.stackSize;
 
 		// Second, try to add to adjacent pipes
 		if (stack.stackSize > 0)
-			Utils.addToRandomPipeEntry(this, Orientations.Unknown, stack);
+			Utils.addToRandomPipeEntry(this, ForgeDirection.UNKNOWN, stack);
 
 		// Lastly, throw the object away
 		if (stack.stackSize > 0) {
@@ -428,6 +422,9 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 
 			EntityItem entityitem = new EntityItem(worldObj, xCoord + f, yCoord + f1 + 0.5F, zCoord + f2, stack);
 
+			entityitem.lifespan = BuildCraftCore.itemLifespan;
+			entityitem.delayBeforeCanPickup = 10;
+
 			float f3 = 0.05F;
 			entityitem.motionX = (float) worldObj.rand.nextGaussian() * f3;
 			entityitem.motionY = (float) worldObj.rand.nextGaussian() * f3 + 1.0F;
@@ -436,8 +433,8 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 		}
 	}
 
-	private boolean isQuarriableBlock(int blockID, int bx, int by, int bz) {
-		return BlockUtil.canChangeBlock(worldObj, bx, by, bz) && !BuildCraftAPI.softBlock(blockID);
+	private boolean isQuarriableBlock(int bx, int by, int bz) {
+		return BlockUtil.canChangeBlock(worldObj, bx, by, bz) && !BlockUtil.isSoftBlock(worldObj, bx, by, bz);
 	}
 
 	@Override
@@ -534,22 +531,22 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 		if (useDefault) {
 			int xMin = 0, zMin = 0;
 
-			Orientations o = Orientations.values()[worldObj.getBlockMetadata(xCoord, yCoord, zCoord)].reverse();
+			ForgeDirection o = ForgeDirection.values()[worldObj.getBlockMetadata(xCoord, yCoord, zCoord)].getOpposite();
 
 			switch (o) {
-			case XPos:
+			case EAST:
 				xMin = xCoord + 1;
 				zMin = zCoord - 4 - 1;
 				break;
-			case XNeg:
+			case WEST:
 				xMin = xCoord - 9 - 2;
 				zMin = zCoord - 4 - 1;
 				break;
-			case ZPos:
+			case SOUTH:
 				xMin = xCoord - 4 - 1;
 				zMin = zCoord + 1;
 				break;
-			case ZNeg:
+			case NORTH:
 			default:
 				xMin = xCoord - 4 - 1;
 				zMin = zCoord - 9 - 2;
@@ -659,7 +656,7 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 	}
 
 	@Override
-	public boolean isPipeConnected(Orientations with) {
+	public boolean isPipeConnected(ForgeDirection with) {
 		return true;
 	}
 
