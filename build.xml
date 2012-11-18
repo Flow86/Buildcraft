@@ -156,7 +156,7 @@
 		</copy>
 	</target>
 
-	<target name="compile" depends="setup,copy-src">
+	<target name="compile" depends="copy-src">
 
 		<!-- Recompile -->
 		<exec dir="${mcp.dir}" executable="cmd" osfamily="windows">
