@@ -205,7 +205,7 @@
 	</target>
 
 	<!-- Zip the compiled files -->
-	<target name="package" depends="compile">
+	<target name="package" depends="setup,compile">
 
 		<jar destfile="${jar.dir}/buildcraft-A-${bc.version.full}.jar" basedir="${classes.dir}"/>
 
