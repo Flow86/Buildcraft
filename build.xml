@@ -124,8 +124,12 @@
 		<copy todir="${mcp.dir}/jars">
 			<fileset dir="${files.minecraft.dir}"/>
 		</copy>
+		
+		<!-- Fix executables' line ending -->
+		<fixcrlf srcdir="${mcp.dir}" includes="**/*.sh" eol="lf" eof="remove" />
+		<fixcrlf srcdir="${forge.dir}" includes="**/*.sh" eol="lf" eof="remove" />
 
-		<!-- Change executables' permitions -->
+		<!-- Change executables' permissions -->
 		<chmod file="${mcp.dir}/updatemd5.sh" perm="+x"/>
 		<chmod file="${mcp.dir}/recompile.sh" perm="+x"/>
 		<chmod file="${mcp.dir}/reobfuscate.sh" perm="+x"/>
