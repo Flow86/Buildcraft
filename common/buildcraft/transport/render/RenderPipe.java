@@ -48,7 +48,7 @@ import buildcraft.transport.PipeTransportPower;
 import buildcraft.transport.TileGenericPipe;
 
 public class RenderPipe extends TileEntitySpecialRenderer {
-
+	
 	final static private int maxPower = 1000;
 
 	final static private int displayLiquidStages = 40;
@@ -58,7 +58,7 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 	private final static EntityItem dummyEntityItem = new EntityItem(null);
 
 	private class DisplayLiquidList {
-
+            
 		public int[] sideHorizontal = new int[displayLiquidStages];
 		public int[] sideVertical = new int[displayLiquidStages];
 		public int[] centerHorizontal = new int[displayLiquidStages];
@@ -269,9 +269,10 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 			if (pow.displayPower[i] >= 1.0) {
 				int stage = 0;
 
-				for (; stage < displayPowerStages; ++stage)
+				for (; stage < displayPowerStages; ++stage) {
 					if (displayPowerLimits[stage] > pow.displayPower[i])
 						break;
+				}
 
 				if (stage < displayPowerList.length)
 					GL11.glCallList(displayPowerList[stage]);
@@ -311,30 +312,30 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 				if (d == null)
 					continue;
 
-				int stage = (int) ((float) liquid.amount / (float) (PipeTransportLiquids.LIQUID_IN_PIPE) * (displayLiquidStages - 1));
+				int stage = (int) ((float) liquid.amount / (float) (liq.getCapacity()) * (displayLiquidStages - 1));
 
 				GL11.glPushMatrix();
 				int list = 0;
 
-				switch (ForgeDirection.values()[i]) {
-				case UP:
-					above = true;
-					list = d.sideVertical[stage];
-					break;
-				case DOWN:
-					GL11.glTranslatef(0, -0.75F, 0);
-					list = d.sideVertical[stage];
-					break;
-				case EAST:
-				case WEST:
-				case SOUTH:
-				case NORTH:
-					sides = true;
-					GL11.glRotatef(angleY[i], 0, 1, 0);
-					GL11.glRotatef(angleZ[i], 0, 0, 1);
-					list = d.sideHorizontal[stage];
-					break;
-				default:
+				switch (ForgeDirection.VALID_DIRECTIONS[i]) {
+					case UP:
+						above = true;
+						list = d.sideVertical[stage];
+						break;
+					case DOWN:
+						GL11.glTranslatef(0, -0.75F, 0);
+						list = d.sideVertical[stage];
+						break;
+					case EAST:
+					case WEST:
+					case SOUTH:
+					case NORTH:
+						sides = true;
+						GL11.glRotatef(angleY[i], 0, 1, 0);
+						GL11.glRotatef(angleZ[i], 0, 0, 1);
+						list = d.sideHorizontal[stage];
+						break;
+					default:
 				}
 
 				GL11.glCallList(list);
@@ -353,7 +354,7 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 			DisplayLiquidList d = getListFromBuffer(liquid, pipe.worldObj);
 
 			if (d != null) {
-				int stage = (int) ((float) liquid.amount / (float) (PipeTransportLiquids.LIQUID_IN_PIPE) * (displayLiquidStages - 1));
+				int stage = (int) ((float) liquid.amount / (float) (liq.getCapacity()) * (displayLiquidStages - 1));
 
 				if (above)
 					GL11.glCallList(d.centerVertical[stage]);
@@ -368,7 +369,7 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 		GL11.glPopMatrix();
 	}
 
-	public DisplayLiquidList getListFromBuffer(LiquidStack stack, World world) {
+	private DisplayLiquidList getListFromBuffer(LiquidStack stack, World world) {
 
 		int liquidId = stack.itemID;
 
@@ -377,9 +378,11 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 
 		if (liquidId < Block.blocksList.length && Block.blocksList[liquidId] != null) {
 			ForgeHooksClient.bindTexture(Block.blocksList[liquidId].getTextureFile(), 0);
-		} else {
+		} else if(Item.itemsList[liquidId] != null) {
 			ForgeHooksClient.bindTexture(Item.itemsList[liquidId].getTextureFile(), 0);
-		}
+		} else {
+			return null;
+		}		
 		return getDisplayLiquidLists(liquidId, stack.itemMeta, world);
 	}
 

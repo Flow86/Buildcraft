@@ -19,8 +19,8 @@
 
 	<property name="mc.version"          value="1.4.5"/>
 	<property name="mcp.version"         value="723"/>
-	<property name="forge.version"       value="6.4.0.394"/>
-	<property name="bc.version"          value="3.2.0"/>
+	<property name="forge.version"       value="6.4.1.408"/>
+	<property name="bc.version"          value="3.2.1"/>
 	<property name="bc.version.full"     value="${bc.version}"/>
 
 	<available property="forge-exists" file="${download.dir}/minecraftforge-src-${mc.version}-${forge.version}.zip"/>
@@ -165,11 +165,11 @@
 	<target name="compile" depends="copy-src">
 
 		<!-- Recompile -->
-		<exec dir="${mcp.dir}" executable="cmd" osfamily="windows">
+		<exec dir="${mcp.dir}" executable="cmd" osfamily="windows" failonerror="true">
 			<arg line="/c recompile.bat"/>
 		</exec>
 
-		<exec dir="${mcp.dir}" executable="sh" osfamily="unix">
+		<exec dir="${mcp.dir}" executable="sh" osfamily="unix" failonerror="true">
 			<arg value="recompile.sh" />
 		</exec>
 

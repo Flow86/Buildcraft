@@ -51,12 +51,22 @@ public class BlockGenericPipe extends BlockContainer {
 	}
 
 	@Override
+	public float getBlockHardness(World par1World, int par2, int par3, int par4) {
+		return BuildCraftTransport.pipeDuribility;
+	}
+	
+	@Override
 	public int getRenderType() {
 		return TransportProxy.pipeModel;
 	}
 
 	@Override
 	public boolean isOpaqueCube() {
+		return false;
+	}
+
+	@Override
+	public boolean canBeReplacedByLeaves(World world, int x, int y, int z) {
 		return false;
 	}
 
@@ -331,13 +341,14 @@ public class BlockGenericPipe extends BlockContainer {
 
 
 	@Override
-	public void func_85105_g(World world, int x, int y, int z, int par5) {
-		super.func_85105_g(world, x, y, z, par5);
+	public int func_85104_a(World world, int x, int y, int z, int side,  float par6, float par7, float par8, int meta) {
+		super.func_85104_a(world, x, y, z, side, par6, par7, par8, meta);
 		Pipe pipe = getPipe(world, x, y, z);
 
 		if (isValid(pipe))
 			pipe.onBlockPlaced();
 
+		return meta;
 	}
 
 	@Override
@@ -375,9 +386,8 @@ public class BlockGenericPipe extends BlockContainer {
 					pipe.wireSet[IPipe.WireColor.Red.ordinal()] = true;
 					if (!entityplayer.capabilities.isCreativeMode)
 						entityplayer.getCurrentEquippedItem().splitStack(1);
-					pipe.container.scheduleRenderUpdate();
-					//world.markBlockNeedsUpdate(i, j, k);
-
+					pipe.signalStrength[IPipe.WireColor.Red.ordinal()] = 0;
+					pipe.container.scheduleNeighborChange();
 					return true;
 				}
 			} else if (entityplayer.getCurrentEquippedItem().getItem() == BuildCraftTransport.bluePipeWire) {
@@ -385,9 +395,8 @@ public class BlockGenericPipe extends BlockContainer {
 					pipe.wireSet[IPipe.WireColor.Blue.ordinal()] = true;
 					if (!entityplayer.capabilities.isCreativeMode)
 						entityplayer.getCurrentEquippedItem().splitStack(1);
-					pipe.container.scheduleRenderUpdate();
-					//world.markBlockNeedsUpdate(i, j, k);
-
+					pipe.signalStrength[IPipe.WireColor.Blue.ordinal()] = 0;
+					pipe.container.scheduleNeighborChange();
 					return true;
 				}
 			} else if (entityplayer.getCurrentEquippedItem().getItem() == BuildCraftTransport.greenPipeWire) {
@@ -395,7 +404,8 @@ public class BlockGenericPipe extends BlockContainer {
 					pipe.wireSet[IPipe.WireColor.Green.ordinal()] = true;
 					if (!entityplayer.capabilities.isCreativeMode)
 						entityplayer.getCurrentEquippedItem().splitStack(1);
-					pipe.container.scheduleRenderUpdate();
+					pipe.signalStrength[IPipe.WireColor.Green.ordinal()] = 0;
+					pipe.container.scheduleNeighborChange();
 					return true;
 				}
 			} else if (entityplayer.getCurrentEquippedItem().getItem() == BuildCraftTransport.yellowPipeWire) {
@@ -403,7 +413,8 @@ public class BlockGenericPipe extends BlockContainer {
 					pipe.wireSet[IPipe.WireColor.Yellow.ordinal()] = true;
 					if (!entityplayer.capabilities.isCreativeMode)
 						entityplayer.getCurrentEquippedItem().splitStack(1);
-					pipe.container.scheduleRenderUpdate();
+					pipe.signalStrength[IPipe.WireColor.Yellow.ordinal()] = 0;
+					pipe.container.scheduleNeighborChange();
 					return true;
 				}
 			} else if (entityplayer.getCurrentEquippedItem().itemID == BuildCraftTransport.pipeGate.shiftedIndex
