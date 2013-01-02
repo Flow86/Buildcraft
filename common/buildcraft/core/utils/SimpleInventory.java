@@ -8,11 +8,11 @@
 
 package buildcraft.core.utils;
 
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.IInventory;
-import net.minecraft.src.ItemStack;
-import net.minecraft.src.NBTTagCompound;
-import net.minecraft.src.NBTTagList;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 
 public class SimpleInventory implements IInventory, INBTTagable {
 
@@ -79,10 +79,12 @@ public class SimpleInventory implements IInventory, INBTTagable {
 	}
 
 	@Override
-	public void openChest() {}
+	public void openChest() {
+	}
 
 	@Override
-	public void closeChest() {}
+	public void closeChest() {
+	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbttagcompound) {

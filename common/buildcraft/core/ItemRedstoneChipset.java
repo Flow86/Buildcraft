@@ -2,11 +2,11 @@ package buildcraft.core;
 
 import java.util.List;
 
-import cpw.mods.fml.common.Side;
-import cpw.mods.fml.common.asm.SideOnly;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
-import net.minecraft.src.CreativeTabs;
-import net.minecraft.src.ItemStack;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.ItemStack;
 
 public class ItemRedstoneChipset extends ItemBuildCraft {
 
@@ -39,7 +39,6 @@ public class ItemRedstoneChipset extends ItemBuildCraft {
 	public String getItemNameIS(ItemStack itemstack) {
 		return (new StringBuilder()).append(super.getItemName()).append(".").append(itemstack.getItemDamage()).toString();
 	}
-
 
 	@Override
 	@SideOnly(Side.CLIENT)

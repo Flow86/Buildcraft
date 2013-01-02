@@ -9,20 +9,19 @@
 
 package buildcraft.energy;
 
+import net.minecraft.block.BlockStationary;
+import net.minecraft.block.material.Material;
+import net.minecraft.world.World;
+import net.minecraftforge.liquids.ILiquid;
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftEnergy;
 import buildcraft.core.DefaultProps;
-import net.minecraft.src.BlockStationary;
-import net.minecraft.src.Material;
-import net.minecraft.src.World;
-import net.minecraftforge.liquids.ILiquid;
-
 
 public class BlockOilStill extends BlockStationary implements ILiquid {
 
 	public BlockOilStill(int i, Material material) {
 		super(i, material);
-		
+
 		setHardness(100F);
 		setLightOpacity(3);
 	}

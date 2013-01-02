@@ -13,8 +13,8 @@ public class DefaultProps {
 
 	public static final String MOD = "BuildCraft";
 
-	public static final String DEPENDENCY_CORE = "required-after:BuildCraft|Core@"+Version.VERSION;
-	public static final String DEPENDENCY_TRANSPORT = "required-after:BuildCraft|Transport@"+Version.VERSION;
+	public static final String DEPENDENCY_CORE = "required-after:BuildCraft|Core@" + Version.VERSION;
+	public static final String DEPENDENCY_TRANSPORT = "required-after:BuildCraft|Transport@" + Version.VERSION;
 
 	public static int WORLD_HEIGHT = 256;
 	public static final String NET_CHANNEL_NAME = "BC";
@@ -104,12 +104,12 @@ public class DefaultProps {
 	public static int ASSEMBLY_TABLE_ID = 1517;
 	public static int PATH_MARKER_ID = 1518;
 	public static int HOPPER_ID = 1519;
-	public static int OIL_MOVING_ID = 150;
-	public static int OIL_STILL_ID = 151;
+	public static int OIL_MOVING_ID = 1520;
+	public static int OIL_STILL_ID = 1521;
 
 	public static boolean CURRENT_CONTINUOUS = false;
 	public static boolean PIPES_ALWAYS_CONNECT = false;
-	public static double  PIPES_DURABILITY = 0.25D;
+	public static double PIPES_DURABILITY = 0.25D;
 	public static boolean FILLER_DESTROY = false;
 	public static boolean USE_PIPELOSS = true;
 

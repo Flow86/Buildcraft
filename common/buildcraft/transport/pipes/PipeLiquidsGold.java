@@ -18,7 +18,7 @@ public class PipeLiquidsGold extends Pipe {
 	public PipeLiquidsGold(int itemID) {
 		super(new PipeTransportLiquids(), new PipeLogicGold(), itemID);
 
-		((PipeTransportLiquids) transport).flowRate = 80;
+		((PipeTransportLiquids) transport).flowRate = 40;
 		((PipeTransportLiquids) transport).travelDelay = 4;
 	}
 
@@ -26,7 +26,7 @@ public class PipeLiquidsGold extends Pipe {
 	public String getTextureFile() {
 		return DefaultProps.TEXTURE_BLOCKS;
 	}
-	
+
 	@Override
 	public int getTextureIndex(ForgeDirection direction) {
 		return 7 * 16 + 4;

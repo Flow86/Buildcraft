@@ -9,16 +9,16 @@
 
 package buildcraft.energy;
 
-import buildcraft.core.DefaultProps;
-import buildcraft.core.utils.Utils;
-import buildcraft.energy.gui.ContainerEngine;
-import net.minecraft.src.ICrafting;
-import net.minecraft.src.ItemStack;
-import net.minecraft.src.NBTTagCompound;
-import net.minecraft.src.TileEntityFurnace;
+import net.minecraft.inventory.ICrafting;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.liquids.ILiquidTank;
 import net.minecraftforge.liquids.LiquidStack;
+import buildcraft.core.DefaultProps;
+import buildcraft.core.utils.Utils;
+import buildcraft.energy.gui.ContainerEngine;
 
 public class EngineStone extends Engine {
 
@@ -130,8 +130,9 @@ public class EngineStone extends Engine {
 	@Override
 	public void delete() {
 		ItemStack stack = tile.getStackInSlot(0);
-		if (stack != null)
+		if (stack != null) {
 			Utils.dropItems(tile.worldObj, stack, tile.xCoord, tile.yCoord, tile.zCoord);
+		}
 	}
 
 	@Override
@@ -166,9 +167,20 @@ public class EngineStone extends Engine {
 	}
 
 	/* IINVENTORY */
-	@Override public int getSizeInventory() { return 1; }
-	@Override public ItemStack getStackInSlot(int i) { return itemInInventory; }
-	@Override public void setInventorySlotContents(int i, ItemStack itemstack) { itemInInventory = itemstack; }
+	@Override
+	public int getSizeInventory() {
+		return 1;
+	}
+
+	@Override
+	public ItemStack getStackInSlot(int i) {
+		return itemInInventory;
+	}
+
+	@Override
+	public void setInventorySlotContents(int i, ItemStack itemstack) {
+		itemInInventory = itemstack;
+	}
 
 	@Override
 	public ItemStack decrStackSize(int slot, int amount) {

@@ -1,8 +1,9 @@
 package buildcraft.transport;
 
+import java.util.EnumSet;
+
 import net.minecraftforge.common.ForgeDirection;
 import buildcraft.api.transport.IPipedItem;
-import java.util.EnumSet;
 
 public class EntityData {
 

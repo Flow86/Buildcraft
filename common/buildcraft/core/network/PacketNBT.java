@@ -4,8 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import net.minecraft.src.CompressedStreamTools;
-import net.minecraft.src.NBTTagCompound;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class PacketNBT extends PacketCoordinates {
 
@@ -21,9 +21,9 @@ public class PacketNBT extends PacketCoordinates {
 
 	@Override
 	public void writeData(DataOutputStream data) throws IOException {
-		
+
 		super.writeData(data);
-		
+
 		byte[] compressed = CompressedStreamTools.compress(nbttagcompound);
 		data.writeShort(compressed.length);
 		data.write(compressed);
@@ -31,9 +31,9 @@ public class PacketNBT extends PacketCoordinates {
 
 	@Override
 	public void readData(DataInputStream data) throws IOException {
-		
+
 		super.readData(data);
-		
+
 		short length = data.readShort();
 		byte[] compressed = new byte[length];
 		data.readFully(compressed);

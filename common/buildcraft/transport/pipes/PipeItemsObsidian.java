@@ -10,6 +10,14 @@ package buildcraft.transport.pipes;
 
 import java.util.List;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.common.ForgeDirection;
 import buildcraft.api.core.Position;
 import buildcraft.api.power.IPowerProvider;
@@ -23,15 +31,6 @@ import buildcraft.core.utils.Utils;
 import buildcraft.transport.Pipe;
 import buildcraft.transport.PipeTransportItems;
 
-import net.minecraft.src.AxisAlignedBB;
-import net.minecraft.src.Entity;
-import net.minecraft.src.EntityArrow;
-import net.minecraft.src.EntityItem;
-import net.minecraft.src.EntityMinecart;
-import net.minecraft.src.IInventory;
-import net.minecraft.src.Item;
-import net.minecraft.src.ItemStack;
-
 public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 
 	private IPowerProvider powerProvider;
@@ -44,8 +43,9 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 
 		entitiesDropped = new int[32];
 
-		for (int i = 0; i < entitiesDropped.length; ++i)
+		for (int i = 0; i < entitiesDropped.length; ++i) {
 			entitiesDropped[i] = -1;
+		}
 
 		powerProvider = PowerFramework.currentFramework.createPowerProvider();
 		powerProvider.configure(25, 1, 64, 1, 256);
@@ -62,7 +62,6 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 		return 1 * 16 + 12;
 	}
 
-
 	@Override
 	public void onEntityCollidedWithBlock(Entity entity) {
 		super.onEntityCollidedWithBlock(entity);
@@ -70,8 +69,9 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 		if (entity.isDead)
 			return;
 
-		if (canSuck(entity, 0))
+		if (canSuck(entity, 0)) {
 			pullItemIntoPipe(entity, 0);
+		}
 	}
 
 	private AxisAlignedBB getSuckingBox(ForgeDirection orientation, int distance) {
@@ -155,7 +155,7 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 			return false;
 
 		@SuppressWarnings("rawtypes")
-		List list = worldObj.getEntitiesWithinAABB(net.minecraft.src.Entity.class, box);
+		List list = worldObj.getEntitiesWithinAABB(Entity.class, box);
 
 		for (int g = 0; g < list.size(); g++)
 			if (list.get(g) instanceof Entity) {
@@ -207,8 +207,7 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 		ForgeDirection orientation = getOpenOrientation().getOpposite();
 
 		if (orientation != ForgeDirection.UNKNOWN) {
-			worldObj.playSoundAtEntity(entity, "random.pop", 0.2F,
-					((worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+			worldObj.playSoundAtEntity(entity, "random.pop", 0.2F, ((worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 
 			ItemStack stack = null;
 
@@ -216,29 +215,32 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 
 			if (entity instanceof EntityItem) {
 				EntityItem item = (EntityItem) entity;
+				ItemStack contained = item.func_92014_d();
+				
 				CoreProxy.proxy.obsidianPipePickup(worldObj, item, this.container);
 
-				float energyUsed = powerProvider.useEnergy(distance, item.item.stackSize * distance, true);
+				float energyUsed = powerProvider.useEnergy(distance, contained.stackSize * distance, true);
 
-				if (distance == 0 || energyUsed / distance == item.item.stackSize) {
-					stack = item.item;
+				if (distance == 0 || energyUsed / distance == contained.stackSize) {
+					stack = contained;
 					CoreProxy.proxy.removeEntity(entity);
-				} else
-					stack = item.item.splitStack((int) (energyUsed / distance));
+				} else {
+					stack = contained.splitStack((int) (energyUsed / distance));
+				}
 
 				speed = Math.sqrt(item.motionX * item.motionX + item.motionY * item.motionY + item.motionZ * item.motionZ);
 				speed = speed / 2F - 0.05;
 
-				if (speed < 0.01)
+				if (speed < 0.01) {
 					speed = 0.01;
+				}
 			} else if (entity instanceof EntityArrow) {
 				powerProvider.useEnergy(distance, distance, true);
 				stack = new ItemStack(Item.arrow, 1);
 				CoreProxy.proxy.removeEntity(entity);
 			}
 
-			IPipedItem passive = new EntityPassiveItem(worldObj, xCoord + 0.5, yCoord + Utils.getPipeFloorOf(stack),
-					zCoord + 0.5, stack);
+			IPipedItem passive = new EntityPassiveItem(worldObj, xCoord + 0.5, yCoord + Utils.getPipeFloorOf(stack), zCoord + 0.5, stack);
 
 			passive.setSpeed((float) speed);
 
@@ -248,10 +250,11 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 
 	@Override
 	public void onDropped(EntityItem item) {
-		if (entitiesDroppedIndex + 1 >= entitiesDropped.length)
+		if (entitiesDroppedIndex + 1 >= entitiesDropped.length) {
 			entitiesDroppedIndex = 0;
-		else
+		} else {
 			entitiesDroppedIndex++;
+		}
 
 		entitiesDropped[entitiesDroppedIndex] = item.entityId;
 	}
@@ -262,7 +265,7 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 		if (entity instanceof EntityItem) {
 			EntityItem item = (EntityItem) entity;
 
-			if (item.item.stackSize <= 0)
+			if (item.func_92014_d().stackSize <= 0)
 				return false;
 
 			for (int i = 0; i < entitiesDropped.length; ++i)

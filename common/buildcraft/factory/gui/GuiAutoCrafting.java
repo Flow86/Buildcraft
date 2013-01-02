@@ -9,8 +9,8 @@
 
 package buildcraft.factory.gui;
 
-import net.minecraft.src.InventoryPlayer;
-import net.minecraft.src.World;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
 
@@ -27,8 +27,9 @@ public class GuiAutoCrafting extends GuiBuildCraft {
 	@Override
 	public void onGuiClosed() {
 		super.onGuiClosed();
-		if (this.mc.thePlayer != null)
+		if (this.mc.thePlayer != null) {
 			inventorySlots.onCraftGuiClosed(mc.thePlayer);
+		}
 	}
 
 	@Override

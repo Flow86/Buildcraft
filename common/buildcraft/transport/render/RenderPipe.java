@@ -12,29 +12,28 @@ package buildcraft.transport.render;
 import java.util.HashMap;
 import java.util.Random;
 
-import net.minecraft.src.Block;
-import net.minecraft.src.EntityItem;
-import net.minecraft.src.GLAllocation;
-import net.minecraft.src.Item;
-import net.minecraft.src.ItemStack;
-import net.minecraft.src.RenderBlocks;
-import net.minecraft.src.RenderManager;
-import net.minecraft.src.Tessellator;
-import net.minecraft.src.TileEntity;
-import net.minecraft.src.TileEntitySpecialRenderer;
-import net.minecraft.src.World;
+import net.minecraft.block.Block;
+import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-
 import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.liquids.LiquidStack;
 
 import org.lwjgl.opengl.GL11;
 
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftCore.RenderMode;
-import net.minecraftforge.common.ForgeDirection;
-import net.minecraftforge.liquids.LiquidStack;
 import buildcraft.api.transport.IPipedItem;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.render.RenderEntityBlock;
@@ -48,33 +47,30 @@ import buildcraft.transport.PipeTransportPower;
 import buildcraft.transport.TileGenericPipe;
 
 public class RenderPipe extends TileEntitySpecialRenderer {
-	
-	final static private int maxPower = 1000;
 
-	final static private int displayLiquidStages = 40;
+	final static private int LIQUID_STAGES = 40;
 
-	final static private int numItemsToRender = 10;
+	final static private int MAX_ITEMS_TO_RENDER = 10;
 
 	private final static EntityItem dummyEntityItem = new EntityItem(null);
 
 	private class DisplayLiquidList {
-            
-		public int[] sideHorizontal = new int[displayLiquidStages];
-		public int[] sideVertical = new int[displayLiquidStages];
-		public int[] centerHorizontal = new int[displayLiquidStages];
-		public int[] centerVertical = new int[displayLiquidStages];
+
+		public int[] sideHorizontal = new int[LIQUID_STAGES];
+		public int[] sideVertical = new int[LIQUID_STAGES];
+		public int[] centerHorizontal = new int[LIQUID_STAGES];
+		public int[] centerVertical = new int[LIQUID_STAGES];
 	}
 
 	private HashMap<Integer, HashMap<Integer, DisplayLiquidList>> displayLiquidLists = new HashMap<Integer, HashMap<Integer, DisplayLiquidList>>();
 
-
 	private final int[] angleY = { 0, 0, 270, 90, 0, 180 };
 	private final int[] angleZ = { 90, 270, 0, 0, 0, 0 };
 
-	final static private int displayPowerStages = 80;
+	final static private int POWER_STAGES = 100;
 
-	public int[] displayPowerList = new int[displayPowerStages];
-	public double[] displayPowerLimits = new double[displayPowerStages];
+	public int[] displayPowerList = new int[POWER_STAGES];
+	public int[] displayPowerListOverload = new int[POWER_STAGES];
 
 	private RenderBlocks renderBlocks;
 
@@ -83,31 +79,30 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 	}
 
 	private DisplayLiquidList getDisplayLiquidLists(int liquidId, int meta, World world) {
-		if (displayLiquidLists.containsKey(liquidId)){
+		if (displayLiquidLists.containsKey(liquidId)) {
 			HashMap<Integer, DisplayLiquidList> x = displayLiquidLists.get(liquidId);
-			if (x.containsKey(meta)){
+			if (x.containsKey(meta))
 				return x.get(meta);
-			}
 		} else {
 			displayLiquidLists.put(liquidId, new HashMap<Integer, DisplayLiquidList>());
 		}
-
 
 		DisplayLiquidList d = new DisplayLiquidList();
 		displayLiquidLists.get(liquidId).put(meta, d);
 
 		BlockInterface block = new BlockInterface();
-		if (liquidId < Block.blocksList.length && Block.blocksList[liquidId] != null)
+		if (liquidId < Block.blocksList.length && Block.blocksList[liquidId] != null) {
 			block.texture = Block.blocksList[liquidId].getBlockTextureFromSideAndMetadata(0, meta);
-		else
+		} else {
 			block.texture = Item.itemsList[liquidId].getIconFromDamage(meta);
+		}
 
 		float size = Utils.pipeMaxPos - Utils.pipeMinPos;
 
 		// render size
 
-		for (int s = 0; s < displayLiquidStages; ++s) {
-			float ratio = (float) s / (float) displayLiquidStages;
+		for (int s = 0; s < LIQUID_STAGES; ++s) {
+			float ratio = (float) s / (float) LIQUID_STAGES;
 
 			// SIDE HORIZONTAL
 
@@ -195,17 +190,17 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 		initialized = true;
 
 		BlockInterface block = new BlockInterface();
-		block.texture = 0 * 16 + 4;
+		block.texture = 4;
 
 		float size = Utils.pipeMaxPos - Utils.pipeMinPos;
 
-		for (int s = 0; s < displayPowerStages; ++s) {
+		for (int s = 0; s < POWER_STAGES; ++s) {
 			displayPowerList[s] = GLAllocation.generateDisplayLists(1);
 			GL11.glNewList(displayPowerList[s], 4864 /* GL_COMPILE */);
 
 			float minSize = 0.005F;
 
-			float unit = (size - minSize) / 2F / displayPowerStages;
+			float unit = (size - minSize) / 2F / POWER_STAGES;
 
 			block.minY = 0.5 - (minSize / 2F) - unit * s;
 			block.maxY = 0.5 + (minSize / 2F) + unit * s;
@@ -221,9 +216,31 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 			GL11.glEndList();
 		}
 
-		for (int i = 0; i < displayPowerStages; ++i)
-			displayPowerLimits[displayPowerStages - i - 1] = maxPower
-					- Math.sqrt(maxPower * maxPower / (displayPowerStages - 1) * i);
+		block.texture = 6;
+
+		size = Utils.pipeMaxPos - Utils.pipeMinPos;
+
+		for (int s = 0; s < POWER_STAGES; ++s) {
+			displayPowerListOverload[s] = GLAllocation.generateDisplayLists(1);
+			GL11.glNewList(displayPowerListOverload[s], 4864 /* GL_COMPILE */);
+
+			float minSize = 0.005F;
+
+			float unit = (size - minSize) / 2F / POWER_STAGES;
+
+			block.minY = 0.5 - (minSize / 2F) - unit * s;
+			block.maxY = 0.5 + (minSize / 2F) + unit * s;
+
+			block.minZ = 0.5 - (minSize / 2F) - unit * s;
+			block.maxZ = 0.5 + (minSize / 2F) + unit * s;
+
+			block.minX = 0;
+			block.maxX = 0.5 + (minSize / 2F) + unit * s;
+
+			RenderEntityBlock.renderBlock(block, world, 0, 0, 0, false, true);
+
+			GL11.glEndList();
+		}
 	}
 
 	@Override
@@ -239,14 +256,13 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 		if (pipe.pipe == null)
 			return;
 
-		if (pipe.pipe.transport instanceof PipeTransportItems)
+		if (pipe.pipe.transport instanceof PipeTransportItems) {
 			renderSolids(pipe.pipe, x, y, z);
-
-		else if (pipe.pipe.transport instanceof PipeTransportLiquids)
+		} else if (pipe.pipe.transport instanceof PipeTransportLiquids) {
 			renderLiquids(pipe.pipe, x, y, z);
-
-		else if (pipe.pipe.transport instanceof PipeTransportPower)
+		} else if (pipe.pipe.transport instanceof PipeTransportPower) {
 			renderPower(pipe.pipe, x, y, z);
+		}
 
 	}
 
@@ -260,6 +276,8 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 
 		GL11.glTranslatef((float) x + 0.5F, (float) y + 0.5F, (float) z + 0.5F);
 
+		int[] displayList = pow.overload ? displayPowerListOverload : displayPowerList;
+
 		for (int i = 0; i < 6; ++i) {
 			GL11.glPushMatrix();
 
@@ -267,17 +285,13 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 			GL11.glRotatef(angleZ[i], 0, 0, 1);
 
 			if (pow.displayPower[i] >= 1.0) {
-				int stage = 0;
+				short stage = pow.displayPower[i];
 
-				for (; stage < displayPowerStages; ++stage) {
-					if (displayPowerLimits[stage] > pow.displayPower[i])
-						break;
+				if (stage < displayList.length) {
+					GL11.glCallList(displayList[stage]);
+				} else {
+					GL11.glCallList(displayList[displayList.length - 1]);
 				}
-
-				if (stage < displayPowerList.length)
-					GL11.glCallList(displayPowerList[stage]);
-				else
-					GL11.glCallList(displayPowerList[displayPowerList.length - 1]);
 			}
 
 			GL11.glPopMatrix();
@@ -300,42 +314,43 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 		boolean sides = false, above = false;
 
 		for (int i = 0; i < 6; ++i) {
-			//ILiquidTank tank = liq.getTanks()[i];
-			//LiquidStack liquid = tank.getLiquid();
+			// ILiquidTank tank = liq.getTanks()[i];
+			// LiquidStack liquid = tank.getLiquid();
 			LiquidStack liquid = liq.renderCache[i];
-			//int amount = liquid != null ? liquid.amount : 0;
-			//int amount = liquid != null ? liq.renderAmmount[i] : 0;
+			// int amount = liquid != null ? liquid.amount : 0;
+			// int amount = liquid != null ? liq.renderAmmount[i] : 0;
 
-			if ( liquid != null && liquid.amount > 0) {
+			if (liquid != null && liquid.amount > 0) {
 				DisplayLiquidList d = getListFromBuffer(liquid, pipe.worldObj);
 
-				if (d == null)
+				if (d == null) {
 					continue;
+				}
 
-				int stage = (int) ((float) liquid.amount / (float) (liq.getCapacity()) * (displayLiquidStages - 1));
+				int stage = (int) ((float) liquid.amount / (float) (liq.getCapacity()) * (LIQUID_STAGES - 1));
 
 				GL11.glPushMatrix();
 				int list = 0;
 
 				switch (ForgeDirection.VALID_DIRECTIONS[i]) {
-					case UP:
-						above = true;
-						list = d.sideVertical[stage];
-						break;
-					case DOWN:
-						GL11.glTranslatef(0, -0.75F, 0);
-						list = d.sideVertical[stage];
-						break;
-					case EAST:
-					case WEST:
-					case SOUTH:
-					case NORTH:
-						sides = true;
-						GL11.glRotatef(angleY[i], 0, 1, 0);
-						GL11.glRotatef(angleZ[i], 0, 0, 1);
-						list = d.sideHorizontal[stage];
-						break;
-					default:
+				case UP:
+					above = true;
+					list = d.sideVertical[stage];
+					break;
+				case DOWN:
+					GL11.glTranslatef(0, -0.75F, 0);
+					list = d.sideVertical[stage];
+					break;
+				case EAST:
+				case WEST:
+				case SOUTH:
+				case NORTH:
+					sides = true;
+					GL11.glRotatef(angleY[i], 0, 1, 0);
+					GL11.glRotatef(angleZ[i], 0, 0, 1);
+					list = d.sideHorizontal[stage];
+					break;
+				default:
 				}
 
 				GL11.glCallList(list);
@@ -343,24 +358,26 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 			}
 		}
 		// CENTER
-//		ILiquidTank tank = liq.getTanks()[ForgeDirection.Unknown.ordinal()];
-//		LiquidStack liquid = tank.getLiquid();
+		// ILiquidTank tank = liq.getTanks()[ForgeDirection.Unknown.ordinal()];
+		// LiquidStack liquid = tank.getLiquid();
 		LiquidStack liquid = liq.renderCache[ForgeDirection.UNKNOWN.ordinal()];
 
-		//int amount = liquid != null ? liquid.amount : 0;
-		//int amount = liquid != null ? liq.renderAmmount[ForgeDirection.Unknown.ordinal()] : 0;
+		// int amount = liquid != null ? liquid.amount : 0;
+		// int amount = liquid != null ? liq.renderAmmount[ForgeDirection.Unknown.ordinal()] : 0;
 		if (liquid != null && liquid.amount > 0) {
-			//DisplayLiquidList d = getListFromBuffer(liq.getTanks()[ForgeDirection.Unknown.ordinal()].getLiquid(), pipe.worldObj);
+			// DisplayLiquidList d = getListFromBuffer(liq.getTanks()[ForgeDirection.Unknown.ordinal()].getLiquid(), pipe.worldObj);
 			DisplayLiquidList d = getListFromBuffer(liquid, pipe.worldObj);
 
 			if (d != null) {
-				int stage = (int) ((float) liquid.amount / (float) (liq.getCapacity()) * (displayLiquidStages - 1));
+				int stage = (int) ((float) liquid.amount / (float) (liq.getCapacity()) * (LIQUID_STAGES - 1));
 
-				if (above)
+				if (above) {
 					GL11.glCallList(d.centerVertical[stage]);
+				}
 
-				if (!above || sides)
+				if (!above || sides) {
 					GL11.glCallList(d.centerHorizontal[stage]);
+				}
 			}
 
 		}
@@ -378,11 +395,10 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 
 		if (liquidId < Block.blocksList.length && Block.blocksList[liquidId] != null) {
 			ForgeHooksClient.bindTexture(Block.blocksList[liquidId].getTextureFile(), 0);
-		} else if(Item.itemsList[liquidId] != null) {
+		} else if (Item.itemsList[liquidId] != null) {
 			ForgeHooksClient.bindTexture(Item.itemsList[liquidId].getTextureFile(), 0);
-		} else {
+		} else
 			return null;
-		}		
 		return getDisplayLiquidLists(liquidId, stack.itemMeta, world);
 	}
 
@@ -394,8 +410,9 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 
 		int count = 0;
 		for (EntityData data : ((PipeTransportItems) pipe.transport).travelingEntities.values()) {
-			if(count >= numItemsToRender)
+			if (count >= MAX_ITEMS_TO_RENDER) {
 				break;
+			}
 
 			doRenderItem(data.item, x + data.item.getPosition().x - pipe.xCoord, y + data.item.getPosition().y - pipe.yCoord, z + data.item.getPosition().z
 					- pipe.zCoord, light);
@@ -419,8 +436,9 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 		GL11.glPushMatrix();
 
 		byte quantity = 1;
-		if (entityitem.getItemStack().stackSize > 1)
+		if (entityitem.getItemStack().stackSize > 1) {
 			quantity = 2;
+		}
 
 		GL11.glTranslatef((float) d, (float) d1, (float) d2);
 		GL11.glEnable(32826 /* GL_RESCALE_NORMAL_EXT */);
@@ -446,22 +464,22 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 					GL11.glTranslatef(f5, f7, f9);
 				}
 
-				RenderPipe.dummyEntityItem.item = itemstack;
+				RenderPipe.dummyEntityItem.func_92013_a(itemstack);
 
 				customRenderer.renderItem(ItemRenderType.ENTITY, itemstack, renderBlocks, RenderPipe.dummyEntityItem);
 				GL11.glPopMatrix();
 			}
 
-		} else if (itemstack.itemID < Block.blocksList.length && Block.blocksList[itemstack.itemID] != null
-				&& Block.blocksList[itemstack.itemID].blockID != 0) {
-				//&& RenderBlocks.renderItemIn3d(Block.blocksList[itemstack.itemID].getRenderType())) {
+		} else if (itemstack.itemID < Block.blocksList.length && Block.blocksList[itemstack.itemID] != null && Block.blocksList[itemstack.itemID].blockID != 0) {
+
 			GL11.glTranslatef(0, 0.25F, 0); // BC SPECIFIC
 
 			ForgeHooksClient.bindTexture(Block.blocksList[itemstack.itemID].getTextureFile(), 0);
 			float f4 = 0.25F;
 			int j = Block.blocksList[itemstack.itemID].getRenderType();
-			if (j == 1 || j == 19 || j == 12 || j == 2)
+			if (j == 1 || j == 19 || j == 12 || j == 2) {
 				f4 = 0.5F;
+			}
 
 			GL11.glScalef(f4, f4, f4);
 			for (int k = 0; k < quantity; k++) {
@@ -480,6 +498,7 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 			}
 
 		} else {
+
 			GL11.glTranslatef(0, 0.10F, 0); // BC SPECIFIC
 
 			if (itemstack.getItem().requiresMultipleRenderPasses()) {
@@ -487,28 +506,27 @@ public class RenderPipe extends TileEntitySpecialRenderer {
 				ForgeHooksClient.bindTexture(Item.itemsList[itemstack.itemID].getTextureFile(), 0);
 
 				for (int i = 0; i <= itemstack.getItem().getRenderPasses(itemstack.getItemDamage()); ++i) {
-					int iconIndex = itemstack.getItem().getIconFromDamageForRenderPass(itemstack.getItemDamage(), i);
+					int iconIndex = itemstack.getItem().getIconIndex(itemstack, i);
 					float scale = 1.0F;
 
-					if (true) {
-						int itemColour = Item.itemsList[itemstack.itemID].getColorFromItemStack(itemstack, i);
-						float var18 = (itemColour >> 16 & 255) / 255.0F;
-						float var19 = (itemColour >> 8 & 255) / 255.0F;
-						float var20 = (itemColour & 255) / 255.0F;
-						GL11.glColor4f(var18 * scale, var19 * scale, var20 * scale, 1.0F);
-					}
+					int itemColour = Item.itemsList[itemstack.itemID].getColorFromItemStack(itemstack, i);
+					float rgbR = (itemColour >> 16 & 255) / 255.0F;
+					float rgbG = (itemColour >> 8 & 255) / 255.0F;
+					float rgbB = (itemColour & 255) / 255.0F;
+					GL11.glColor4f(rgbR * scale, rgbG * scale, rgbB * scale, 1.0F);
 
 					this.drawItem(iconIndex, quantity);
 				}
+
 			} else {
 
 				GL11.glScalef(0.5F, 0.5F, 0.5F);
 				int i = itemstack.getIconIndex();
-				if (itemstack.itemID < Block.blocksList.length && Block.blocksList[itemstack.itemID] != null
-						&& Block.blocksList[itemstack.itemID].blockID != 0)
+				if (itemstack.itemID < Block.blocksList.length && Block.blocksList[itemstack.itemID] != null && Block.blocksList[itemstack.itemID].blockID != 0) {
 					ForgeHooksClient.bindTexture(Block.blocksList[itemstack.itemID].getTextureFile(), 0);
-				else
+				} else {
 					ForgeHooksClient.bindTexture(Item.itemsList[itemstack.itemID].getTextureFile(), 0);
+				}
 
 				drawItem(i, quantity);
 			}

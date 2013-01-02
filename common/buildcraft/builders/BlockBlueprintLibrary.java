@@ -11,19 +11,18 @@ package buildcraft.builders;
 
 import java.util.ArrayList;
 
-import net.minecraft.src.BlockContainer;
-import net.minecraft.src.CreativeTabs;
-import net.minecraft.src.EntityLiving;
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.ItemStack;
-import net.minecraft.src.Material;
-import net.minecraft.src.TileEntity;
-import net.minecraft.src.World;
+import net.minecraft.block.BlockContainer;
+import net.minecraft.block.material.Material;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import buildcraft.BuildCraftBuilders;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.GuiIds;
 import buildcraft.core.proxy.CoreProxy;
-
 
 public class BlockBlueprintLibrary extends BlockContainer {
 
@@ -49,12 +48,12 @@ public class BlockBlueprintLibrary extends BlockContainer {
 		TileBlueprintLibrary tile = (TileBlueprintLibrary) world.getBlockTileEntity(i, j, k);
 
 		if (!tile.locked || entityplayer.username.equals(tile.owner))
-			if (!CoreProxy.proxy.isRenderWorld(world))
+			if (!CoreProxy.proxy.isRenderWorld(world)) {
 				entityplayer.openGui(BuildCraftBuilders.instance, GuiIds.BLUEPRINT_LIBRARY, world, i, j, k);
+			}
 
 		return true;
 	}
-
 
 	@Override
 	public TileEntity createNewTileEntity(World var1) {

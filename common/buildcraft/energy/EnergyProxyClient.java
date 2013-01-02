@@ -20,7 +20,7 @@ public class EnergyProxyClient extends EnergyProxy {
 
 	@Override
 	public void registerTextureFX() {
-		net.minecraft.src.RenderEngine renderEngine = FMLClientHandler.instance().getClient().renderEngine;
+		net.minecraft.client.renderer.RenderEngine renderEngine = FMLClientHandler.instance().getClient().renderEngine;
 
 		renderEngine.registerTextureFX(new TextureOilFX());
 		renderEngine.registerTextureFX(new TextureFuelFX());
@@ -29,11 +29,11 @@ public class EnergyProxyClient extends EnergyProxy {
 
 	@Override
 	public void registerBlockRenderers() {
-		RenderingEntityBlocks.blockByEntityRenders.put(new EntityRenderIndex(BuildCraftEnergy.engineBlock, 0),
-				new RenderEngine(DefaultProps.TEXTURE_PATH_BLOCKS + "/base_wood.png"));
-		RenderingEntityBlocks.blockByEntityRenders.put(new EntityRenderIndex(BuildCraftEnergy.engineBlock, 1),
-				new RenderEngine(DefaultProps.TEXTURE_PATH_BLOCKS + "/base_stone.png"));
-		RenderingEntityBlocks.blockByEntityRenders.put(new EntityRenderIndex(BuildCraftEnergy.engineBlock, 2),
-				new RenderEngine(DefaultProps.TEXTURE_PATH_BLOCKS + "/base_iron.png"));
+		RenderingEntityBlocks.blockByEntityRenders.put(new EntityRenderIndex(BuildCraftEnergy.engineBlock, 0), new RenderEngine(
+				DefaultProps.TEXTURE_PATH_BLOCKS + "/base_wood.png"));
+		RenderingEntityBlocks.blockByEntityRenders.put(new EntityRenderIndex(BuildCraftEnergy.engineBlock, 1), new RenderEngine(
+				DefaultProps.TEXTURE_PATH_BLOCKS + "/base_stone.png"));
+		RenderingEntityBlocks.blockByEntityRenders.put(new EntityRenderIndex(BuildCraftEnergy.engineBlock, 2), new RenderEngine(
+				DefaultProps.TEXTURE_PATH_BLOCKS + "/base_iron.png"));
 	}
 }
