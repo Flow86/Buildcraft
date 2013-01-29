@@ -87,7 +87,7 @@ public class BuildCraftEnergy {
 	@Init
 	public static void load(FMLInitializationEvent evt) {
 		NetworkRegistry.instance().registerGuiHandler(instance, new GuiHandler());
-		GameRegistry.registerWorldGenerator(new OilPopulate());
+		MinecraftForge.EVENT_BUS.register(new OilPopulate());
 
 		new BptBlockEngine(engineBlock.blockID);
 
@@ -138,7 +138,7 @@ public class BuildCraftEnergy {
 		LanguageRegistry.addName(bucketOil, "Oil Bucket");
 
 		bucketFuel = new ItemBuildCraft(Integer.parseInt(bucketFuelId.value)).setItemName("bucketFuel").setContainerItem(Item.bucketEmpty);
-		bucketFuel.setIconIndex(0 * 16 + 3).setMaxStackSize(1).setCreativeTab(CreativeTabs.tabMisc);
+		bucketFuel.setIconIndex(0 * 16 + 3).setMaxStackSize(1);
 		LanguageRegistry.addName(bucketFuel, "Fuel Bucket");
 
 		oilLiquid = LiquidDictionary.getOrCreateLiquid("Oil", new LiquidStack(oilStill, 1));
@@ -162,7 +162,7 @@ public class BuildCraftEnergy {
 
 	public static void loadRecipes() {
 		CoreProxy.proxy.addCraftingRecipe(new ItemStack(engineBlock, 1, 0),
-				new Object[] { "www", " g ", "GpG", Character.valueOf('w'), Block.planks, Character.valueOf('g'), Block.glass, Character.valueOf('G'),
+				new Object[] { "www", " g ", "GpG", Character.valueOf('w'), "plankWood", Character.valueOf('g'), Block.glass, Character.valueOf('G'),
 						BuildCraftCore.woodenGearItem, Character.valueOf('p'), Block.pistonBase });
 		CoreProxy.proxy.addCraftingRecipe(new ItemStack(engineBlock, 1, 1), new Object[] { "www", " g ", "GpG", Character.valueOf('w'), Block.cobblestone,
 				Character.valueOf('g'), Block.glass, Character.valueOf('G'), BuildCraftCore.stoneGearItem, Character.valueOf('p'), Block.pistonBase });

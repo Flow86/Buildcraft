@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import buildcraft.BuildCraftSilicon;
+import buildcraft.core.CreativeTabBuildCraft;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.Utils;
@@ -21,11 +22,10 @@ public class BlockAssemblyTable extends BlockContainer {
 
 	public BlockAssemblyTable(int i) {
 		super(i, Material.iron);
-		// TODO Auto-generated constructor stub
 
 		setBlockBounds(0, 0, 0, 1, 9F / 16F, 1);
 		setHardness(0.5F);
-		setCreativeTab(CreativeTabs.tabRedstone);
+		setCreativeTab(CreativeTabBuildCraft.tabBuildCraft);
 
 	}
 
@@ -64,12 +64,13 @@ public class BlockAssemblyTable extends BlockContainer {
 
 	@Override
 	public int getBlockTextureFromSideAndMetadata(int i, int j) {
-		if (i == 1)
-			return 16 * 6 + 12;
-		else if (i == 0)
+		if (i == 1) {
+			return j == 0 ? 16 * 6 + 12 : 16 * 3 + 15;
+		} else if (i == 0) {
 			return 16 * 2 + 15;
-		else
-			return j == 0 ? 16 * 6 + 11 : 2 * 16 + 12;
+		} else {
+			return j == 0 ? 16 * 6 + 11 : 16 * 3 + 14;
+		}
 	}
 
 	@Override
