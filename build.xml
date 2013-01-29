@@ -152,7 +152,7 @@
 		<mkdir dir="${jar.dir}"/>
 		<jar destfile="${jar.dir}/${ant.project.name}-${mc.version}-${bc.version.full}.jar" basedir="${classes.dir}"/>
 		<copy todir="${jar.dir}/changelog">
-			<fileset dir="${resources.dir}/changelog">
+			<fileset dir="${src.dir}/${resources.dir}/changelog">
 				<include name="*" />
 			</fileset>
 		</copy>
