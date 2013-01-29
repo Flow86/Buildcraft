@@ -1,10 +1,10 @@
-<project name="BuildCraft" default="main">
+<project name="BuildCraft" basedir="../" default="main">
 	<property environment="env"/>
 	<!-- Properties -->
 
 	<property name="build.dir" value="build"/>
-	<property name="src.dir" value="."/>
-	<property name="lang.dir" value="../buildcraft.localization"/>
+	<property name="src.dir" value="BuildCraft"/>
+	<property name="lang.dir" value="Buildcraft-Localization"/>
 	<property name="resources.dir" value="buildcraft_resources"/>
 
 	<property name="download.dir" value="download"/>
@@ -19,7 +19,7 @@
 
 	<property name="mc.version" value="1.4.7"/>
 	<property name="forge.version" value="6.6.0.497"/>
-	<property name="project.version" value="3.3.0"/>
+	<property name="bc.version" value="3.4.0"/>
 
 	<property name="forge.name" value="minecraftforge-src-${mc.version}-${forge.version}.zip"/>
 
@@ -45,7 +45,7 @@
 
 	<!-- Set full version -->
 	<target name="initialize-version" depends="version-provided,version-not-provided">
-		<property name="project.version.full" value="${project.version}.${build.number}"/>
+		<property name="bc.version.full" value="${bc.version}.${build.number}"/>
 	</target>
 
 	<!-- Set unknown build number -->
@@ -86,20 +86,22 @@
 		</exec>
 
 	</target>
-
-	<target name="compile" depends="initialize-version,setup">
-
-		<delete dir="${classes.dir}"/>
-		<mkdir dir="${classes.dir}"/>
-
+	
+	<target name="copy-src">
 		<!-- Copy sources -->
 		<copy todir="${mcpsrc.dir}/minecraft">
 			<fileset dir="${src.dir}/common"/>
 			<filterset>
-				<filter token="VERSION" value="${project.version.full}" />
+				<filter token="VERSION" value="${bc.version.full}" />
 				<filter token="BUILD_NUMBER" value="${build.number}" />
 			</filterset>
 		</copy>
+	</target>
+
+	<target name="compile" depends="initialize-version,setup,copy-src">
+
+		<delete dir="${classes.dir}"/>
+		<mkdir dir="${classes.dir}"/>
 
 		<!-- Recompile -->
 		<exec dir="${mcp.dir}" executable="cmd" osfamily="windows">
@@ -148,7 +150,7 @@
 
 		<delete dir="${jar.dir}"/>
 		<mkdir dir="${jar.dir}"/>
-		<jar destfile="${jar.dir}/${ant.project.name}-${mc.version}-${project.version.full}.jar" basedir="${classes.dir}"/>
+		<jar destfile="${jar.dir}/${ant.project.name}-${mc.version}-${bc.version.full}.jar" basedir="${classes.dir}"/>
 		<copy todir="${jar.dir}/changelog">
 			<fileset dir="${resources.dir}/changelog">
 				<include name="*" />
