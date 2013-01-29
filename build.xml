@@ -67,7 +67,7 @@
 	</target>
 
 	<!-- Setup mcp and forge -->
-	<target name="setup" depends="download-files" if="out-of-date">
+	<target name="setup" depends="download-files"><!-- if="out-of-date"-->
 
 		<delete dir="${forge.dir}" failonerror="false"/>
 
@@ -128,7 +128,7 @@
 
 		<!-- Copy resources -->
 		<copy todir="${classes.dir}">
-			<fileset dir="${resources.dir}">
+			<fileset dir="${src.dir}/${resources.dir}">
 				<exclude name="build.xml"/>
 			</fileset>
 		</copy>
@@ -152,7 +152,7 @@
 		<mkdir dir="${jar.dir}"/>
 		<jar destfile="${jar.dir}/${ant.project.name}-${mc.version}-${bc.version.full}.jar" basedir="${classes.dir}"/>
 		<copy todir="${jar.dir}/changelog">
-			<fileset dir="${resources.dir}/changelog">
+			<fileset dir="${src.dir}/${resources.dir}/changelog">
 				<include name="*" />
 			</fileset>
 		</copy>
