@@ -46,6 +46,15 @@
 	<!-- Set full version -->
 	<target name="initialize-version" depends="version-provided,version-not-provided">
 		<property name="bc.version.full" value="${bc.version}.${build.number}"/>
+
+		<delete file="jenkins.properties" failonerror="false" />
+		<propertyfile file="jenkins.properties">
+			<entry key="BC_VERSION_FULL" value="${bc.version.full}" />
+			<entry key="BC_VERSION" value="${bc.version}" />
+			<entry key="MC_VERSION" value="${mc.version}" />
+			<entry key="MCP_VERSION" value="${mcp.version}" />
+			<entry key="FORGE_VERSION" value="${forge.version}" />
+		</propertyfile>
 	</target>
 
 	<!-- Set unknown build number -->
