@@ -18,7 +18,7 @@
 	<property name="mcpsrc.dir" value="${mcp.dir}/src"/>
 
 	<property name="mc.version" value="1.4.7"/>
-	<property name="forge.version" value="6.6.0.507"/>
+	<property name="forge.version" value="6.6.0.515"/>
 	<property name="bc.version" value="3.4.2"/>
 
 	<property name="forge.name" value="minecraftforge-src-${mc.version}-${forge.version}.zip"/>
@@ -120,7 +120,14 @@
 		<exec dir="${mcp.dir}" executable="sh" osfamily="unix">
 			<arg value="recompile.sh"/>
 		</exec>
-
+		
+		<!-- Check for failure -->
+		<fail message="MCP failed to build">
+			<condition>
+				<resourcecontains resource="${mcp.dir}/logs/client_compile.log" substring="error:"/>
+			</condition>
+		</fail>
+		
 		<!-- Reobfuscate -->
 		<exec dir="${mcp.dir}" executable="cmd" osfamily="windows">
 			<arg line="/c reobfuscate.bat"/>

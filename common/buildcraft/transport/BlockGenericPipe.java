@@ -19,6 +19,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -38,6 +39,7 @@ import buildcraft.core.DefaultProps;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.Utils;
 import buildcraft.transport.render.PipeWorldRenderer;
+import cpw.mods.fml.common.registry.GameRegistry;
 
 public class BlockGenericPipe extends BlockContainer {
 
@@ -362,7 +364,17 @@ public class BlockGenericPipe extends BlockContainer {
 
 		return meta;
 	}
+	
+	@Override
+	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLiving placer) {
+		super.onBlockPlacedBy(world, x, y, z, placer);
+		Pipe pipe = getPipe(world, x, y, z);
 
+		if (isValid(pipe)) {
+			pipe.onBlockPlacedBy(placer);
+		}
+	}
+	
 	@Override
 	public boolean onBlockActivated(World world, int i, int j, int k, EntityPlayer entityplayer, int par6, float par7, float par8, float par9) {
 		super.onBlockActivated(world, i, j, k, entityplayer, par6, par7, par8, par9);
@@ -594,6 +606,8 @@ public class BlockGenericPipe extends BlockContainer {
 
 	public static ItemPipe registerPipe(int key, Class<? extends Pipe> clas) {
 		ItemPipe item = new ItemPipe(key);
+		item.setItemName("buildcraftPipe." + clas.getSimpleName().toLowerCase());
+		GameRegistry.registerItem(item, item.getItemName());
 
 		pipes.put(item.itemID, clas);
 

@@ -74,7 +74,7 @@ import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraftforge.common.MinecraftForge;
 
-@Mod(name = "BuildCraft", version = Version.VERSION, useMetadata = false, modid = "BuildCraft|Core", dependencies = "required-after:Forge@[6.3.0.0,)")
+@Mod(name = "BuildCraft", version = Version.VERSION, useMetadata = false, modid = "BuildCraft|Core", dependencies = "required-after:Forge@[6.5.0.0,)")
 @NetworkMod(channels = { DefaultProps.NET_CHANNEL_NAME }, packetHandler = PacketHandler.class, clientSideRequired = true, serverSideRequired = true)
 public class BuildCraftCore {
 	public static enum RenderMode {
@@ -154,7 +154,7 @@ public class BuildCraftCore {
 	@PreInit
 	public void loadConfiguration(FMLPreInitializationEvent evt) {
 
-		Version.versionCheck();
+		Version.check();
 
 		bcLog.setParent(FMLLog.getLogger());
 		bcLog.info("Starting BuildCraft " + Version.getVersion());
@@ -295,8 +295,7 @@ public class BuildCraftCore {
 
 	@ServerStarting
 	public void serverStarting(FMLServerStartingEvent event) {
-		CommandHandler commandManager = (CommandHandler) event.getServer().getCommandManager();
-		commandManager.registerCommand(new CommandBuildCraft());
+		event.registerServerCommand(new CommandBuildCraft());
 	}
 
 	public void loadRecipes() {
