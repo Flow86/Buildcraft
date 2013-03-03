@@ -258,8 +258,10 @@ public class BuildCraftCore {
 		ActionManager.registerTriggerProvider(new DefaultTriggerProvider());
 		ActionManager.registerActionProvider(new DefaultActionProvider());
 
-		MinecraftForge.EVENT_BUS.register(new SpringPopulate());
-				
+		if (BuildCraftCore.modifyWorld) {
+			MinecraftForge.EVENT_BUS.register(new SpringPopulate());
+		}
+
 		if (BuildCraftCore.loadDefaultRecipes) {
 			loadRecipes();
 		}
@@ -289,6 +291,7 @@ public class BuildCraftCore {
 		}
 
 		BuildCraftAPI.softBlocks[Block.snow.blockID] = true;
+		BuildCraftAPI.softBlocks[Block.vine.blockID] = true;
 		TickRegistry.registerTickHandler(new TickHandlerCoreClient(), Side.CLIENT);
 
 	}
