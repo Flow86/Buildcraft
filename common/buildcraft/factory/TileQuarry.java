@@ -202,7 +202,7 @@ public class TileQuarry extends TileMachine implements IMachine, IPowerReceptor,
 		powerProvider.getTimeTracker().markTime(worldObj);
 
 		if (builder == null) {
-			builder = new EntityRobot(worldObj, box);
+			builder = new EntityRobot(worldObj, box, xCoord, yCoord, zCoord);
 			worldObj.spawnEntityInWorld(builder);
 		}
 

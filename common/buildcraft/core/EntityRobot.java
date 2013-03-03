@@ -16,8 +16,10 @@ import java.util.List;
 import javax.management.RuntimeErrorException;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeDirection;
 import buildcraft.BuildCraftCore;
 import buildcraft.api.blueprints.BptSlotInfo;
 import buildcraft.api.core.Position;
@@ -27,6 +29,7 @@ import buildcraft.core.blueprints.BptSlot;
 import buildcraft.core.blueprints.BptSlot.Mode;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.BlockUtil;
+import buildcraft.core.utils.Utils;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
@@ -43,6 +46,8 @@ public class EntityRobot extends Entity implements IEntityAdditionalSpawnData {
 	public LinkedList<Action> targets = new LinkedList<Action>();
 	public static int MAX_TARGETS = 20;
 	public int wait = 0;
+	
+	private int xCoord, yCoord, zCoord;
 
 	private class Action {
 
@@ -62,13 +67,22 @@ public class EntityRobot extends Entity implements IEntityAdditionalSpawnData {
 
 	public EntityRobot(World world) {
 		super(world);
+
+		this.xCoord = (int) posX;
+		this.yCoord = (int) posY;
+		this.zCoord = (int) posZ;
 	}
 
-	public EntityRobot(World world, Box box) {
+	public EntityRobot(World world, Box box, int xCoord, int yCoord, int zCoord) {
 
 		super(world);
 
 		this.box = box;
+		
+		this.xCoord = xCoord;
+		this.yCoord = yCoord;
+		this.zCoord = zCoord;
+		
 		init();
 	}
 
@@ -196,6 +210,26 @@ public class EntityRobot extends Entity implements IEntityAdditionalSpawnData {
 
 		return false;
 	}
+	
+	protected void clearPos(BptSlot target)
+	{
+		List<ItemStack> stacks = BlockUtil.getItemStackFromBlock(worldObj, target.x, target.y, target.z);
+
+		if (stacks != null) {
+			for (ItemStack s : stacks) {
+				if (s != null) {
+					// First, try to add to a nearby chest
+					ItemStack added = Utils.addToRandomInventory(s, worldObj, xCoord, yCoord, zCoord, ForgeDirection.UNKNOWN);
+					s.stackSize -= added.stackSize;
+
+					// Second, try to add to adjacent pipes
+					if (s.stackSize > 0) {
+						Utils.addToRandomPipeEntry(worldObj.getBlockTileEntity(xCoord, yCoord, zCoord), ForgeDirection.UNKNOWN, s);
+					}
+				}
+			}
+		}
+	}
 
 	protected void build() {
 
@@ -214,12 +248,14 @@ public class EntityRobot extends Entity implements IEntityAdditionalSpawnData {
 						if (target.mode == Mode.ClearIfInvalid) {
 
 							if (!target.isValid(a.context)) {
-								worldObj.setBlockAndMetadataWithNotify(target.x, target.y, target.z, 0, 0);
+								clearPos(target);
+								//worldObj.setBlockAndMetadataWithNotify(target.x, target.y, target.z, 0, 0);
 							}
 
 						} else if (target.stackToUse != null) {
 
-							worldObj.setBlockWithNotify(target.x, target.y, target.z, 0);
+							clearPos(target);
+							//worldObj.setBlockWithNotify(target.x, target.y, target.z, 0);
 							throw new RuntimeErrorException(null, "NOT IMPLEMENTED");
 							// target.stackToUse.getItem().onItemUse(target.stackToUse,
 							// CoreProxy.getBuildCraftPlayer(worldObj), worldObj, target.x, target.y - 1,
