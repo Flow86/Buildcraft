@@ -3,16 +3,19 @@ package buildcraft.transport.render;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Icon;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.common.ForgeDirection;
+import buildcraft.BuildCraftTransport;
 import buildcraft.api.transport.IPipe;
 import buildcraft.api.transport.IPipe.WireColor;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.utils.Utils;
 import buildcraft.transport.IPipeRenderState;
+import buildcraft.transport.IconTerrainConstants;
 import buildcraft.transport.PipeRenderState;
 import buildcraft.transport.TransportProxy;
+import buildcraft.transport.pipes.PipeStructureCobblestone;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 
 public class PipeWorldRenderer implements ISimpleBlockRenderingHandler {
@@ -21,7 +24,7 @@ public class PipeWorldRenderer implements ISimpleBlockRenderingHandler {
 
 	/**
 	 * Mirrors the array on the Y axis by calculating offsets from 0.5F
-	 * 
+	 *
 	 * @param targetArray
 	 */
 	private void mirrorY(float[][] targetArray) {
@@ -33,7 +36,7 @@ public class PipeWorldRenderer implements ISimpleBlockRenderingHandler {
 	/**
 	 * Shifts the coordinates around effectivly rotating something. Zero state is DOWN then -> NORTH -> WEST Note - To obtain Pos, do a mirrorY() before
 	 * rotating
-	 * 
+	 *
 	 * @param targetArray
 	 *            the array that should be rotated
 	 */
@@ -63,7 +66,7 @@ public class PipeWorldRenderer implements ISimpleBlockRenderingHandler {
 
 	/**
 	 * Clones both dimensions of a float[][]
-	 * 
+	 *
 	 * @param source
 	 *            the float[][] to deepClone
 	 * @return
@@ -76,55 +79,58 @@ public class PipeWorldRenderer implements ISimpleBlockRenderingHandler {
 		return target;
 	}
 
-	public void renderPipe(RenderBlocks renderblocks, IBlockAccess iblockaccess, Block block, PipeRenderState state, int x, int y, int z) {
+	public void renderPipe(RenderBlocks renderblocks, IBlockAccess iblockaccess, Block block, IPipeRenderState renderState, int x, int y, int z) {
 
 		float minSize = Utils.pipeMinPos;
 		float maxSize = Utils.pipeMaxPos;
+		
+		PipeRenderState state = renderState.getRenderState();
+		Icon[] icons = renderState.getPipeIcons();
+		if (icons == null) return;
+		
 
-		ForgeHooksClient.bindTexture(state.getTextureFile(), 0);
-
-		state.currentTextureIndex = state.textureMatrix.getTextureIndex(ForgeDirection.UNKNOWN);
+		state.currentTexture = icons[state.textureMatrix.getTextureIndex(ForgeDirection.UNKNOWN)];
 		block.setBlockBounds(minSize, minSize, minSize, maxSize, maxSize, maxSize);
 		renderblocks.setRenderBoundsFromBlock(block);
 		renderblocks.renderStandardBlock(block, x, y, z);
 
 		if (state.pipeConnectionMatrix.isConnected(ForgeDirection.WEST)) {
-			state.currentTextureIndex = state.textureMatrix.getTextureIndex(ForgeDirection.WEST);
+			state.currentTexture = icons[state.textureMatrix.getTextureIndex(ForgeDirection.WEST)];
 			block.setBlockBounds(0.0F, minSize, minSize, minSize, maxSize, maxSize);
 			renderblocks.setRenderBoundsFromBlock(block);
 			renderblocks.renderStandardBlock(block, x, y, z);
 		}
 
 		if (state.pipeConnectionMatrix.isConnected(ForgeDirection.EAST)) {
-			state.currentTextureIndex = state.textureMatrix.getTextureIndex(ForgeDirection.EAST);
+			state.currentTexture = icons[state.textureMatrix.getTextureIndex(ForgeDirection.EAST)];
 			block.setBlockBounds(maxSize, minSize, minSize, 1.0F, maxSize, maxSize);
 			renderblocks.setRenderBoundsFromBlock(block);
 			renderblocks.renderStandardBlock(block, x, y, z);
 		}
 
 		if (state.pipeConnectionMatrix.isConnected(ForgeDirection.DOWN)) {
-			state.currentTextureIndex = state.textureMatrix.getTextureIndex(ForgeDirection.DOWN);
+			state.currentTexture = icons[state.textureMatrix.getTextureIndex(ForgeDirection.DOWN)];
 			block.setBlockBounds(minSize, 0.0F, minSize, maxSize, minSize, maxSize);
 			renderblocks.setRenderBoundsFromBlock(block);
 			renderblocks.renderStandardBlock(block, x, y, z);
 		}
 
 		if (state.pipeConnectionMatrix.isConnected(ForgeDirection.UP)) {
-			state.currentTextureIndex = state.textureMatrix.getTextureIndex(ForgeDirection.UP);
+			state.currentTexture = icons[state.textureMatrix.getTextureIndex(ForgeDirection.UP)];
 			block.setBlockBounds(minSize, maxSize, minSize, maxSize, 1.0F, maxSize);
 			renderblocks.setRenderBoundsFromBlock(block);
 			renderblocks.renderStandardBlock(block, x, y, z);
 		}
 
 		if (state.pipeConnectionMatrix.isConnected(ForgeDirection.NORTH)) {
-			state.currentTextureIndex = state.textureMatrix.getTextureIndex(ForgeDirection.NORTH);
+			state.currentTexture = icons[state.textureMatrix.getTextureIndex(ForgeDirection.NORTH)];
 			block.setBlockBounds(minSize, minSize, 0.0F, maxSize, maxSize, minSize);
 			renderblocks.setRenderBoundsFromBlock(block);
 			renderblocks.renderStandardBlock(block, x, y, z);
 		}
 
 		if (state.pipeConnectionMatrix.isConnected(ForgeDirection.SOUTH)) {
-			state.currentTextureIndex = state.textureMatrix.getTextureIndex(ForgeDirection.SOUTH);
+			state.currentTexture = icons[state.textureMatrix.getTextureIndex(ForgeDirection.SOUTH)];
 			block.setBlockBounds(minSize, minSize, maxSize, maxSize, maxSize, 1.0F);
 			renderblocks.setRenderBoundsFromBlock(block);
 			renderblocks.renderStandardBlock(block, x, y, z);
@@ -132,25 +138,23 @@ public class PipeWorldRenderer implements ISimpleBlockRenderingHandler {
 
 		block.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
 
-		ForgeHooksClient.bindTexture(DefaultProps.TEXTURE_BLOCKS, 0);
-
 		if (state.wireMatrix.hasWire(WireColor.Red)) {
-			state.currentTextureIndex = state.wireMatrix.getTextureIndex(WireColor.Red);
+			state.currentTexture = BuildCraftTransport.instance.terrainIcons[state.wireMatrix.isWireLit(WireColor.Red)?IconTerrainConstants.Texture_Red_Lit:IconTerrainConstants.Texture_Red_Dark];
 			pipeWireRender(renderblocks, block, state, Utils.pipeMinPos, Utils.pipeMaxPos, Utils.pipeMinPos, IPipe.WireColor.Red, x, y, z);
 		}
 
 		if (state.wireMatrix.hasWire(WireColor.Blue)) {
-			state.currentTextureIndex = state.wireMatrix.getTextureIndex(WireColor.Blue);
+			state.currentTexture = BuildCraftTransport.instance.terrainIcons[state.wireMatrix.isWireLit(WireColor.Blue)?IconTerrainConstants.Texture_Blue_Lit:IconTerrainConstants.Texture_Blue_Dark];
 			pipeWireRender(renderblocks, block, state, Utils.pipeMaxPos, Utils.pipeMaxPos, Utils.pipeMaxPos, IPipe.WireColor.Blue, x, y, z);
 		}
 
 		if (state.wireMatrix.hasWire(WireColor.Green)) {
-			state.currentTextureIndex = state.wireMatrix.getTextureIndex(WireColor.Green);
+			state.currentTexture = BuildCraftTransport.instance.terrainIcons[state.wireMatrix.isWireLit(WireColor.Green)?IconTerrainConstants.Texture_Green_Lit:IconTerrainConstants.Texture_Green_Dark];
 			pipeWireRender(renderblocks, block, state, Utils.pipeMaxPos, Utils.pipeMinPos, Utils.pipeMinPos, IPipe.WireColor.Green, x, y, z);
 		}
 
 		if (state.wireMatrix.hasWire(WireColor.Yellow)) {
-			state.currentTextureIndex = state.wireMatrix.getTextureIndex(WireColor.Yellow);
+			state.currentTexture = BuildCraftTransport.instance.terrainIcons[state.wireMatrix.isWireLit(WireColor.Yellow)?IconTerrainConstants.Texture_Yellow_Lit:IconTerrainConstants.Texture_Yellow_Dark];
 			pipeWireRender(renderblocks, block, state, Utils.pipeMinPos, Utils.pipeMinPos, Utils.pipeMaxPos, IPipe.WireColor.Yellow, x, y, z);
 		}
 
@@ -179,8 +183,7 @@ public class PipeWorldRenderer implements ISimpleBlockRenderingHandler {
 
 		for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
 			if (state.facadeMatrix.isConnected(direction)) {
-				ForgeHooksClient.bindTexture(state.facadeMatrix.getTextureFile(direction), 0);
-				state.currentTextureIndex = state.facadeMatrix.getTextureIndex(direction);
+				state.currentTexture = Block.blocksList[state.facadeMatrix.getFacadeBlockId(direction)].getBlockTextureFromSideAndMetadata(direction.ordinal(), state.facadeMatrix.getFacadeMetaId(direction));
 
 				// Hollow facade
 				if (state.pipeConnectionMatrix.isConnected(direction)) {
@@ -238,8 +241,7 @@ public class PipeWorldRenderer implements ISimpleBlockRenderingHandler {
 		zeroState[2][0] = Utils.pipeMinPos;
 		zeroState[2][1] = Utils.pipeMaxPos;
 
-		ForgeHooksClient.bindTexture(DefaultProps.TEXTURE_BLOCKS, 0);
-		state.currentTextureIndex = 7 * 16 + 13; // Structure Pipe
+		state.currentTexture = BuildCraftTransport.instance.terrainIcons[IconTerrainConstants.PipeStructureCobblestone]; // Structure Pipe
 
 		for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
 			if (state.facadeMatrix.isConnected(direction) && !state.pipeConnectionMatrix.isConnected(direction)) {
@@ -474,7 +476,7 @@ public class PipeWorldRenderer implements ISimpleBlockRenderingHandler {
 
 	private void pipeGateRender(RenderBlocks renderblocks, Block block, PipeRenderState state, int x, int y, int z) {
 
-		state.currentTextureIndex = state.getGateTextureIndex();
+		state.currentTexture = BuildCraftTransport.instance.itemIcons[state.getGateIconIndex()];
 
 		float min = Utils.pipeMinPos + 0.05F;
 		float max = Utils.pipeMaxPos - 0.05F;
@@ -528,7 +530,7 @@ public class PipeWorldRenderer implements ISimpleBlockRenderingHandler {
 
 		if (tile instanceof IPipeRenderState) {
 			IPipeRenderState pipeTile = (IPipeRenderState) tile;
-			renderPipe(renderer, world, block, pipeTile.getRenderState(), x, y, z);
+			renderPipe(renderer, world, block, pipeTile, x, y, z);
 		}
 		return true;
 	}

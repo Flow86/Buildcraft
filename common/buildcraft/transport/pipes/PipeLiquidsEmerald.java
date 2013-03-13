@@ -8,6 +8,7 @@
  */
 package buildcraft.transport.pipes;
 
+import buildcraft.transport.IconTerrainConstants;
 import buildcraft.transport.PipeTransportLiquids;
 
 /**
@@ -19,8 +20,8 @@ public class PipeLiquidsEmerald extends PipeLiquidsWood {
 	public PipeLiquidsEmerald(int itemID) {
 		super(new PipeLogicEmerald(), itemID);
 
-		baseTexture = 6 * 16 + 15;
-		plainTexture = baseTexture - 1;
+		standardIconIndex = IconTerrainConstants.PipeLiquidsEmerald_Standard;
+		solidIconIndex = IconTerrainConstants.PipeAllEmerald_Solid;
 
 		((PipeTransportLiquids) transport).flowRate = 40;
 		((PipeTransportLiquids) transport).travelDelay = 4;

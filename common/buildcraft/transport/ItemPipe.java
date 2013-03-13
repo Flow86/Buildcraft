@@ -9,9 +9,13 @@
 
 package buildcraft.transport;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 import buildcraft.BuildCraftTransport;
 import buildcraft.core.CreativeTabBuildCraft;
@@ -20,10 +24,6 @@ import buildcraft.core.ItemBuildCraft;
 import buildcraft.BuildCraftCore;
 
 public class ItemPipe extends ItemBuildCraft implements IItemPipe {
-
-	Pipe dummyPipe;
-
-	private int textureIndex = 0;
 
 	protected ItemPipe(int i) {
 		super(i);
@@ -65,7 +65,7 @@ public class ItemPipe extends ItemBuildCraft implements IItemPipe {
 
 		if (itemstack.stackSize == 0)
 			return false;
-		if (entityplayer.canCurrentToolHarvestBlock(i, j, k) && world.canPlaceEntityOnSide(blockID, i, j, k, false, side, entityplayer)) {
+		if (entityplayer.canCurrentToolHarvestBlock(i, j, k) && world.canPlaceEntityOnSide(blockID, i, j, k, false, side, entityplayer,itemstack)) {
 
 			Pipe pipe = BlockGenericPipe.createPipe(itemID);
 			if (pipe == null) {
@@ -74,7 +74,7 @@ public class ItemPipe extends ItemBuildCraft implements IItemPipe {
 			}
 			if (BlockGenericPipe.placePipe(pipe, world, i, j, k, blockID, 0)) {
 
-				Block.blocksList[blockID].onBlockPlacedBy(world, i, j, k, entityplayer);
+				Block.blocksList[blockID].onBlockPlacedBy(world, i, j, k, entityplayer, itemstack);
 				world.playSoundEffect(i + 0.5F, j + 0.5F, k + 0.5F,
 						block.stepSound.getPlaceSound(),
 						(block.stepSound.getVolume() + 1.0F) / 2.0F,
@@ -86,12 +86,20 @@ public class ItemPipe extends ItemBuildCraft implements IItemPipe {
 			return false;
 	}
 
-	public ItemPipe setTextureIndex(int textureIndex) {
-		this.textureIndex = textureIndex;
-		return this;
+	@SideOnly(Side.CLIENT)
+	public Icon getPipeIcon(){
+		return iconIndex;
 	}
 
-	public int getTextureIndex() {
-		return textureIndex;
+	@SideOnly(Side.CLIENT)
+	public void setPipeIcon(Icon icon){
+		this.iconIndex = icon;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void func_94581_a(IconRegister par1IconRegister)
+	{
+	    // NOOP
 	}
 }

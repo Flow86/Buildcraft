@@ -10,15 +10,21 @@ package buildcraft.transport.pipes;
 
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.item.EntityMinecartChest;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.Icon;
 import net.minecraftforge.common.ForgeDirection;
+import buildcraft.BuildCraftTransport;
 import buildcraft.api.core.Position;
 import buildcraft.api.power.IPowerProvider;
 import buildcraft.api.power.IPowerReceptor;
@@ -28,6 +34,7 @@ import buildcraft.core.DefaultProps;
 import buildcraft.core.EntityPassiveItem;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.Utils;
+import buildcraft.transport.IconTerrainConstants;
 import buildcraft.transport.Pipe;
 import buildcraft.transport.PipeTransportItems;
 
@@ -53,13 +60,14 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 	}
 
 	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
+	@SideOnly(Side.CLIENT)
+	public Icon[] getTextureIcons() {
+		return BuildCraftTransport.instance.terrainIcons;
 	}
 
 	@Override
-	public int getTextureIndex(ForgeDirection direction) {
-		return 1 * 16 + 12;
+	public int getIconIndex(ForgeDirection direction) {
+		return IconTerrainConstants.PipeItemsObsidian;
 	}
 
 	@Override
@@ -166,9 +174,9 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 					return true;
 				}
 
-				if (distance == 1 && list.get(g) instanceof EntityMinecart) {
-					EntityMinecart cart = (EntityMinecart) list.get(g);
-					if (!cart.isDead && cart.minecartType == 1) {
+				if (distance == 1 && list.get(g) instanceof EntityMinecartChest) {
+					EntityMinecartChest cart = (EntityMinecartChest) list.get(g);
+					if (!cart.isDead) {
 						ItemStack stack = checkExtractGeneric(cart, true, getOpenOrientation());
 						if (stack != null && powerProvider.useEnergy(1, 1, true) == 1) {
 							EntityItem entityitem = new EntityItem(worldObj, cart.posX, cart.posY + 0.3F, cart.posZ, stack);
@@ -216,7 +224,7 @@ public class PipeItemsObsidian extends Pipe implements IPowerReceptor {
 			if (entity instanceof EntityItem) {
 				EntityItem item = (EntityItem) entity;
 				ItemStack contained = item.getEntityItem();
-				
+
 				CoreProxy.proxy.obsidianPipePickup(worldObj, item, this.container);
 
 				float energyUsed = powerProvider.useEnergy(distance, contained.stackSize * distance, true);
