@@ -28,7 +28,6 @@ import buildcraft.BuildCraftFactory;
 import buildcraft.api.core.Position;
 import buildcraft.api.tools.IToolWrench;
 import buildcraft.core.Box;
-import buildcraft.core.DefaultProps;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.Utils;
 
@@ -215,11 +214,6 @@ public class BlockQuarry extends BlockMachineRoot {
 		}
 
 		return false;
-	}
-
-	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

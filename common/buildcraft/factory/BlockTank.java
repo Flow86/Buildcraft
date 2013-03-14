@@ -28,7 +28,6 @@ import net.minecraftforge.liquids.LiquidContainerRegistry;
 import net.minecraftforge.liquids.LiquidStack;
 import buildcraft.BuildCraftCore;
 import buildcraft.core.CreativeTabBuildCraft;
-import buildcraft.core.DefaultProps;
 import buildcraft.core.utils.Utils;
 
 public class BlockTank extends BlockContainer {
@@ -61,11 +60,6 @@ public class BlockTank extends BlockContainer {
 	@Override
 	public TileEntity createNewTileEntity(World var1) {
 		return new TileTank();
-	}
-
-	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
 	}
 
 	@SuppressWarnings({ "all" })

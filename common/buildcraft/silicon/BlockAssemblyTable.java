@@ -16,7 +16,6 @@ import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 import buildcraft.BuildCraftSilicon;
 import buildcraft.core.CreativeTabBuildCraft;
-import buildcraft.core.DefaultProps;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.Utils;
 
@@ -80,11 +79,6 @@ public class BlockAssemblyTable extends BlockContainer {
 	@Override
 	public TileEntity createNewTileEntity(World var1) {
 		return null;
-	}
-
-	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
 	}
 
 	@Override

@@ -29,7 +29,6 @@ import buildcraft.BuildCraftBuilders;
 import buildcraft.api.core.Position;
 import buildcraft.api.tools.IToolWrench;
 import buildcraft.core.CreativeTabBuildCraft;
-import buildcraft.core.DefaultProps;
 import buildcraft.core.GuiIds;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.Utils;
@@ -49,11 +48,6 @@ public class BlockBuilder extends BlockContainer {
 	@Override
 	public TileEntity createNewTileEntity(World var1) {
 		return new TileBuilder();
-	}
-
-	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
 	}
 
 	@Override

@@ -24,7 +24,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeDirection;
 import buildcraft.BuildCraftFactory;
 import buildcraft.api.core.Position;
-import buildcraft.core.DefaultProps;
 import buildcraft.core.utils.Utils;
 
 public class BlockMiningWell extends BlockMachineRoot {
@@ -79,11 +78,6 @@ public class BlockMiningWell extends BlockMachineRoot {
 	@Override
 	public TileEntity createNewTileEntity(World var1) {
 		return new TileMiningWell();
-	}
-
-	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
