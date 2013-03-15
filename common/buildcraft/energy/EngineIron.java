@@ -47,7 +47,7 @@ public class EngineIron extends Engine {
 		super(engine);
 
 		maxEnergy = 100000;
-		maxEnergyExtracted = 500;
+		maxEnergyExtracted = 10000;
 		fuelTank = new LiquidTank(MAX_LIQUID);
 		coolantTank = new LiquidTank(MAX_LIQUID);
 	}
