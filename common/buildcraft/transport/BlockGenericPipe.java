@@ -38,7 +38,6 @@ import buildcraft.BuildCraftTransport;
 import buildcraft.api.tools.IToolWrench;
 import buildcraft.api.transport.IPipe;
 import buildcraft.core.BlockIndex;
-import buildcraft.core.DefaultProps;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.Utils;
 import buildcraft.transport.render.PipeWorldRenderer;
@@ -467,11 +466,6 @@ public class BlockGenericPipe extends BlockContainer {
 		Utils.preDestroyBlock(world, x, y, z);
 		removePipe(getPipe(world, x, y, z));
 		super.breakBlock(world, x, y, z, par5, par6);
-	}
-
-	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
 	}
 
 	@Override

@@ -25,7 +25,6 @@ import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 import buildcraft.BuildCraftBuilders;
 import buildcraft.core.CreativeTabBuildCraft;
-import buildcraft.core.DefaultProps;
 import buildcraft.core.GuiIds;
 import buildcraft.core.proxy.CoreProxy;
 
@@ -38,11 +37,6 @@ public class BlockBlueprintLibrary extends BlockContainer {
 		super(i, Material.wood);
 		setCreativeTab(CreativeTabBuildCraft.tabBuildCraft);
 		setHardness(0.7F);
-	}
-
-	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
 	}
 
 	@Override

@@ -18,7 +18,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.liquids.ILiquid;
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftEnergy;
-import buildcraft.core.DefaultProps;
 
 public class BlockOilFlowing extends BlockFluid implements ILiquid {
 
@@ -36,11 +35,6 @@ public class BlockOilFlowing extends BlockFluid implements ILiquid {
 	@Override
 	public int getRenderType() {
 		return BuildCraftCore.oilModel;
-	}
-
-	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
 	}
 
 	private void updateFlow(World world, int i, int j, int k) {

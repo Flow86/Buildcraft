@@ -28,7 +28,6 @@ import net.minecraft.world.World;
 import buildcraft.BuildCraftBuilders;
 import buildcraft.BuildCraftCore;
 import buildcraft.core.CreativeTabBuildCraft;
-import buildcraft.core.DefaultProps;
 import buildcraft.core.utils.Utils;
 
 public class BlockMarker extends BlockContainer {
@@ -212,11 +211,6 @@ public class BlockMarker extends BlockContainer {
 			return false;
 		} else
 			return true;
-	}
-
-	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

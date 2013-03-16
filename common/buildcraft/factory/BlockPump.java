@@ -22,7 +22,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 import buildcraft.core.CreativeTabBuildCraft;
-import buildcraft.core.DefaultProps;
 import buildcraft.core.utils.Utils;
 
 public class BlockPump extends BlockContainer {
@@ -40,11 +39,6 @@ public class BlockPump extends BlockContainer {
 	@Override
 	public TileEntity createNewTileEntity(World var1) {
 		return new TilePump();
-	}
-
-	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
 	}
 
 	@Override

@@ -18,17 +18,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import buildcraft.core.DefaultProps;
 
 public class BlockPollution extends BlockContainer {
 
 	public BlockPollution(int i) {
 		super(i, Material.air);
-	}
-
-	@Override
-	public String getTextureFile() {
-		return DefaultProps.TEXTURE_BLOCKS;
 	}
 
 	@Override

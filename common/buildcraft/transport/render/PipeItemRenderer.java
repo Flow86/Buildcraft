@@ -24,6 +24,9 @@ public class PipeItemRenderer implements IItemRenderer {
 		Block block = BuildCraftTransport.genericPipeBlock;
 		Icon icon = ((ItemPipe) Item.itemsList[item.itemID]).getPipeIcon();
 
+		if (icon == null)
+			return;
+
 		block.setBlockBounds(Utils.pipeMinPos, 0.0F, Utils.pipeMinPos, Utils.pipeMaxPos, 1.0F, Utils.pipeMaxPos);
 		block.setBlockBoundsForItemRender();
 		render.setRenderBoundsFromBlock(block);
