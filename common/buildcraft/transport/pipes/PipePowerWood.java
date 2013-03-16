@@ -40,7 +40,7 @@ public class PipePowerWood extends Pipe implements IPowerReceptor {
 		super(new PipeTransportPower(), new PipeLogicWood(), itemID);
 
 		powerProvider = PowerFramework.currentFramework.createPowerProvider();
-		powerProvider.configure(50, 2, 1000, 1, 1000);
+		powerProvider.configure(50, 2, 7500, 1, 7500);
 		powerProvider.configurePowerPerdition(1, 100);
 	}
 
