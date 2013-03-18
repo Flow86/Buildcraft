@@ -13,9 +13,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -35,22 +32,20 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeDirection;
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftTransport;
-import buildcraft.api.gates.ActionManager;
-import buildcraft.api.gates.IAction;
-import buildcraft.api.gates.ITrigger;
 import buildcraft.api.tools.IToolWrench;
 import buildcraft.api.transport.IPipe;
+import buildcraft.api.transport.ISolidSideTile;
 import buildcraft.core.BlockIndex;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.Utils;
 import buildcraft.transport.render.PipeWorldRenderer;
-import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockGenericPipe extends BlockContainer {
 	static enum Part {
-		Pipe,
-		Gate
+		Pipe, Gate
 	}
 
 	static class RaytraceResult {
@@ -100,8 +95,8 @@ public class BlockGenericPipe extends BlockContainer {
 	@Override
 	public boolean isBlockSolidOnSide(World world, int x, int y, int z, ForgeDirection side) {
 		TileEntity tile = world.getBlockTileEntity(x, y, z);
-		if (tile instanceof TileGenericPipe) {
-			return ((TileGenericPipe)tile).hasFacade(side);
+		if (tile instanceof ISolidSideTile) {
+			return ((ISolidSideTile) tile).isSolidOnSide(side);
 		}
 		return false;
 	}
@@ -258,15 +253,15 @@ public class BlockGenericPipe extends BlockContainer {
 		double pitch = Math.toRadians(entityPlayer.rotationPitch);
 		double yaw = Math.toRadians(entityPlayer.rotationYaw);
 
-        double dirX = -Math.sin(yaw) * Math.cos(pitch);
-        double dirY = -Math.sin(pitch);
-        double dirZ = Math.cos(yaw) * Math.cos(pitch);
+		double dirX = -Math.sin(yaw) * Math.cos(pitch);
+		double dirY = -Math.sin(pitch);
+		double dirZ = Math.cos(yaw) * Math.cos(pitch);
 
-        double reachDistance = 5;
+		double reachDistance = 5;
 
-        if (entityPlayer instanceof EntityPlayerMP) {
-        	reachDistance = ((EntityPlayerMP) entityPlayer).theItemInWorldManager.getBlockReachDistance();
-        }
+		if (entityPlayer instanceof EntityPlayerMP) {
+			reachDistance = ((EntityPlayerMP) entityPlayer).theItemInWorldManager.getBlockReachDistance();
+		}
 
 		Vec3 origin = Vec3.fakePool.getVecFromPool(entityPlayer.posX, entityPlayer.posY + 1.62 - entityPlayer.yOffset, entityPlayer.posZ);
 		Vec3 direction = origin.addVector(dirX * reachDistance, dirY * reachDistance, dirZ * reachDistance);
@@ -285,7 +280,8 @@ public class BlockGenericPipe extends BlockContainer {
 		}
 
 		/**
-		 * pipe hits along x, y, and z axis, gate (all 6 sides) [and wires+facades]
+		 * pipe hits along x, y, and z axis, gate (all 6 sides) [and
+		 * wires+facades]
 		 */
 		MovingObjectPosition[] hits = new MovingObjectPosition[] { null, null, null, null, null, null, null, null, null };
 
@@ -358,7 +354,8 @@ public class BlockGenericPipe extends BlockContainer {
 			needCenterCheck = false; // center already checked through this axis
 		}
 
-		// check center (only if no axis were checked/the pipe has no connections)
+		// check center (only if no axis were checked/the pipe has no
+		// connections)
 
 		if (needCenterCheck) {
 			setBlockBounds(xMin, yMin, zMin, xMax, yMax, zMax);
@@ -385,7 +382,8 @@ public class BlockGenericPipe extends BlockContainer {
 
 		for (int i = 0; i < hits.length; i++) {
 			MovingObjectPosition hit = hits[i];
-			if (hit == null) continue;
+			if (hit == null)
+				continue;
 
 			double lengthSquared = hit.hitVec.squareDistanceTo(origin);
 
@@ -571,8 +569,7 @@ public class BlockGenericPipe extends BlockContainer {
 
 			// / Right click while sneaking without wrench to strip equipment
 			// from the pipe.
-			if (entityplayer.isSneaking()
-					&& (entityplayer.getCurrentEquippedItem() == null || !(entityplayer.getCurrentEquippedItem().getItem() instanceof IToolWrench))) {
+			if (entityplayer.isSneaking() && (entityplayer.getCurrentEquippedItem() == null || !(entityplayer.getCurrentEquippedItem().getItem() instanceof IToolWrench))) {
 
 				if (pipe.hasGate() || pipe.isWired())
 					return stripEquipment(pipe);
@@ -671,7 +668,8 @@ public class BlockGenericPipe extends BlockContainer {
 					dropWire(color.reverse(), pipe.worldObj, pipe.xCoord, pipe.yCoord, pipe.zCoord);
 				}
 				pipe.wireSet[color.reverse().ordinal()] = false;
-				// pipe.worldObj.markBlockNeedsUpdate(pipe.xCoord, pipe.yCoord, pipe.zCoord);
+				// pipe.worldObj.markBlockNeedsUpdate(pipe.xCoord, pipe.yCoord,
+				// pipe.zCoord);
 				pipe.container.scheduleRenderUpdate();
 				return true;
 			}
@@ -690,7 +688,7 @@ public class BlockGenericPipe extends BlockContainer {
 
 	/**
 	 * Drops a pipe wire item of the passed color.
-	 *
+	 * 
 	 * @param color
 	 */
 	private void dropWire(IPipe.WireColor color, World world, int i, int j, int k) {
@@ -835,7 +833,7 @@ public class BlockGenericPipe extends BlockContainer {
 		if (world.isRemote)
 			return true;
 
-		boolean placed = world.setBlockAndMetadataWithNotify(i, j, k, blockId, meta,1);
+		boolean placed = world.setBlockAndMetadataWithNotify(i, j, k, blockId, meta, 1);
 
 		if (placed) {
 
@@ -866,17 +864,16 @@ public class BlockGenericPipe extends BlockContainer {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void func_94332_a(IconRegister iconRegister)
-	{
-		if (!skippedFirstIconRegister){
+	public void func_94332_a(IconRegister iconRegister) {
+		if (!skippedFirstIconRegister) {
 			skippedFirstIconRegister = true;
 			return;
 		}
 		BuildCraftTransport.instance.gateIconProvider.RegisterIcons(iconRegister);
 		BuildCraftTransport.instance.wireIconProvider.RegisterIcons(iconRegister);
-		for (int i : pipes.keySet()){
+		for (int i : pipes.keySet()) {
 			Pipe dummyPipe = createPipe(i);
-			if (dummyPipe != null){
+			if (dummyPipe != null) {
 				dummyPipe.getIconProvider().RegisterIcons(iconRegister);
 			}
 		}

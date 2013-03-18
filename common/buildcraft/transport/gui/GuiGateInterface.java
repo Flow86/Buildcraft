@@ -17,9 +17,6 @@ import net.minecraft.util.Icon;
 
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
 import buildcraft.api.gates.IAction;
 import buildcraft.api.gates.ITrigger;
 import buildcraft.api.gates.ITriggerParameter;
@@ -27,6 +24,8 @@ import buildcraft.core.gui.GuiAdvancedInterface;
 import buildcraft.core.utils.StringUtil;
 import buildcraft.transport.Gate.GateKind;
 import buildcraft.transport.Pipe;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class GuiGateInterface extends GuiAdvancedInterface {
 
@@ -57,7 +56,7 @@ public class GuiGateInterface extends GuiAdvancedInterface {
 				return "";
 		}
 
-        @SideOnly(Side.CLIENT)
+		@SideOnly(Side.CLIENT)
 		@Override
 		public Icon getTexture() {
 			ITrigger trigger = pipe.getTrigger(slot);
@@ -239,7 +238,7 @@ public class GuiGateInterface extends GuiAdvancedInterface {
 
 		_container.synchronize();
 
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		mc.renderEngine.func_98187_b(_container.getGateGuiFile());
 
 		int cornerX = (width - xSize) / 2;
@@ -256,18 +255,18 @@ public class GuiGateInterface extends GuiAdvancedInterface {
 				if (_container.getGateOrdinal() >= GateKind.AND_3.ordinal()) {
 
 					if (_container.triggerState[triggerTracker++]) {
-						mc.renderEngine.bindTexture(texture);
+						// mc.renderEngine.bindTexture(texture);
 
 						drawTexturedModalRect(cornerX + slot.x + 35, cornerY + slot.y + 6, 176, 18, 18, 4);
 					}
 
 					if (trigger == null || !trigger.hasParameter()) {
-						mc.renderEngine.bindTexture(texture);
+						// mc.renderEngine.bindTexture(texture);
 
 						drawTexturedModalRect(cornerX + slot.x + 17, cornerY + slot.y - 1, 176, 0, 18, 18);
 					}
 				} else if (_container.triggerState[triggerTracker++]) {
-					mc.renderEngine.bindTexture(texture);
+					// mc.renderEngine.bindTexture(texture);
 
 					drawTexturedModalRect(cornerX + slot.x + 17, cornerY + slot.y + 6, 176, 18, 18, 4);
 				}
