@@ -22,7 +22,7 @@ public class PipeItemRenderer implements IItemRenderer {
 		Tessellator tessellator = Tessellator.instance;
 
 		Block block = BuildCraftTransport.genericPipeBlock;
-		Icon icon = ((ItemPipe) Item.itemsList[item.itemID]).getPipeIcon();
+		Icon icon = ((ItemPipe) Item.itemsList[item.itemID]).getIconFromDamage(0);
 
 		if (icon == null)
 			return;

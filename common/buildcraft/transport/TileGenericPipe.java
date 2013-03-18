@@ -30,6 +30,7 @@ import net.minecraftforge.liquids.ITankContainer;
 import net.minecraftforge.liquids.LiquidStack;
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftTransport;
+import buildcraft.api.core.IIconProvider;
 import buildcraft.api.core.Position;
 import buildcraft.api.core.SafeTimeTracker;
 import buildcraft.api.gates.IOverrideDefaultTriggers;
@@ -214,7 +215,25 @@ public class TileGenericPipe extends TileEntity implements IPowerReceptor, ITank
 			for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
 				renderState.wireMatrix.setWireConnected(color, direction, pipe.isWireConnectedTo(this.getTile(direction), color));
 			}
-			renderState.wireMatrix.setWireLit(color, pipe.signalStrength[color.ordinal()] > 0);
+			boolean lit = pipe.signalStrength[color.ordinal()] > 0;
+			
+			switch(color){
+			case Red:
+				renderState.wireMatrix.setWireIndex(color, lit? WireIconProvider.Texture_Red_Lit : WireIconProvider.Texture_Red_Dark);
+				break;
+			case Blue:
+				renderState.wireMatrix.setWireIndex(color, lit? WireIconProvider.Texture_Blue_Lit : WireIconProvider.Texture_Blue_Dark);
+				break;
+			case Green:
+				renderState.wireMatrix.setWireIndex(color, lit? WireIconProvider.Texture_Green_Lit : WireIconProvider.Texture_Green_Dark);
+				break;
+			case Yellow:
+				renderState.wireMatrix.setWireIndex(color, lit? WireIconProvider.Texture_Yellow_Lit : WireIconProvider.Texture_Yellow_Dark);
+				break;
+			default:
+				break;
+		
+			}
 		}
 
 		// Gate Textures
@@ -593,9 +612,10 @@ public class TileGenericPipe extends TileEntity implements IPowerReceptor, ITank
 	}
 	
 	@Override
-	public Icon[] getPipeIcons() {
+	@SideOnly(Side.CLIENT)
+	public IIconProvider getPipeIcons() {
 		if (pipe == null) return null;
-		return pipe.getTextureIcons();
+		return pipe.getIconProvider();
 	}
 
 	@Override

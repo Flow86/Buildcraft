@@ -23,4 +23,5 @@ public abstract class BlockBuildCraft extends BlockContainer {
 		Utils.preDestroyBlock(world, x, y, z);
 		super.breakBlock(world, x, y, z, par5, par6);
 	}
+
 }
