@@ -56,7 +56,7 @@ public class GuiGateInterface extends GuiAdvancedInterface {
 				return "";
 		}
 
-		@SideOnly(Side.CLIENT)
+        @SideOnly(Side.CLIENT)
 		@Override
 		public Icon getTexture() {
 			ITrigger trigger = pipe.getTrigger(slot);
@@ -237,9 +237,11 @@ public class GuiGateInterface extends GuiAdvancedInterface {
 	protected void drawGuiContainerBackgroundLayer(float f, int x, int y) {
 
 		_container.synchronize();
-
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		mc.renderEngine.func_98187_b(_container.getGateGuiFile());
+		
+		String texture = _container.getGateGuiFile();
+		
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		mc.renderEngine.bindTexture(texture);
 
 		int cornerX = (width - xSize) / 2;
 		int cornerY = (height - ySize) / 2;
@@ -255,18 +257,18 @@ public class GuiGateInterface extends GuiAdvancedInterface {
 				if (_container.getGateOrdinal() >= GateKind.AND_3.ordinal()) {
 
 					if (_container.triggerState[triggerTracker++]) {
-						// mc.renderEngine.bindTexture(texture);
+						mc.renderEngine.bindTexture(texture);
 
 						drawTexturedModalRect(cornerX + slot.x + 35, cornerY + slot.y + 6, 176, 18, 18, 4);
 					}
 
 					if (trigger == null || !trigger.hasParameter()) {
-						// mc.renderEngine.bindTexture(texture);
+						mc.renderEngine.bindTexture(texture);
 
 						drawTexturedModalRect(cornerX + slot.x + 17, cornerY + slot.y - 1, 176, 0, 18, 18);
 					}
 				} else if (_container.triggerState[triggerTracker++]) {
-					// mc.renderEngine.bindTexture(texture);
+					mc.renderEngine.bindTexture(texture);
 
 					drawTexturedModalRect(cornerX + slot.x + 17, cornerY + slot.y + 6, 176, 18, 18, 4);
 				}

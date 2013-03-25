@@ -11,9 +11,6 @@ package buildcraft.factory;
 
 import java.util.ArrayList;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.EntityLiving;
@@ -25,6 +22,8 @@ import net.minecraftforge.common.ForgeDirection;
 import buildcraft.BuildCraftFactory;
 import buildcraft.api.core.Position;
 import buildcraft.core.utils.Utils;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockMiningWell extends BlockMachineRoot {
 
@@ -71,7 +70,7 @@ public class BlockMiningWell extends BlockMachineRoot {
 			if (pipeID != BuildCraftFactory.plainPipeBlock.blockID) {
 				break;
 			}
-			world.func_94575_c(x, depth, z, 0);
+			world.setBlock(x, depth, z, 0);
 		}
 	}
 
@@ -88,11 +87,11 @@ public class BlockMiningWell extends BlockMachineRoot {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void func_94332_a(IconRegister par1IconRegister)
+	public void registerIcons(IconRegister par1IconRegister)
 	{
-	    textureFront = par1IconRegister.func_94245_a("buildcraft:miningwell_front");
-        textureSides = par1IconRegister.func_94245_a("buildcraft:miningwell_side");
-        textureBack = par1IconRegister.func_94245_a("buildcraft:miningwell_back");
-        textureTop = par1IconRegister.func_94245_a("buildcraft:miningwell_top");
+	    textureFront = par1IconRegister.registerIcon("buildcraft:miningwell_front");
+        textureSides = par1IconRegister.registerIcon("buildcraft:miningwell_side");
+        textureBack = par1IconRegister.registerIcon("buildcraft:miningwell_back");
+        textureTop = par1IconRegister.registerIcon("buildcraft:miningwell_top");
 	}
 }
