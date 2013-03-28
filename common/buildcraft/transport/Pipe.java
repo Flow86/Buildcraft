@@ -14,6 +14,9 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
@@ -36,8 +39,6 @@ import buildcraft.api.transport.IPipe;
 import buildcraft.core.IDropControlInventory;
 import buildcraft.core.network.TilePacketWrapper;
 import buildcraft.core.triggers.ActionRedstoneOutput;
-import buildcraft.core.triggers.BCAction;
-import buildcraft.core.triggers.BCTrigger;
 import buildcraft.core.utils.Utils;
 import buildcraft.transport.Gate.GateConditional;
 import buildcraft.transport.pipes.PipeLogic;
@@ -68,9 +69,9 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 	@SuppressWarnings("rawtypes")
 	private static Map<Class, TilePacketWrapper> networkWrappers = new HashMap<Class, TilePacketWrapper>();
 
-	public ITrigger[] activatedTriggers = new BCTrigger[8];
+	public ITrigger[] activatedTriggers = new ITrigger[8];
 	public ITriggerParameter[] triggerParameters = new ITriggerParameter[8];
-	public IAction[] activatedActions = new BCAction[8];
+	public IAction[] activatedActions = new IAction[8];
 
 	public boolean broadcastSignal[] = new boolean[] { false, false, false, false };
 	public boolean broadcastRedstone = false;
@@ -148,23 +149,23 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 	public int getIconIndexForItem() {
 		return getIconIndex(ForgeDirection.UNKNOWN);
 	}
-	
+
 	/**
 	 * Should return the IIconProvider that provides icons for this pipe
 	 * @return An array of icons
 	 */
 	@SideOnly(Side.CLIENT)
 	public abstract IIconProvider getIconProvider();
-	
+
 	/**
 	 * Should return the index in the array returned by GetTextureIcons() for a specified direction
 	 * @param direction - The direction for which the indexed should be rendered. Unknown for pipe center
-	 * 		
-	 * @return An index valid in the array returned by getTextureIcons() 
+	 *
+	 * @return An index valid in the array returned by getTextureIcons()
 	 */
 	public abstract int getIconIndex(ForgeDirection direction);
-	
-	
+
+
 
 	public void updateEntity() {
 
@@ -523,9 +524,9 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 
 	public void resetGate() {
 		gate = null;
-		activatedTriggers = new BCTrigger[activatedTriggers.length];
+		activatedTriggers = new ITrigger[activatedTriggers.length];
 		triggerParameters = new ITriggerParameter[triggerParameters.length];
-		activatedActions = new BCAction[activatedActions.length];
+		activatedActions = new IAction[activatedActions.length];
 		broadcastSignal = new boolean[] { false, false, false, false };
 		if (broadcastRedstone) {
 			updateNeighbors(true);
@@ -549,6 +550,7 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 		gate.startResolution();
 
 		HashMap<Integer, Boolean> actions = new HashMap<Integer, Boolean>();
+		Multiset<Integer> actionCount = HashMultiset.create();
 
 		// Computes the actions depending on the triggers
 		for (int it = 0; it < 8; ++it) {
@@ -556,7 +558,8 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 			IAction action = activatedActions[it];
 			ITriggerParameter parameter = triggerParameters[it];
 
-			if (trigger != null && action != null)
+			if (trigger != null && action != null) {
+				actionCount.add(action.getId());
 				if (!actions.containsKey(action.getId())) {
 					actions.put(action.getId(), isNearbyTriggerActive(trigger, parameter));
 				} else if (gate.getConditional() == GateConditional.AND) {
@@ -564,6 +567,7 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 				} else {
 					actions.put(action.getId(), actions.get(action.getId()) || isNearbyTriggerActive(trigger, parameter));
 				}
+			}
 		}
 
 		// Activate the actions
@@ -571,7 +575,7 @@ public abstract class Pipe implements IPipe, IDropControlInventory {
 			if (actions.get(i)) {
 
 				// Custom gate actions take precedence over defaults.
-				if (gate.resolveAction(ActionManager.actions[i])) {
+				if (gate.resolveAction(ActionManager.actions[i], actionCount.count(i))) {
 					continue;
 				}
 
