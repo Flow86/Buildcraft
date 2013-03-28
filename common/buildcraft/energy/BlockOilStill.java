@@ -11,10 +11,14 @@ package buildcraft.energy;
 
 import net.minecraft.block.BlockStationary;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 import net.minecraftforge.liquids.ILiquid;
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftEnergy;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockOilStill extends BlockStationary implements ILiquid {
 
@@ -52,11 +56,11 @@ public class BlockOilStill extends BlockStationary implements ILiquid {
 	public boolean isBlockReplaceable(World world, int i, int j, int k) {
 		return true;
 	}
-	
+
 	@Override
-    	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister iconRegister){
-		this.field_94425_a = new Icon[] {iconRegister.registerIcon("buildcraft:oil"), iconRegister.registerIcon("buildcraft:oil_flow")};
+	@SideOnly(Side.CLIENT)
+	public void registerIcons(IconRegister iconRegister) {
+		this.field_94425_a = new Icon[] { iconRegister.registerIcon("buildcraft:oil"), iconRegister.registerIcon("buildcraft:oil_flow") };
 	}
 
 	@Override
