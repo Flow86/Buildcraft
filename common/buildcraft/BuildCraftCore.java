@@ -127,7 +127,7 @@ public class BuildCraftCore {
 	public static Icon stripesLaserTexture;
     @SideOnly(Side.CLIENT)
 	public static Icon transparentTexture;
-    
+
     @SideOnly(Side.CLIENT)
     public static IIconProvider iconProvider;
 
@@ -161,7 +161,7 @@ public class BuildCraftCore {
 	public static BptItem[] itemBptProps = new BptItem[Item.itemsList.length];
 
 	public static Logger bcLog = Logger.getLogger("Buildcraft");
-	
+
 	public IIconProvider actionTriggerIconProvider = new ActionTriggerIconProvider();
 
 	@Instance("BuildCraft|Core")
@@ -258,7 +258,7 @@ public class BuildCraftCore {
 
 			diamondGearItem = (new ItemBuildCraft(diamondGearId.getInt())).setUnlocalizedName("diamondGearItem");
 			LanguageRegistry.addName(diamondGearItem, "Diamond Gear");
-			
+
 			MinecraftForge.EVENT_BUS.register(this);
 
 		} finally {
@@ -316,15 +316,21 @@ public class BuildCraftCore {
 	public void serverStarting(FMLServerStartingEvent event) {
 		event.registerServerCommand(new CommandBuildCraft());
 	}
-	
+
 	@ForgeSubscribe
 	@SideOnly(Side.CLIENT)
 	public void textureHook(TextureStitchEvent.Pre event){
 		if (event.map == Minecraft.getMinecraft().renderEngine.textureMapItems) {
-		//if (event.map.textureType == 1) { 'TODO Replace above
 			iconProvider = new CoreIconProvider();
 			iconProvider.registerIcons(event.map);
+			actionTriggerIconProvider.registerIcons(event.map);
+		} else if (event.map == Minecraft.getMinecraft().renderEngine.textureMapBlocks) {
+	        BuildCraftCore.redLaserTexture = event.map.registerIcon("buildcraft:blockRedLaser");
+	        BuildCraftCore.blueLaserTexture = event.map.registerIcon("buildcraft:blockBlueLaser");
+	        BuildCraftCore.stripesLaserTexture = event.map.registerIcon("buildcraft:blockStripesLaser");
+	        BuildCraftCore.transparentTexture = event.map.registerIcon("buildcraft:blockTransparentLaser");
 		}
+
 	}
 
 	public void loadRecipes() {

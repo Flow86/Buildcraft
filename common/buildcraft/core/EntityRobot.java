@@ -241,6 +241,7 @@ public class EntityRobot extends Entity implements IEntityAdditionalSpawnData {
 			if (a.slot != null) {
 
 				BptSlot target = a.slot;
+				System.out.printf("RobotChanging %d %d %d %s\n",target.x, target.y, target.z, target.mode);
 				if (wait <= 0 && BlockUtil.canChangeBlock(worldObj, target.x, target.y, target.z)) {
 
 					if (!CoreProxy.proxy.isRenderWorld(worldObj)) {
@@ -249,14 +250,14 @@ public class EntityRobot extends Entity implements IEntityAdditionalSpawnData {
 
 							if (!target.isValid(a.context)) {
 								clearPos(target);
-								//worldObj.setBlock(target.x, target.y, target.z, 0, 0,1);
+								worldObj.setBlock(target.x, target.y, target.z, 0, 0,3);
 							}
 
 						} else if (target.stackToUse != null) {
 
 							clearPos(target);
-							//worldObj.setBlock(target.x, target.y, target.z, 0);
-							throw new RuntimeErrorException(null, "NOT IMPLEMENTED");
+							worldObj.setBlock(target.x, target.y, target.z, 0);
+							throw new RuntimeException("NOT IMPLEMENTED");
 							// target.stackToUse.getItem().onItemUse(target.stackToUse,
 							// CoreProxy.getBuildCraftPlayer(worldObj), worldObj, target.x, target.y - 1,
 							// target.z, 1);
