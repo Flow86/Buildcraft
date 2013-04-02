@@ -21,7 +21,7 @@ import buildcraft.core.utils.Utils;
 import buildcraft.energy.gui.ContainerEngine;
 
 public class EngineStone extends Engine {
-	final float maxProduction = 1f;
+	final float maxProduction = 3f;
 	final float minProduction = maxProduction / 3;
 	final float target = 0.375f;
 	final float kp = 1f;
@@ -37,8 +37,8 @@ public class EngineStone extends Engine {
 	public EngineStone(TileEngine engine) {
 		super(engine);
 
-		maxEnergy = 10000;
-		maxEnergyExtracted = 100;
+		maxEnergy = 50000;
+		maxEnergyExtracted = 500;
 	}
 
 	@Override
