@@ -140,6 +140,12 @@ public class ItemFacade extends ItemBuildCraft {
 		return ((encoded & 0xFFF0) >>> 4);
 	}
 
+	@Override
+	public boolean shouldPassSneakingClickToBlock(World worldObj, int x, int y, int z ) {
+		// Simply send shift click to the pipe / mod block.
+		return true;
+	}
+
 	public static void addFacade(ItemStack itemStack) {
 		allFacades.add(new ItemStack(BuildCraftTransport.facadeItem, 1, ItemFacade.encode(itemStack.itemID, itemStack.getItemDamage())));
 
@@ -150,11 +156,11 @@ public class ItemFacade extends ItemBuildCraft {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void updateIcons(IconRegister par1IconRegister)
+	public void registerIcons(IconRegister par1IconRegister)
 	{
 	    // NOOP
 	}
-	
+
 	@Override
     @SideOnly(Side.CLIENT)
     public int getSpriteNumber()
