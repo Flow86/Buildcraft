@@ -70,7 +70,7 @@ public class FillerFlattener extends FillerPattern {
 			return false;
 		}
 
-		return !empty(xMin, yMin, zMin, xMax, 64 * 4, zMax, tile.worldObj);
+		return !empty(xMin, yMin, zMin, xMax, 64 * 4, zMax, tile);
 	}
 
 	@SideOnly(Side.CLIENT)

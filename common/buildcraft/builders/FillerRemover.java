@@ -28,7 +28,7 @@ public class FillerRemover extends FillerPattern {
 		int yMax = (int) box.pMax().y;
 		int zMax = (int) box.pMax().z;
 
-		return !empty(xMin, yMin, zMin, xMax, yMax, zMax, tile.worldObj);
+		return !empty(xMin, yMin, zMin, xMax, yMax, zMax, tile);
 	}
 
     @SideOnly(Side.CLIENT)
