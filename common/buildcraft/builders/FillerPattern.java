@@ -9,22 +9,27 @@
 
 package buildcraft.builders;
 
+import java.util.List;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeDirection;
 import buildcraft.BuildCraftBuilders;
 import buildcraft.api.core.IBox;
 import buildcraft.api.filler.IFillerPattern;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.BlockUtil;
+import buildcraft.core.utils.Utils;
 
 public abstract class FillerPattern implements IFillerPattern {
 
 	protected int id;
 
 	/**
-	 * stackToPlace contains the next item that can be place in the world. Null if there is none. IteratePattern is responsible to decrementing the stack size
-	 * if needed. Return true when the iteration process is finished.
+	 * stackToPlace contains the next item that can be place in the world. Null
+	 * if there is none. IteratePattern is responsible to decrementing the stack
+	 * size if needed. Return true when the iteration process is finished.
 	 */
 	@Override
 	public abstract boolean iteratePattern(TileEntity tile, IBox box, ItemStack stackToPlace);
@@ -47,9 +52,9 @@ public abstract class FillerPattern implements IFillerPattern {
 
 	/**
 	 * Attempt to fill blocks in the area.
-	 *
+	 * 
 	 * Return false if the process failed.
-	 *
+	 * 
 	 */
 	public boolean fill(int xMin, int yMin, int zMin, int xMax, int yMax, int zMax, ItemStack stackToPlace, World world) {
 		boolean found = false;
@@ -80,11 +85,11 @@ public abstract class FillerPattern implements IFillerPattern {
 
 	/**
 	 * Attempt to remove the blocks in the area.
-	 *
+	 * 
 	 * Return false if is the process failed.
-	 *
+	 * 
 	 */
-	public boolean empty(int xMin, int yMin, int zMin, int xMax, int yMax, int zMax, World world) {
+	public boolean empty(int xMin, int yMin, int zMin, int xMax, int yMax, int zMax, TileEntity tile) {
 		boolean found = false;
 		int lastX = Integer.MAX_VALUE, lastY = Integer.MAX_VALUE, lastZ = Integer.MAX_VALUE;
 
@@ -92,9 +97,9 @@ public abstract class FillerPattern implements IFillerPattern {
 			found = false;
 			for (int x = xMin; x <= xMax; ++x) {
 				for (int z = zMin; z <= zMax; ++z) {
-					if (!BlockUtil.canChangeBlock(world, x, y, z))
+					if (!BlockUtil.canChangeBlock(tile.worldObj, x, y, z))
 						return false;
-					if (!BlockUtil.isSoftBlock(world, x, y, z)) {
+					if (!BlockUtil.isSoftBlock(tile.worldObj, x, y, z)) {
 						found = true;
 						lastX = x;
 						lastY = y;
@@ -109,11 +114,34 @@ public abstract class FillerPattern implements IFillerPattern {
 		}
 
 		if (lastX != Integer.MAX_VALUE) {
-			if (BuildCraftBuilders.fillerDestroy) {
-				world.setBlockWithNotify(lastX, lastY, lastZ, 0);
-			} else {
-				BlockUtil.breakBlock(world, lastX, lastY, lastZ, 20);
+			/*
+			 * if (BuildCraftBuilders.fillerDestroy) {
+			 * tile.worldObj.setBlockWithNotify(lastX, lastY, lastZ, 0); } else
+			 * { BlockUtil.breakBlock(tile.worldObj, lastX, lastY, lastZ, 20); }
+			 */
+			List<ItemStack> stacks = BlockUtil.getItemStackFromBlock(tile.worldObj, lastX, lastY, lastZ);
+
+			boolean added = false;
+			if (stacks != null) {
+				for (ItemStack s : stacks) {
+					if (s != null) {
+						// First, try to add to a nearby chest
+						ItemStack a = Utils.addToRandomInventory(s, tile.worldObj, tile.xCoord, tile.yCoord, tile.zCoord, ForgeDirection.UNKNOWN);
+						s.stackSize -= a.stackSize;
+
+						// Second, try to add to adjacent pipes
+						if (s.stackSize > 0) {
+							Utils.addToRandomPipeEntry(tile.worldObj.getBlockTileEntity(tile.xCoord, tile.yCoord, tile.zCoord), ForgeDirection.UNKNOWN, s);
+							added = true;
+						}
+					}
+				}
 			}
+
+			if (added || BuildCraftBuilders.fillerDestroy)
+				tile.worldObj.setBlockWithNotify(lastX, lastY, lastZ, 0);
+			else
+				BlockUtil.breakBlock(tile.worldObj, lastX, lastY, lastZ, 20);
 			return true;
 		}
 
