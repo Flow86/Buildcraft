@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftFactory;
@@ -18,6 +19,8 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockHopper extends BlockBuildCraft {
+
+	private static Icon icon;
 
 	public BlockHopper(int blockId) {
 		super(blockId, Material.iron);
@@ -49,12 +52,14 @@ public class BlockHopper extends BlockBuildCraft {
 		super.onBlockActivated(world, x, y, z, entityplayer, par6, par7, par8, par9);
 
 		// Drop through if the player is sneaking
-		if (entityplayer.isSneaking())
+		if (entityplayer.isSneaking()) {
 			return false;
+		}
 
 		if (entityplayer.getCurrentEquippedItem() != null) {
-			if (entityplayer.getCurrentEquippedItem().getItem() instanceof IItemPipe)
+			if (entityplayer.getCurrentEquippedItem().getItem() instanceof IItemPipe) {
 				return false;
+			}
 		}
 
 		if (!CoreProxy.proxy.isRenderWorld(world)) {
@@ -64,7 +69,7 @@ public class BlockHopper extends BlockBuildCraft {
 		return true;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
 	public void addCreativeItems(ArrayList itemList) {
 		itemList.add(new ItemStack(this));
@@ -72,9 +77,13 @@ public class BlockHopper extends BlockBuildCraft {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister par1IconRegister)
-	{
-//	    field_94336_cN = par1IconRegister.registerIcons("buildcraft:hopper");
+	public void registerIcons(IconRegister par1IconRegister) {
+		icon = par1IconRegister.registerIcon("buildcraft:hopperBottom");
 	}
 
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Icon getIcon(int par1, int par2) {
+		return icon;
+	}
 }
