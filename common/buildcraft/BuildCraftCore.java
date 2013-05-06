@@ -82,7 +82,7 @@ import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-@Mod(name = "BuildCraft", version = Version.VERSION, useMetadata = false, modid = "BuildCraft|Core", dependencies = "required-after:Forge@[7.7.1.662,)")
+@Mod(name = "BuildCraft", version = Version.VERSION, useMetadata = false, modid = "BuildCraft|Core", dependencies = "required-after:Forge@[7.7.2.682,)")
 @NetworkMod(channels = { DefaultProps.NET_CHANNEL_NAME }, packetHandler = PacketHandler.class, clientSideRequired = true, serverSideRequired = true)
 public class BuildCraftCore {
 	public static enum RenderMode {
@@ -315,6 +315,7 @@ public class BuildCraftCore {
 
 		BuildCraftAPI.softBlocks[Block.snow.blockID] = true;
 		BuildCraftAPI.softBlocks[Block.vine.blockID] = true;
+		BuildCraftAPI.softBlocks[Block.fire.blockID] = true;
 		TickRegistry.registerTickHandler(new TickHandlerCoreClient(), Side.CLIENT);
 
 	}
