@@ -9,11 +9,11 @@
 package buildcraft.transport.pipes;
 
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeDirection;
-import net.minecraftforge.common.ISidedInventory;
 import buildcraft.BuildCraftTransport;
 import buildcraft.api.core.IIconProvider;
 import buildcraft.api.core.Position;
@@ -25,6 +25,7 @@ import buildcraft.api.transport.IPipedItem;
 import buildcraft.api.transport.PipeManager;
 import buildcraft.core.EntityPassiveItem;
 import buildcraft.core.RedstonePowerFramework;
+import buildcraft.core.inventory.InventoryWrapper;
 import buildcraft.core.utils.Utils;
 import buildcraft.transport.Pipe;
 import buildcraft.transport.PipeIconProvider;
@@ -134,7 +135,7 @@ public class PipeItemsWood extends Pipe implements IPowerReceptor {
 	 */
 	public ItemStack[] checkExtract(IInventory inventory, boolean doRemove, ForgeDirection from) {
 
-		// / ISPECIALINVENTORY
+		/* ISPECIALINVENTORY */
 		if (inventory instanceof ISpecialInventory) {
 			ItemStack[] stacks = ((ISpecialInventory) inventory).extractItem(doRemove, from, (int) powerProvider.getEnergyStored());
 			if (stacks != null && doRemove) {
@@ -145,20 +146,41 @@ public class PipeItemsWood extends Pipe implements IPowerReceptor {
 				}
 			}
 			return stacks;
+		} else {
+			
+			IInventory inv = Utils.getInventory(inventory);
+			ItemStack result = checkExtractGeneric(inv, doRemove, from, 0, inv.getSizeInventory() - 1);
+
+			if (result != null)
+				return new ItemStack[] { result };
 		}
 
+		return null;
+
+		/*
 		if (inventory instanceof ISidedInventory) {
-			ISidedInventory sidedInv = (ISidedInventory) inventory;
+			net.minecraft.inventory.ISidedInventory sidedInv = (ISidedInventory) inventory;
+
+			int[] slots = sidedInv.getAccessibleSlotsFromSide(from.ordinal());
+
+			ItemStack result = checkExtractGeneric(sidedInv, doRemove, from, slots);
+
+			if (result != null)
+				return new ItemStack[] { result };
+		
+		} else if (inventory instanceof net.minecraftforge.common.ISidedInventory) {
+			net.minecraftforge.common.ISidedInventory sidedInv = (net.minecraftforge.common.ISidedInventory) inventory;
 
 			int first = sidedInv.getStartInventorySide(from);
 			int last = first + sidedInv.getSizeInventorySide(from) - 1;
 
 			IInventory inv = Utils.getInventory(inventory);
 
-			ItemStack result = checkExtractGeneric(inv, doRemove, from, first, last);
+			ItemStack result = checkExtractGeneric(sidedInv, doRemove, from, first, last);
 
 			if (result != null)
 				return new ItemStack[] { result };
+			
 		} else if (inventory.getSizeInventory() == 2) {
 			// This is an input-output inventory
 
@@ -208,15 +230,18 @@ public class PipeItemsWood extends Pipe implements IPowerReceptor {
 			if (result != null)
 				return new ItemStack[] { result };
 		}
-
-		return null;
+		 */
 	}
-
+	
 	public ItemStack checkExtractGeneric(IInventory inventory, boolean doRemove, ForgeDirection from, int start, int stop) {
-		for (int k = start; k <= stop; ++k) {
+		return checkExtractGeneric(InventoryWrapper.getWrappedInventory(inventory), doRemove, from, Utils.createSlotArray(start, stop - start));
+	}
+	
+	public ItemStack checkExtractGeneric(ISidedInventory inventory, boolean doRemove, ForgeDirection from, int[] slots) {
+		for(int k : slots) {
 			ItemStack slot = inventory.getStackInSlot(k);
 
-			if (slot != null && slot.stackSize > 0) {
+			if (slot != null && slot.stackSize > 0 && inventory.canExtractItem(k, slot, from.ordinal())) {
 				if (doRemove) {
 					return inventory.decrStackSize(k, (int) powerProvider.useEnergy(1, slot.stackSize, true));
 				} else {

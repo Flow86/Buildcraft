@@ -518,5 +518,12 @@ public class Utils {
 		System.arraycopy(second, 0, result, first.length, second.length);
 		return result;
 	}
-
+	
+	public static int[] createSlotArray(int first, int count) {
+		int[] slots = new int[count];
+		for(int k = first; k < first + count; k++)
+			slots[k - first] = k;
+		return slots;
+	}
+	
 }
