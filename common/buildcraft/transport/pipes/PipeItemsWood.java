@@ -36,7 +36,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class PipeItemsWood extends Pipe implements IPowerReceptor {
 
 	private IPowerProvider powerProvider;
-	
+
 	protected int standardIconIndex = PipeIconProvider.PipeItemsWood_Standard;
 	protected int solidIconIndex = PipeIconProvider.PipeAllWood_Solid;
 
@@ -47,7 +47,7 @@ public class PipeItemsWood extends Pipe implements IPowerReceptor {
 		powerProvider.configure(50, 1, 64, 1, 64);
 		powerProvider.configurePowerPerdition(64, 1);
 	}
-	
+
 	protected PipeItemsWood(int itemID, PipeTransportItems transport) {
 		this(transport, new PipeLogicWood(), itemID);
 	}
@@ -147,9 +147,9 @@ public class PipeItemsWood extends Pipe implements IPowerReceptor {
 			}
 			return stacks;
 		} else {
-			
+
 			IInventory inv = Utils.getInventory(inventory);
-			ItemStack result = checkExtractGeneric(inv, doRemove, from, 0, inv.getSizeInventory() - 1);
+			ItemStack result = checkExtractGeneric(inv, doRemove, from);
 
 			if (result != null)
 				return new ItemStack[] { result };
@@ -167,7 +167,7 @@ public class PipeItemsWood extends Pipe implements IPowerReceptor {
 
 			if (result != null)
 				return new ItemStack[] { result };
-		
+
 		} else if (inventory instanceof net.minecraftforge.common.ISidedInventory) {
 			net.minecraftforge.common.ISidedInventory sidedInv = (net.minecraftforge.common.ISidedInventory) inventory;
 
@@ -180,7 +180,7 @@ public class PipeItemsWood extends Pipe implements IPowerReceptor {
 
 			if (result != null)
 				return new ItemStack[] { result };
-			
+
 		} else if (inventory.getSizeInventory() == 2) {
 			// This is an input-output inventory
 
@@ -232,13 +232,13 @@ public class PipeItemsWood extends Pipe implements IPowerReceptor {
 		}
 		 */
 	}
-	
-	public ItemStack checkExtractGeneric(IInventory inventory, boolean doRemove, ForgeDirection from, int start, int stop) {
-		return checkExtractGeneric(InventoryWrapper.getWrappedInventory(inventory), doRemove, from, Utils.createSlotArray(start, stop - start));
+
+	public ItemStack checkExtractGeneric(IInventory inventory, boolean doRemove, ForgeDirection from) {
+		return checkExtractGeneric(InventoryWrapper.getWrappedInventory(inventory), doRemove, from);
 	}
-	
-	public ItemStack checkExtractGeneric(ISidedInventory inventory, boolean doRemove, ForgeDirection from, int[] slots) {
-		for(int k : slots) {
+
+	public ItemStack checkExtractGeneric(ISidedInventory inventory, boolean doRemove, ForgeDirection from) {
+		for (int k : inventory.getAccessibleSlotsFromSide(from.ordinal())) {
 			ItemStack slot = inventory.getStackInSlot(k);
 
 			if (slot != null && slot.stackSize > 0 && inventory.canExtractItem(k, slot, from.ordinal())) {
