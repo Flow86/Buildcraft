@@ -126,7 +126,7 @@ public abstract class FillerPattern implements IFillerPattern {
 				for (ItemStack s : stacks) {
 					if (s != null) {
 						// First, try to add to a nearby chest
-						ItemStack a = Utils.addToRandomInventory(s, tile.worldObj, tile.xCoord, tile.yCoord, tile.zCoord, ForgeDirection.UNKNOWN);
+						ItemStack a = Utils.addToRandomInventory(s, tile.worldObj, tile.xCoord, tile.yCoord, tile.zCoord);
 						s.stackSize -= a.stackSize;
 
 						// Second, try to add to adjacent pipes

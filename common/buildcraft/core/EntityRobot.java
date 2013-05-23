@@ -217,7 +217,7 @@ public class EntityRobot extends Entity implements IEntityAdditionalSpawnData {
 			for (ItemStack s : stacks) {
 				if (s != null) {
 					// First, try to add to a nearby chest
-					ItemStack added = Utils.addToRandomInventory(s, worldObj, xCoord, yCoord, zCoord, ForgeDirection.UNKNOWN);
+					ItemStack added = Utils.addToRandomInventory(s, worldObj, xCoord, yCoord, zCoord);
 					s.stackSize -= added.stackSize;
 
 					// Second, try to add to adjacent pipes
