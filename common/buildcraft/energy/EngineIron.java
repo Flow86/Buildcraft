@@ -253,8 +253,11 @@ public class EngineIron extends Engine {
 
 	@Override
 	public void delete() {
-
-	}
+		ItemStack stack = tile.getStackInSlot(0);
+		if (stack != null) {
+			Utils.dropItems(tile.worldObj, stack, tile.xCoord, tile.yCoord, tile.zCoord);
+		}
+	}		
 
 	@Override
 	public void getGUINetworkData(int i, int j) {
@@ -403,6 +406,13 @@ public class EngineIron extends Engine {
 			return newStack;
 		}
 		return null;
+	}
+	
+	@Override
+	public boolean isStackValidForSlot(int i, ItemStack itemstack) {
+		if (itemstack == null) return false;
+		if (Block.ice.blockID == itemstack.itemID) return true;
+		return LiquidContainerRegistry.getLiquidForFilledItem(itemstack) != null;		
 	}
 
 	@Override
