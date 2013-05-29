@@ -16,19 +16,22 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
-import net.minecraftforge.common.ForgeDirection;
 import buildcraft.core.IMachine;
+import buildcraft.core.inventory.Transactor;
 import buildcraft.core.network.PacketIds;
 import buildcraft.core.network.PacketSlotChange;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.CraftingHelper;
-import buildcraft.core.utils.SimpleInventory;
+import buildcraft.core.inventory.SimpleInventory;
 import buildcraft.core.utils.Utils;
 
 import com.google.common.collect.Lists;
+import net.minecraftforge.common.ForgeDirection;
 
-public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInventory, ILaserTarget, IMachine {
+public class TileAdvancedCraftingTable extends TileEntity implements IInventory, ILaserTarget, IMachine {
+
 	private final class InternalInventoryCraftingContainer extends Container {
+
 		@Override
 		public boolean canInteractWith(EntityPlayer var1) {
 			return false;
@@ -36,6 +39,7 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 	}
 
 	private final class InternalInventoryCrafting extends InventoryCrafting {
+
 		int[] bindings = new int[9];
 		ItemStack[] tempStacks;
 		public int[] hitCount;
@@ -46,14 +50,14 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 		}
 
 		@Override
-		public ItemStack getStackInSlot(int par1) {
-			if (par1 >= 0 && par1 < 9) {
+		public ItemStack getStackInSlot(int slot) {
+			if (slot >= 0 && slot < 9) {
 				if (useRecipeStack || tempStacks == null) {
-					return craftingSlots.getStackInSlot(par1);
+					return craftingSlots.getStackInSlot(slot);
 				} else {
 
-					if (bindings[par1] >= 0) {
-						return tempStacks[bindings[par1]];
+					if (bindings[slot] >= 0) {
+						return tempStacks[bindings[slot]];
 					}
 				}
 			}
@@ -63,18 +67,23 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 		}
 
 		@Override
-		public void setInventorySlotContents(int par1, ItemStack par2ItemStack) {
+		public void setInventorySlotContents(int slot, ItemStack par2ItemStack) {
 			if (tempStacks != null) {
-				tempStacks[bindings[par1]] = par2ItemStack;
+				tempStacks[bindings[slot]] = par2ItemStack;
 			}
 		}
 
 		@Override
-		public ItemStack decrStackSize(int par1, int par2) {
-			if (tempStacks != null)
-				return tempStacks[bindings[par1]].splitStack(par2);
-			else
+		public ItemStack decrStackSize(int slot, int amount) {
+			if (tempStacks != null) {
+				ItemStack result = tempStacks[bindings[slot]].splitStack(amount);
+				if (tempStacks[bindings[slot]].stackSize <= 0) {
+					tempStacks[bindings[slot]] = null;
+				}
+				return result;
+			} else {
 				return null;
+			}
 		}
 
 		public void recipeUpdate(boolean flag) {
@@ -83,8 +92,13 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 	}
 
 	private final class InternalPlayer extends EntityPlayer {
+
 		public InternalPlayer() {
-			super(TileAssemblyAdvancedWorkbench.this.worldObj);
+			super(TileAdvancedCraftingTable.this.worldObj);
+			posX = TileAdvancedCraftingTable.this.xCoord;
+			posY = TileAdvancedCraftingTable.this.yCoord + 1;
+			posZ = TileAdvancedCraftingTable.this.zCoord;
+			username = "[Buildcraft]";
 		}
 
 		@Override
@@ -101,21 +115,17 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 			return null;
 		}
 	}
-
 	public InventoryCraftResult craftResult;
 	private InternalInventoryCrafting internalInventoryCrafting;
 
-	public TileAssemblyAdvancedWorkbench() {
+	public TileAdvancedCraftingTable() {
 		craftingSlots = new SimpleInventory(9, "CraftingSlots", 1);
 		storageSlots = new ItemStack[27];
 		craftResult = new InventoryCraftResult();
 	}
-
 	private SimpleInventory craftingSlots;
 	private ItemStack[] storageSlots;
-
 	private SlotCrafting craftSlot;
-
 	private float storedEnergy;
 	private float[] recentEnergy = new float[20];
 	private boolean craftable;
@@ -130,27 +140,28 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int var1) {
-		if (var1 < storageSlots.length)
-			return storageSlots[var1];
+	public ItemStack getStackInSlot(int slot) {
+		if (slot < storageSlots.length) {
+			return storageSlots[slot];
+		}
 		return null;
 	}
 
 	@Override
-	public ItemStack decrStackSize(int var1, int var2) {
-		if (var1 < storageSlots.length && storageSlots[var1] != null) {
+	public ItemStack decrStackSize(int slot, int amount) {
+		if (slot < storageSlots.length && storageSlots[slot] != null) {
 			ItemStack var3;
 
-			if (this.storageSlots[var1].stackSize <= var2) {
-				var3 = this.storageSlots[var1];
-				this.storageSlots[var1] = null;
+			if (this.storageSlots[slot].stackSize <= amount) {
+				var3 = this.storageSlots[slot];
+				this.storageSlots[slot] = null;
 				this.onInventoryChanged();
 				return var3;
 			} else {
-				var3 = this.storageSlots[var1].splitStack(var2);
+				var3 = this.storageSlots[slot].splitStack(amount);
 
-				if (this.storageSlots[var1].stackSize == 0) {
-					this.storageSlots[var1] = null;
+				if (this.storageSlots[slot].stackSize == 0) {
+					this.storageSlots[slot] = null;
 				}
 
 				this.onInventoryChanged();
@@ -162,25 +173,28 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 	}
 
 	@Override
-	public ItemStack getStackInSlotOnClosing(int var1) {
-		if (var1 >= storageSlots.length)
+	public ItemStack getStackInSlotOnClosing(int slot) {
+		if (slot >= storageSlots.length) {
 			return null;
-		if (this.storageSlots[var1] != null) {
-			ItemStack var2 = this.storageSlots[var1];
-			this.storageSlots[var1] = null;
+		}
+		if (this.storageSlots[slot] != null) {
+			ItemStack var2 = this.storageSlots[slot];
+			this.storageSlots[slot] = null;
 			return var2;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	@Override
-	public void setInventorySlotContents(int var1, ItemStack var2) {
-		if (var1 >= storageSlots.length)
+	public void setInventorySlotContents(int slot, ItemStack stack) {
+		if (slot >= storageSlots.length) {
 			return;
-		this.storageSlots[var1] = var2;
+		}
+		this.storageSlots[slot] = stack;
 
-		if (var2 != null && var2.stackSize > this.getInventoryStackLimit()) {
-			var2.stackSize = this.getInventoryStackLimit();
+		if (stack != null && stack.stackSize > this.getInventoryStackLimit()) {
+			stack.stackSize = this.getInventoryStackLimit();
 		}
 
 		this.onInventoryChanged();
@@ -240,7 +254,7 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 	}
 
 	@Override
-	public boolean isUseableByPlayer(EntityPlayer var1) {
+	public boolean isUseableByPlayer(EntityPlayer player) {
 		return worldObj.getBlockTileEntity(xCoord, yCoord, zCoord) == this;
 	}
 
@@ -272,8 +286,9 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 			craftSlot = new SlotCrafting(internalPlayer, internalInventoryCrafting, craftResult, 0, 0, 0);
 			updateCraftingResults();
 		}
-		if (!CoreProxy.proxy.isSimulating(worldObj))
+		if (!CoreProxy.proxy.isSimulating(worldObj)) {
 			return;
+		}
 		updateCraftingResults();
 		tick++;
 		tick = tick % recentEnergy.length;
@@ -323,28 +338,12 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 			for (ItemStack output : outputs) {
 				boolean putToPipe = Utils.addToRandomPipeEntry(this, ForgeDirection.UP, output);
 				if (!putToPipe) {
-					for (int i = 0; i < storageSlots.length; i++) {
-						if (output.stackSize <= 0) {
-							break;
-						}
-						if (storageSlots[i] != null && output.isStackable() && output.isItemEqual(storageSlots[i])) {
-							storageSlots[i].stackSize += output.stackSize;
-							if (storageSlots[i].stackSize > output.getMaxStackSize()) {
-								output.stackSize = storageSlots[i].stackSize - output.getMaxStackSize();
-								storageSlots[i].stackSize = output.getMaxStackSize();
-							} else {
-								output.stackSize = 0;
-							}
-						} else if (storageSlots[i] == null) {
-							storageSlots[i] = output.copy();
-							output.stackSize = 0;
-						}
+					output.stackSize -= Transactor.getTransactorFor(this).add(output, ForgeDirection.UP, true).stackSize;
+					if (output.stackSize > 0) {
+						output.stackSize -= Utils.addToRandomInventory(output, worldObj, xCoord, yCoord, zCoord).stackSize;
 					}
 					if (output.stackSize > 0) {
-						output = Utils.addToRandomInventory(output, worldObj, xCoord, yCoord, zCoord);
-					}
-					if (output.stackSize > 0) {
-						Utils.dropItems(worldObj, output, xCoord, yCoord, zCoord);
+						Utils.dropItems(worldObj, output, xCoord, yCoord + 1, zCoord);
 					}
 				}
 			}
@@ -365,8 +364,9 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 			return;
 		}
 		internalInventoryCrafting.recipeUpdate(true);
-		if (this.currentRecipe == null || !this.currentRecipe.matches(internalInventoryCrafting, worldObj))
+		if (this.currentRecipe == null || !this.currentRecipe.matches(internalInventoryCrafting, worldObj)) {
 			currentRecipe = CraftingHelper.findMatchingRecipe(internalInventoryCrafting, worldObj);
+		}
 
 		ItemStack resultStack = null;
 		if (currentRecipe != null) {
@@ -381,8 +381,8 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 		return craftingSlots;
 	}
 
-	public ItemStack getOutputSlot() {
-		return craftResult.getStackInSlot(0);
+	public IInventory getOutputSlot() {
+		return craftResult;
 	}
 
 	@Override
@@ -431,23 +431,23 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 		return true;
 	}
 
-	public void getGUINetworkData(int i, int j) {
+	public void getGUINetworkData(int id, int data) {
 		int currentStored = (int) (storedEnergy * 100.0);
-		switch (i) {
-		case 1:
-			currentStored = (currentStored & 0xFFFF0000) | (j & 0xFFFF);
-			storedEnergy = (currentStored / 100.0f);
-			break;
-		case 3:
-			currentStored = (currentStored & 0xFFFF) | ((j & 0xFFFF) << 16);
-			storedEnergy = (currentStored / 100.0f);
-			break;
-		case 4:
-			recentEnergyAverage = recentEnergyAverage & 0xFFFF0000 | (j & 0xFFFF);
-			break;
-		case 5:
-			recentEnergyAverage = (recentEnergyAverage & 0xFFFF) | ((j & 0xFFFF) << 16);
-			break;
+		switch (id) {
+			case 1:
+				currentStored = (currentStored & 0xFFFF0000) | (data & 0xFFFF);
+				storedEnergy = (currentStored / 100.0f);
+				break;
+			case 3:
+				currentStored = (currentStored & 0xFFFF) | ((data & 0xFFFF) << 16);
+				storedEnergy = (currentStored / 100.0f);
+				break;
+			case 4:
+				recentEnergyAverage = recentEnergyAverage & 0xFFFF0000 | (data & 0xFFFF);
+				break;
+			case 5:
+				recentEnergyAverage = (recentEnergyAverage & 0xFFFF) | ((data & 0xFFFF) << 16);
+				break;
 		}
 	}
 
@@ -470,9 +470,7 @@ public class TileAssemblyAdvancedWorkbench extends TileEntity implements IInvent
 	}
 
 	@Override
-	public boolean isStackValidForSlot(int i, ItemStack itemstack) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isStackValidForSlot(int slot, ItemStack stack) {
+		return true;
 	}
-
 }
