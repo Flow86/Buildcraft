@@ -1,12 +1,10 @@
 /**
- * Copyright (c) SpaceToad, 2011
- * http://www.mod-buildcraft.com
+ * Copyright (c) SpaceToad, 2011 http://www.mod-buildcraft.com
  *
- * BuildCraft is distributed under the terms of the Minecraft Mod Public
- * License 1.0, or MMPL. Please check the contents of the license located in
+ * BuildCraft is distributed under the terms of the Minecraft Mod Public License
+ * 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
-
 package buildcraft.factory;
 
 import java.util.HashSet;
@@ -27,6 +25,7 @@ import net.minecraftforge.liquids.LiquidTank;
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftFactory;
 import buildcraft.api.core.Position;
+import buildcraft.api.gates.IAction;
 import buildcraft.api.power.IPowerProvider;
 import buildcraft.api.power.IPowerReceptor;
 import buildcraft.api.power.PowerFramework;
@@ -41,32 +40,31 @@ import buildcraft.core.utils.Utils;
 public class TilePump extends TileMachine implements IMachine, IPowerReceptor, ITankContainer {
 
 	public static int MAX_LIQUID = LiquidContainerRegistry.BUCKET_VOLUME;
-
 	EntityBlock tube;
-
 	private TreeMap<Integer, LinkedList<BlockIndex>> blocksToPump = new TreeMap<Integer, LinkedList<BlockIndex>>();
-
 	LiquidTank tank;
 	double tubeY = Double.NaN;
 	int aimY = 0;
-	
 	private IPowerProvider powerProvider;
 
 	public TilePump() {
 		powerProvider = PowerFramework.currentFramework.createPowerProvider();
-		powerProvider.configure(20, 1, 10, 10, 100);
+		initPowerProvider();
 		tank = new LiquidTank(MAX_LIQUID);
 	}
 
-	// TODO, manage this by different levels (pump what's above first...)
+	private void initPowerProvider() {
+		powerProvider.configure(20, 1, 8, 10, 100);
+	}
 
+	// TODO, manage this by different levels (pump what's above first...)
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
-		
+
 		if (tube == null)
 			return;
-		
+
 		if (!CoreProxy.proxy.isRenderWorld(worldObj)) {
 			if (tube.posY - aimY > 0.01) {
 				tubeY = tube.posY - 0.01;
@@ -113,8 +111,9 @@ public class TilePump extends TileMachine implements IMachine, IPowerReceptor, I
 								if (isLiquid(new BlockIndex(xCoord, y, zCoord))) {
 									aimY = y;
 									return;
-								} else if (worldObj.getBlockId(xCoord, y, zCoord) != 0)
+								} else if (!worldObj.isAirBlock(xCoord, y, zCoord)) {
 									return;
+								}
 							}
 						}
 					}
@@ -143,7 +142,7 @@ public class TilePump extends TileMachine implements IMachine, IPowerReceptor, I
 
 	@Override
 	public void initialize() {
-	    tube = FactoryProxy.proxy.newPumpTube(worldObj);
+		tube = FactoryProxy.proxy.newPumpTube(worldObj);
 
 		if (!Double.isNaN(tubeY)) {
 			tube.posY = tubeY;
@@ -211,7 +210,7 @@ public class TilePump extends TileMachine implements IMachine, IPowerReceptor, I
 			return;
 
 		addToPumpIfLiquid(new BlockIndex(x, y, z), markedBlocks, lastFound, pumpList, liquidId);
-		
+
 		long timeoutTime = System.currentTimeMillis() + 1000;
 
 		while (lastFound.size() > 0) {
@@ -231,8 +230,8 @@ public class TilePump extends TileMachine implements IMachine, IPowerReceptor, I
 				pumpList = blocksToPump.get(index.j + 1);
 
 				addToPumpIfLiquid(new BlockIndex(index.i, index.j + 1, index.k), markedBlocks, lastFound, pumpList, liquidId);
-				
-				if(System.currentTimeMillis() > timeoutTime)
+
+				if (System.currentTimeMillis() > timeoutTime)
 					return;
 			}
 		}
@@ -263,13 +262,13 @@ public class TilePump extends TileMachine implements IMachine, IPowerReceptor, I
 	}
 
 	private boolean isLiquid(BlockIndex index) {
-		if(index == null)
+		if (index == null)
 			return false;
-		
+
 		LiquidStack liquid = Utils.liquidFromBlockId(worldObj.getBlockId(index.i, index.j, index.k));
-		if(liquid == null)
+		if (liquid == null)
 			return false;
-		
+
 		return BuildCraftFactory.pumpDimensionList.isLiquidAllowed(liquid, worldObj.provider.dimensionId);
 	}
 
@@ -287,8 +286,7 @@ public class TilePump extends TileMachine implements IMachine, IPowerReceptor, I
 		tubeY = nbttagcompound.getFloat("tubeY");
 
 		PowerFramework.currentFramework.loadPowerProvider(this, nbttagcompound);
-		powerProvider.configure(20, 1, 10, 10, 100);
-
+		initPowerProvider();
 	}
 
 	@Override
@@ -404,12 +402,11 @@ public class TilePump extends TileMachine implements IMachine, IPowerReceptor, I
 	}
 
 	@Override
-	public boolean allowActions() {
+	public boolean allowAction(IAction action) {
 		return false;
 	}
 
 	// ITankContainer implementation.
-
 	@Override
 	public int fill(ForgeDirection from, LiquidStack resource, boolean doFill) {
 		// not acceptable
@@ -437,7 +434,7 @@ public class TilePump extends TileMachine implements IMachine, IPowerReceptor, I
 
 	@Override
 	public ILiquidTank[] getTanks(ForgeDirection direction) {
-		return new ILiquidTank[] { tank };
+		return new ILiquidTank[]{tank};
 	}
 
 	@Override

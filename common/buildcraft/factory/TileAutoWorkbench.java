@@ -19,8 +19,7 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import buildcraft.core.inventory.StackMergeHelper;
+import buildcraft.core.inventory.StackHelper;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.utils.CraftingHelper;
 import buildcraft.core.inventory.SimpleInventory;
@@ -34,7 +33,6 @@ import net.minecraftforge.common.ForgeDirection;
 
 public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory {
 
-	private static final StackMergeHelper MERGE_HELPER = new StackMergeHelper();
 	public static final int SLOT_RESULT = 0;
 	public static final int CRAFT_TIME = 256;
 	public static final int UPDATE_TIME = 16;
@@ -228,6 +226,7 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 				continue;
 			}
 			if (!gridHasRoomFor(stack)) {
+				slot.setStackInSlot(null);
 				Utils.dropItems(worldObj, stack, xCoord, yCoord + 1, zCoord);
 				continue;
 			}
@@ -266,7 +265,7 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 		inv.setInventorySlotContents(SLOT_RESULT, result);
 
 		// clean fake player inventory (crafting handler support)
-		for (IInvSlot slot : InventoryIterator.getIterable(internalPlayer.inventory, ForgeDirection.DOWN)) {
+		for (IInvSlot slot : InventoryIterator.getIterable(internalPlayer.inventory, ForgeDirection.UP)) {
 			ItemStack stack = slot.getStackInSlot();
 			if (stack != null) {
 				slot.setStackInSlot(null);
@@ -321,20 +320,20 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 	}
 
 	/**
-	 * Check if the item exists in the crafting grid.
+	 * Check if there is room for the stack in the crafting grid.
 	 *
 	 * @param input
 	 * @return true if in grid
 	 */
 	private boolean gridHasRoomFor(ItemStack input) {
+		int space = 0;
 		for (IInvSlot slot : InventoryIterator.getIterable(craftMatrix, ForgeDirection.UP)) {
 			ItemStack stack = slot.getStackInSlot();
-			if (MERGE_HELPER.canStacksMerge(stack, input)
-					&& input.stackSize + stack.stackSize <= craftMatrix.getInventoryStackLimit()) {
-				return true;
+			if (StackHelper.instance().canStacksMerge(stack, input)) {
+				space += stack.getMaxStackSize() - stack.stackSize;
 			}
 		}
-		return false;
+		return space >= input.stackSize;
 	}
 
 	/**
