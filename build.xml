@@ -2,10 +2,11 @@
 	<property environment="env"/>
 	<!-- Properties -->
 
+	<dirname property="imported.basedir" file="${ant.file.BuildCraft}"/>
 	<property name="build.dir" value="build"/>
-	<property name="src.dir" value="BuildCraft"/>
+	<property name="src.dir" value="${imported.basedir}"/>
 	<property name="lang.dir" value="Buildcraft-Localization"/>
-	<property name="resources.dir" value="${src.dir}/buildcraft_resources"/>
+	<property name="resources.dir" value="${imported.basedir}/buildcraft_resources"/>
 
 	<property name="download.dir" value="download"/>
 

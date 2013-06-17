@@ -7,18 +7,15 @@
  */
 package buildcraft.transport.pipes;
 
-import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeDirection;
 import buildcraft.BuildCraftTransport;
 import buildcraft.api.core.IIconProvider;
 import buildcraft.api.power.IPowerProvider;
 import buildcraft.api.power.IPowerReceptor;
 import buildcraft.api.power.PowerFramework;
-import buildcraft.core.utils.Utils;
 import buildcraft.transport.Pipe;
 import buildcraft.transport.PipeIconProvider;
 import buildcraft.transport.PipeTransportPower;
-import buildcraft.transport.TileGenericPipe;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -27,6 +24,7 @@ public class PipePowerWood extends Pipe implements IPowerReceptor {
 	private IPowerProvider powerProvider;
 	protected int standardIconIndex = PipeIconProvider.PipePowerWood_Standard;
 	protected int solidIconIndex = PipeIconProvider.PipeAllWood_Solid;
+	private int[] powerSources = new int[6];
 
 	public PipePowerWood(int itemID) {
 		super(new PipeTransportPower(), new PipeLogicWood(), itemID);
@@ -34,6 +32,7 @@ public class PipePowerWood extends Pipe implements IPowerReceptor {
 		powerProvider = PowerFramework.currentFramework.createPowerProvider();
 		powerProvider.configure(50, 2, 7500, 1, 7500);
 		powerProvider.configurePowerPerdition(1, 10);
+		((PipeTransportPower) transport).maxPower = 32;
 	}
 
 	@Override
@@ -77,16 +76,25 @@ public class PipePowerWood extends Pipe implements IPowerReceptor {
 		if (worldObj.isRemote)
 			return;
 
+		int sources = 0;
 		for (ForgeDirection o : ForgeDirection.VALID_DIRECTIONS) {
-			if (Utils.checkPipesConnections(container, container.getTile(o))) {
-				TileEntity tile = container.getTile(o);
-
-				if (tile instanceof TileGenericPipe) {
-					if (((TileGenericPipe) tile).pipe == null) {
-						continue; // Null pointer protection
+			if (!container.isPipeConnected(o)) {
+				powerSources[o.ordinal()] = 0;
+				continue;
 					}
+			if (powerSources[o.ordinal()] > 0) {
+				powerSources[o.ordinal()]--;
+			}
+			if (powerProvider.isPowerSource(o)) {
+				powerSources[o.ordinal()] = 40;
+			}
+			if (powerSources[o.ordinal()] > 0) {
+				sources++;
+			}
+		}
 
-					PipeTransportPower trans = (PipeTransportPower) ((TileGenericPipe) tile).pipe.transport;
+		if (sources <= 0)
+			return;
 
 					float energyToRemove;
 
@@ -97,18 +105,22 @@ public class PipePowerWood extends Pipe implements IPowerReceptor {
 					} else {
 						energyToRemove = 1;
 					}
+		energyToRemove /= (float) sources;
+
+		PipeTransportPower trans = (PipeTransportPower) transport;
+
+		for (ForgeDirection o : ForgeDirection.VALID_DIRECTIONS) {
+			if (powerSources[o.ordinal()] <= 0)
+				continue;
 
 					float energyUsable = powerProvider.useEnergy(1, energyToRemove, false);
 
-					float energySend = Math.min(energyUsable, ((PipeTransportPower) transport).powerQuery[o.ordinal()]);
+			float energySend = (float) trans.receiveEnergy(o, energyUsable);
 					if (energySend > 0) {
-						trans.receiveEnergy(o.getOpposite(), energySend);
 						powerProvider.useEnergy(1, energySend, true);
 					}
 				}
 			}
-		}
-	}
 
 	@Override
 	public int powerRequest(ForgeDirection from) {
