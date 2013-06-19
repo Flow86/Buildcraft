@@ -49,7 +49,7 @@ public class FillerFillPyramid extends FillerPattern {
 		}
 
 		while (step <= xSize / 2 && step <= zSize / 2 && height >= yMin && height <= yMax) {
-			if (fill(xMin + step, height, zMin + step, xMax - step, height, zMax - step, stackToPlace, tile.worldObj))
+			if (fill(xMin + step, height, zMin + step, xMax - step, height, zMax - step, stackToPlace, tile))
 				return false;
 
 			step++;

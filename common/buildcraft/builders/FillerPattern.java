@@ -55,16 +55,16 @@ public abstract class FillerPattern implements IFillerPattern {
 	 * Return false if the process failed.
 	 * 
 	 */
-	public boolean fill(int xMin, int yMin, int zMin, int xMax, int yMax, int zMax, ItemStack stackToPlace, World world) {
+	public boolean fill(int xMin, int yMin, int zMin, int xMax, int yMax, int zMax, ItemStack stackToPlace, TileEntity tile) {
 		boolean found = false;
 		int lastX = 0, lastY = 0, lastZ = 0;
 
 		for (int y = yMin; y <= yMax && !found; ++y) {
 			for (int x = xMin; x <= xMax && !found; ++x) {
 				for (int z = zMin; z <= zMax && !found; ++z) {
-					if (!BlockUtil.canChangeBlock(world, x, y, z))
+					if (!BlockUtil.canChangeBlock(tile.worldObj, x, y, z))
 						return false;
-					if (BlockUtil.isSoftBlock(world, x, y, z)) {
+					if (BlockUtil.isSoftBlock(tile.worldObj, x, y, z)) {
 						lastX = x;
 						lastY = y;
 						lastZ = z;
@@ -76,8 +76,8 @@ public abstract class FillerPattern implements IFillerPattern {
 		}
 
 		if (found && stackToPlace != null) {
-			breakBlock(world, lastX, lastY, lastZ);
-			stackToPlace.getItem().onItemUse(stackToPlace, CoreProxy.proxy.getBuildCraftPlayer(world), world, lastX, lastY - 1, lastZ, 1, 0.0f, 0.0f, 0.0f);
+			breakBlock(tile, lastX, lastY, lastZ);
+			stackToPlace.getItem().onItemUse(stackToPlace, CoreProxy.proxy.getBuildCraftPlayer(tile.worldObj), tile.worldObj, lastX, lastY - 1, lastZ, 1, 0.0f, 0.0f, 0.0f);
 		}
 
 		return found;
@@ -114,7 +114,7 @@ public abstract class FillerPattern implements IFillerPattern {
 		}
 
 		if (lastX != Integer.MAX_VALUE) {
-			breakBlock(world, lastX, lastY, lastZ);
+			breakBlock(tile, lastX, lastY, lastZ);
 			return true;
 		}
 
@@ -129,14 +129,14 @@ public abstract class FillerPattern implements IFillerPattern {
 	 *
 	 * Return false if is the process failed.
 	 */
-	public boolean flatten(int xMin, int yMin, int zMin, int xMax, int yMax, int zMax, World world, ItemStack stackToPlace) {
+	public boolean flatten(int xMin, int yMin, int zMin, int xMax, int yMax, int zMax, TileEntity tile, ItemStack stackToPlace) {
 		int lastX = Integer.MAX_VALUE, lastY = Integer.MAX_VALUE, lastZ = Integer.MAX_VALUE;
 
 		boolean found = false;
 		for (int x = xMin; x <= xMax && !found; ++x) {
 			for (int z = zMin; z <= zMax && !found; ++z) {
 				for (int y = yMax; y >= yMin; --y) {
-					if (!BlockUtil.canChangeBlock(world, x, y, z) || !BlockUtil.isSoftBlock(world, x, y, z)) {
+					if (!BlockUtil.canChangeBlock(tile.worldObj, x, y, z) || !BlockUtil.isSoftBlock(tile.worldObj, x, y, z)) {
 						break;
 					} else {
 						found = true;
@@ -149,14 +149,14 @@ public abstract class FillerPattern implements IFillerPattern {
 		}
 
 		if (found && stackToPlace != null) {
-			breakBlock(world, lastX, lastY, lastZ);
-			stackToPlace.getItem().onItemUse(stackToPlace, CoreProxy.proxy.getBuildCraftPlayer(world), world, lastX, lastY - 1, lastZ, 1, 0.0f, 0.0f, 0.0f);
+			breakBlock(tile, lastX, lastY, lastZ);
+			stackToPlace.getItem().onItemUse(stackToPlace, CoreProxy.proxy.getBuildCraftPlayer(tile.worldObj), tile.worldObj, lastX, lastY - 1, lastZ, 1, 0.0f, 0.0f, 0.0f);
 		}
 		return found;
 	}
 
-	private void breakBlock(World world, int x, int y, int z) {
-		List<ItemStack> stacks = BlockUtil.getItemStackFromBlock(tile.worldObj, lastX, lastY, lastZ);
+	private void breakBlock(TileEntity tile, int x, int y, int z) {
+		List<ItemStack> stacks = BlockUtil.getItemStackFromBlock(tile.worldObj, x, x, x);
 
 		boolean added = false;
 		if (stacks != null) {
@@ -176,11 +176,11 @@ public abstract class FillerPattern implements IFillerPattern {
 		}
 
 		if (added || BuildCraftBuilders.fillerDestroy) {
-			world.setBlockToAir(x, y, z);
-		} else if (BlockUtil.isToughBlock(world, x, y, z)) {
-			BlockUtil.breakBlock(world, x, y, z, BuildCraftBuilders.fillerLifespanTough);
+			tile.worldObj.setBlockToAir(x, y, z);
+		} else if (BlockUtil.isToughBlock(tile.worldObj, x, y, z)) {
+			BlockUtil.breakBlock(tile.worldObj, x, y, z, BuildCraftBuilders.fillerLifespanTough);
 		} else {
-			BlockUtil.breakBlock(world, x, y, z, BuildCraftBuilders.fillerLifespanNormal);
+			BlockUtil.breakBlock(tile.worldObj, x, y, z, BuildCraftBuilders.fillerLifespanNormal);
 		}
 	}
 }

@@ -25,10 +25,10 @@ public class FillerHorizon extends FillerPattern {
 		int xMax = (int) box.pMax().x;
 		int zMax = (int) box.pMax().z;
 
-		if (flatten(xMin, 1, zMin, xMax, yMin - 1, zMax, tile.worldObj, stackToPlace)) {
+		if (flatten(xMin, 1, zMin, xMax, yMin - 1, zMax, tile, stackToPlace)) {
 			return false;
 		}
-		return !empty(xMin, yMin, zMin, xMax, tile.worldObj.getActualHeight(), zMax, tile.worldObj);
+		return !empty(xMin, yMin, zMin, xMax, tile.worldObj.getActualHeight(), zMax, tile);
 	}
 
 	@SideOnly(Side.CLIENT)

@@ -28,22 +28,22 @@ public class FillerFillWalls extends FillerPattern {
 		int yMax = (int) box.pMax().y;
 		int zMax = (int) box.pMax().z;
 
-		if (fill(xMin, yMin, zMin, xMax, yMin, zMax, stackToPlace, tile.worldObj))
+		if (fill(xMin, yMin, zMin, xMax, yMin, zMax, stackToPlace, tile))
 			return false;
 
-		if (fill(xMin, yMin, zMin, xMin, yMax, zMax, stackToPlace, tile.worldObj))
+		if (fill(xMin, yMin, zMin, xMin, yMax, zMax, stackToPlace, tile))
 			return false;
 
-		if (fill(xMin, yMin, zMin, xMax, yMax, zMin, stackToPlace, tile.worldObj))
+		if (fill(xMin, yMin, zMin, xMax, yMax, zMin, stackToPlace, tile))
 			return false;
 
-		if (fill(xMax, yMin, zMin, xMax, yMax, zMax, stackToPlace, tile.worldObj))
+		if (fill(xMax, yMin, zMin, xMax, yMax, zMax, stackToPlace, tile))
 			return false;
 
-		if (fill(xMin, yMin, zMax, xMax, yMax, zMax, stackToPlace, tile.worldObj))
+		if (fill(xMin, yMin, zMax, xMax, yMax, zMax, stackToPlace, tile))
 			return false;
 
-		if (fill(xMin, yMax, zMin, xMax, yMax, zMax, stackToPlace, tile.worldObj))
+		if (fill(xMin, yMax, zMin, xMax, yMax, zMax, stackToPlace, tile))
 			return false;
 
 		return true;

@@ -18,8 +18,8 @@ public class Version implements Runnable {
 		CURRENT, OUTDATED, CONNECTION_ERROR
 	}
 
-	public static final String VERSION = "@VERSION@";
-	public static final String BUILD_NUMBER = "@BUILD_NUMBER@";
+	public static final String VERSION = "3.6.0-181-g317404e";
+	public static final String BUILD_NUMBER = "custom";
 	private static final String REMOTE_VERSION_FILE = "http://bit.ly/buildcraftver";
 	private static final String REMOTE_CHANGELOG_ROOT = "https://dl.dropbox.com/u/44760587/buildcraft/changelog/";
 

@@ -27,7 +27,7 @@ public class FillerFlattener extends FillerPattern {
 		int yMax = (int) box.pMax().y;
 		int zMax = (int) box.pMax().z;
 
-		if (flatten(xMin, 1, zMin, xMax, yMin - 1, zMax, tile.worldObj, stackToPlace)) {
+		if (flatten(xMin, 1, zMin, xMax, yMin - 1, zMax, tile, stackToPlace)) {
 			return false;
 		}
 
