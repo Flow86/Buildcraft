@@ -23,7 +23,7 @@ public class GuiEmeraldPipe extends GuiBuildCraft {
 	PipeItemsEmerald filterInventory;
 
 	public GuiEmeraldPipe(IInventory playerInventory, TileGenericPipe tile) {
-		super(new ContainerEmeraldPipe(playerInventory, (IInventory) tile.pipe), (IInventory) tile.pipe);
+		super(new ContainerEmeraldPipe(playerInventory, ((PipeItemsEmerald) tile.pipe).getFilters()), ((PipeItemsEmerald) tile.pipe).getFilters());
 		this.playerInventory = playerInventory;
 		this.filterInventory = (PipeItemsEmerald) tile.pipe;
 		xSize = 175;
@@ -32,7 +32,7 @@ public class GuiEmeraldPipe extends GuiBuildCraft {
 
 	@Override
 	protected void drawGuiContainerForegroundLayer(int par1, int par2) {
-		fontRenderer.drawString(filterInventory.getInvName(), getCenteredOffset(filterInventory.getInvName()), 6, 0x404040);
+		fontRenderer.drawString(filterInventory.getFilters().getInvName(), getCenteredOffset(filterInventory.getFilters().getInvName()), 6, 0x404040);
 		fontRenderer.drawString(StringUtils.localize("gui.inventory"), 8, ySize - 93, 0x404040);
 	}
 

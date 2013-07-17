@@ -19,6 +19,9 @@ public class EnergyPulser {
 	}
 
 	public void update() {
+	    if (!isActive && hasPulsed)
+	        hasPulsed = false;
+
 		if (powerReceptor == null || !isActive || tick++ % 10 != 0)
 			return;
 
@@ -50,10 +53,6 @@ public class EnergyPulser {
 
 	public boolean isActive() {
 		return isActive;
-	}
-
-	private float getPulseSpeed() {
-		return 0.1F;
 	}
 
 	public void writeToNBT(NBTTagCompound nbttagcompound) {
