@@ -20,7 +20,7 @@
 
 	<property name="mc.version" value="1.6.2"/>
 	<property name="forge.version" value="9.10.0.800"/>
-	<!--	<property name="project.version" value="0.0.0"/>-->
+	<property name="bc.version" value="4.0.2"/>-->
 
 	<property name="buildcraft.name" value="buildcraft"/>
 
@@ -49,7 +49,16 @@
 
 	<!-- Set full version -->
 	<target name="initialize-version" depends="version-provided,version-not-provided,git.revision">
-		<property name="project.version.full" value="${project.version}.${build.number}"/>
+		<property name="bc.version.full" value="${bc.version}.${build.number}"/>
+
+		<delete file="jenkins.properties" failonerror="false" />
+		<propertyfile file="jenkins.properties">
+			<entry key="BC_VERSION_FULL" value="${bc.version.full}" />
+			<entry key="BC_VERSION" value="${bc.version}" />
+			<entry key="MC_VERSION" value="${mc.version}" />
+			<entry key="MCP_VERSION" value="${mcp.version}" />
+			<entry key="FORGE_VERSION" value="${forge.version}" />
+		</propertyfile>
 	</target>
 
 	<!-- Set unknown build number -->
@@ -79,19 +88,19 @@
 			</filterchain>
 		</loadresource>
 
-		<condition property="project.version" value="${git.clean.revision}" else="0.0.0">
+		<condition property="bc.version" value="${git.clean.revision}" else="0.0.0">
 			<and>
 				<isset property="git.clean.revision"/>
 				<length string="${git.clean.revision}" trim="yes" length="0" when="greater"/>
 			</and>
 		</condition>
-		<condition property="project.complete.version" value="${git.revision}" else="0.0.0">
+		<condition property="bc.complete.version" value="${git.revision}" else="0.0.0">
 			<and>
 				<isset property="git.revision"/>
 				<length string="${git.revision}" trim="yes" length="0" when="greater"/>
 			</and>
 		</condition>
-		<echo>Building buildcraft version ${project.complete.version} (${project.version})</echo>
+		<echo>Building buildcraft version ${bc.complete.version} (${bc.version})</echo>
 	</target>
 
 	<!-- Download necessary files -->
@@ -133,7 +142,7 @@
 		<copy todir="${mcpsrc.dir}/minecraft" verbose="true">
 			<fileset dir="${src.dir}/common"/>
 			<filterset>
-				<filter token="VERSION" value="${project.complete.version}" />
+				<filter token="VERSION" value="${bc.complete.version}" />
 				<filter token="BUILD_NUMBER" value="${build.number}" />
 			</filterset>
 		</copy>
@@ -206,7 +215,7 @@
 		<delete includeemptydirs="true">
 			<fileset dir="${jar.dir}" includes="**/*"/>
 		</delete>
-		<condition property="jar.file.name" value="${jar.dir}/${buildcraft.name}-${mc.version}-${project.version.full}.jar" else="${jar.dir}/${buildcraft.name}-universal-${mc.version}-${project.version.full}.jar">
+		<condition property="jar.file.name" value="${jar.dir}/${buildcraft.name}-${mc.version}-${bc.version.full}.jar" else="${jar.dir}/${buildcraft.name}-universal-${mc.version}-${bc.version.full}.jar">
 			<isset property="forge-long-name"/>
 		</condition>
 		
