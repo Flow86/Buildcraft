@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -572,7 +573,9 @@ public class PipeTransportItems extends PipeTransport {
 			if (BlockGenericPipe.isValid(pipe2) && !(pipe2.transport instanceof PipeTransportItems))
 				return false;
 		}
-
+		
+		if(tile instanceof ISidedInventory)
+			return ((ISidedInventory)tile).getAccessibleSlotsFromSide(side.getOpposite().ordinal()).length > 0;
 		return tile instanceof TileGenericPipe || tile instanceof ISpecialInventory || (tile instanceof IInventory && ((IInventory) tile).getSizeInventory() > 0)
 				|| (tile instanceof IMachine && ((IMachine) tile).manageSolids());
 	}
