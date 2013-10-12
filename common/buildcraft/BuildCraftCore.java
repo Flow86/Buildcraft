@@ -168,8 +168,6 @@ public class BuildCraftCore {
     @EventHandler
 	public void loadConfiguration(FMLPreInitializationEvent evt) {
 
-		Version.check();
-
 		bcLog.setParent(FMLLog.getLogger());
 		bcLog.info("Starting BuildCraft " + Version.getVersion());
 		bcLog.info("Copyright (c) SpaceToad, 2011");
@@ -178,6 +176,12 @@ public class BuildCraftCore {
 		mainConfiguration = new BuildCraftConfiguration(new File(evt.getModConfigurationDirectory(), "buildcraft/main.conf"));
 		try {
 			mainConfiguration.load();
+			
+			Property updateCheck = BuildCraftCore.mainConfiguration.get(Configuration.CATEGORY_GENERAL, "update.check", true);
+			updateCheck.comment = "set to true for version check on startup";
+			if (updateCheck.getBoolean(true)) {
+				Version.check();
+			}
 
 			Property continuousCurrent = BuildCraftCore.mainConfiguration.get(Configuration.CATEGORY_GENERAL, "current.continuous",
 					DefaultProps.CURRENT_CONTINUOUS);
@@ -335,13 +339,13 @@ public class BuildCraftCore {
 	}
 
 	public void loadRecipes() {
-		GameRegistry.addRecipe(new ItemStack(wrenchItem), "I I", " G ", " I ", Character.valueOf('I'), Item.ingotIron, Character.valueOf('G'), stoneGearItem);
-		GameRegistry.addRecipe(new ItemStack(woodenGearItem), " S ", "S S", " S ", Character.valueOf('S'), Item.stick);
-		GameRegistry.addRecipe(new ItemStack(stoneGearItem), " I ", "IGI", " I ", Character.valueOf('I'), Block.cobblestone, Character.valueOf('G'),
+	        CoreProxy.proxy.addCraftingRecipe(new ItemStack(wrenchItem), "I I", " G ", " I ", 'I', Item.ingotIron, 'G', stoneGearItem);
+		CoreProxy.proxy.addCraftingRecipe(new ItemStack(woodenGearItem), " S ", "S S", " S ", 'S', "stickWood");
+		CoreProxy.proxy.addCraftingRecipe(new ItemStack(stoneGearItem), " I ", "IGI", " I ", 'I', "cobblestone", 'G',
 				woodenGearItem);
-		GameRegistry.addRecipe(new ItemStack(ironGearItem), " I ", "IGI", " I ", Character.valueOf('I'), Item.ingotIron, Character.valueOf('G'), stoneGearItem);
-		GameRegistry.addRecipe(new ItemStack(goldGearItem), " I ", "IGI", " I ", Character.valueOf('I'), Item.ingotGold, Character.valueOf('G'), ironGearItem);
-		GameRegistry.addRecipe(new ItemStack(diamondGearItem), " I ", "IGI", " I ", Character.valueOf('I'), Item.diamond, Character.valueOf('G'), goldGearItem);
+		CoreProxy.proxy.addCraftingRecipe(new ItemStack(ironGearItem), " I ", "IGI", " I ", 'I', Item.ingotIron, 'G', stoneGearItem);
+		CoreProxy.proxy.addCraftingRecipe(new ItemStack(goldGearItem), " I ", "IGI", " I ", 'I', Item.ingotGold, 'G', ironGearItem);
+		CoreProxy.proxy.addCraftingRecipe(new ItemStack(diamondGearItem), " I ", "IGI", " I ", 'I', Item.diamond, 'G', goldGearItem);
 	}
 	
 	@EventHandler

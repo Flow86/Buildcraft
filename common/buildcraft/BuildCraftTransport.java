@@ -65,6 +65,8 @@ import buildcraft.transport.pipes.PipeItemsWood;
 import buildcraft.transport.pipes.PipePowerCobblestone;
 import buildcraft.transport.pipes.PipePowerDiamond;
 import buildcraft.transport.pipes.PipePowerGold;
+import buildcraft.transport.pipes.PipePowerIron;
+import buildcraft.transport.pipes.PipePowerIron.PowerMode;
 import buildcraft.transport.pipes.PipePowerQuartz;
 import buildcraft.transport.pipes.PipePowerStone;
 import buildcraft.transport.pipes.PipePowerWood;
@@ -72,21 +74,18 @@ import buildcraft.transport.pipes.PipeStructureCobblestone;
 import buildcraft.transport.triggers.ActionEnergyPulser;
 import buildcraft.transport.triggers.ActionPipeColor;
 import buildcraft.transport.triggers.ActionPipeDirection;
+import buildcraft.transport.triggers.ActionPowerLimiter;
 import buildcraft.transport.triggers.ActionSignalOutput;
 import buildcraft.transport.triggers.ActionSingleEnergyPulse;
 import buildcraft.transport.triggers.TriggerFilteredBufferInventoryLevel;
 import buildcraft.transport.triggers.TriggerPipeContents;
 import buildcraft.transport.triggers.TriggerPipeContents.Kind;
 import buildcraft.transport.triggers.TriggerPipeSignal;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
-import com.google.common.primitives.Ints;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLInterModComms.IMCEvent;
-import cpw.mods.fml.common.event.FMLInterModComms.IMCMessage;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
@@ -94,8 +93,6 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -143,6 +140,7 @@ public class BuildCraftTransport {
 	public static Item pipePowerCobblestone;
 	public static Item pipePowerStone;
 	public static Item pipePowerQuartz;
+	public static Item pipePowerIron;
 	public static Item pipePowerGold;
 	public static Item pipePowerDiamond;
 	public static ItemFacade facadeItem;
@@ -176,6 +174,7 @@ public class BuildCraftTransport {
 	public static BCAction actionSingleEnergyPulse = new ActionSingleEnergyPulse(DefaultProps.ACTION_SINGLE_ENERGY_PULSE);
 	public static BCAction[] actionPipeColor = new BCAction[16];
 	public static BCAction[] actionPipeDirection = new BCAction[16];
+	public static BCAction[] actionPowerLimiter = new BCAction[7];
 	@Instance("BuildCraft|Transport")
 	public static BuildCraftTransport instance;
 	public IIconProvider pipeIconProvider = new PipeIconProvider();
@@ -278,8 +277,8 @@ public class BuildCraftTransport {
 			// Fixing retro-compatiblity
 			pipeItemsWood = buildPipe(DefaultProps.PIPE_ITEMS_WOOD_ID, PipeItemsWood.class, "Wooden Transport Pipe", "plankWood", Block.glass, "plankWood");
 			pipeItemsEmerald = buildPipe(DefaultProps.PIPE_ITEMS_EMERALD_ID, PipeItemsEmerald.class, "Emerald Transport Pipe", Item.emerald, Block.glass, Item.emerald);
-			pipeItemsCobblestone = buildPipe(DefaultProps.PIPE_ITEMS_COBBLESTONE_ID, PipeItemsCobblestone.class, "Cobblestone Transport Pipe", Block.cobblestone, Block.glass, Block.cobblestone);
-			pipeItemsStone = buildPipe(DefaultProps.PIPE_ITEMS_STONE_ID, PipeItemsStone.class, "Stone Transport Pipe", Block.stone, Block.glass, Block.stone);
+			pipeItemsCobblestone = buildPipe(DefaultProps.PIPE_ITEMS_COBBLESTONE_ID, PipeItemsCobblestone.class, "Cobblestone Transport Pipe", "cobblestone", Block.glass, "cobblestone");
+			pipeItemsStone = buildPipe(DefaultProps.PIPE_ITEMS_STONE_ID, PipeItemsStone.class, "Stone Transport Pipe", "stone", Block.glass, "stone");
 			pipeItemsQuartz = buildPipe(DefaultProps.PIPE_ITEMS_QUARTZ_ID, PipeItemsQuartz.class, "Quartz Transport Pipe", Block.blockNetherQuartz, Block.glass, Block.blockNetherQuartz);
 			pipeItemsIron = buildPipe(DefaultProps.PIPE_ITEMS_IRON_ID, PipeItemsIron.class, "Iron Transport Pipe", Item.ingotIron, Block.glass, Item.ingotIron);
 			pipeItemsGold = buildPipe(DefaultProps.PIPE_ITEMS_GOLD_ID, PipeItemsGold.class, "Golden Transport Pipe", Item.ingotGold, Block.glass, Item.ingotGold);
@@ -299,12 +298,13 @@ public class BuildCraftTransport {
 			pipeFluidsSandstone = buildPipe(DefaultProps.PIPE_LIQUIDS_SANDSTONE_ID, PipeFluidsSandstone.class, "Sandstone Waterproof Pipe", pipeWaterproof, pipeItemsSandstone);
 			pipeFluidsVoid = buildPipe(DefaultProps.PIPE_LIQUIDS_VOID_ID, PipeFluidsVoid.class, "Void Waterproof Pipe", pipeWaterproof, pipeItemsVoid);
 
-			pipePowerWood = buildPipe(DefaultProps.PIPE_POWER_WOOD_ID, PipePowerWood.class, "Wooden Conductive Pipe", Item.redstone, pipeItemsWood);
-			pipePowerCobblestone = buildPipe(DefaultProps.PIPE_POWER_COBBLESTONE_ID, PipePowerCobblestone.class, "Cobblestone Conductive Pipe", Item.redstone, pipeItemsCobblestone);
-			pipePowerStone = buildPipe(DefaultProps.PIPE_POWER_STONE_ID, PipePowerStone.class, "Stone Conductive Pipe", Item.redstone, pipeItemsStone);
-			pipePowerQuartz = buildPipe(DefaultProps.PIPE_POWER_QUARTZ_ID, PipePowerQuartz.class, "Quartz Conductive Pipe", Item.redstone, pipeItemsQuartz);
-			pipePowerGold = buildPipe(DefaultProps.PIPE_POWER_GOLD_ID, PipePowerGold.class, "Golden Conductive Pipe", Item.redstone, pipeItemsGold);
-			pipePowerDiamond = buildPipe(DefaultProps.PIPE_POWER_DIAMOND_ID, PipePowerDiamond.class, "Diamond Conductive Pipe", Item.redstone, pipeItemsDiamond);
+			pipePowerWood = buildPipe(DefaultProps.PIPE_POWER_WOOD_ID, PipePowerWood.class, "Wooden Kinesis Pipe", Item.redstone, pipeItemsWood);
+			pipePowerCobblestone = buildPipe(DefaultProps.PIPE_POWER_COBBLESTONE_ID, PipePowerCobblestone.class, "Cobblestone Kinesis Pipe", Item.redstone, pipeItemsCobblestone);
+			pipePowerStone = buildPipe(DefaultProps.PIPE_POWER_STONE_ID, PipePowerStone.class, "Stone Kinesis Pipe", Item.redstone, pipeItemsStone);
+			pipePowerQuartz = buildPipe(DefaultProps.PIPE_POWER_QUARTZ_ID, PipePowerQuartz.class, "Quartz Kinesis Pipe", Item.redstone, pipeItemsQuartz);
+			pipePowerIron = buildPipe(DefaultProps.PIPE_POWER_IRON_ID, PipePowerIron.class, "Iron Kinesis Pipe", Item.redstone, pipeItemsIron);
+			pipePowerGold = buildPipe(DefaultProps.PIPE_POWER_GOLD_ID, PipePowerGold.class, "Golden Kinesis Pipe", Item.redstone, pipeItemsGold);
+			pipePowerDiamond = buildPipe(DefaultProps.PIPE_POWER_DIAMOND_ID, PipePowerDiamond.class, "Diamond Kinesis Pipe", Item.redstone, pipeItemsDiamond);
 
 			pipeStructureCobblestone = buildPipe(DefaultProps.PIPE_STRUCTURE_COBBLESTONE_ID, PipeStructureCobblestone.class, "Cobblestone Structure Pipe", Block.gravel, pipeItemsCobblestone);
 
@@ -418,6 +418,10 @@ public class BuildCraftTransport {
 		for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
 			actionPipeDirection[direction.ordinal()] = new ActionPipeDirection(-1, direction);
 		}
+		
+		for (PowerMode limit : PowerMode.VALUES) {
+			actionPowerLimiter[limit.ordinal()] = new ActionPowerLimiter(-1, limit);
+		}
 	}
 
 	public void loadRecipes() {
@@ -428,15 +432,15 @@ public class BuildCraftTransport {
 		// Add pipe recipes
 		for (PipeRecipe pipe : pipeRecipes) {
 			if (pipe.isShapeless) {
-				GameRegistry.addShapelessRecipe(pipe.result, pipe.input);
+			        CoreProxy.proxy.addShapelessRecipe(pipe.result, pipe.input);
 			} else {
 				CoreProxy.proxy.addCraftingRecipe(pipe.result, pipe.input);
 			}
 		}
 
 		CoreProxy.proxy.addCraftingRecipe(new ItemStack(filteredBufferBlock, 1),
-				new Object[]{"wdw", "wcw", "wpw", Character.valueOf('w'), "plankWood", Character.valueOf('d'),
-			BuildCraftTransport.pipeItemsDiamond, Character.valueOf('c'), Block.chest, Character.valueOf('p'),
+				new Object[]{"wdw", "wcw", "wpw", 'w', "plankWood", 'd',
+			BuildCraftTransport.pipeItemsDiamond, 'c', Block.chest, 'p',
 			Block.pistonBase});
 
 		//Facade turning helper
@@ -463,7 +467,7 @@ public class BuildCraftTransport {
 
 		if (ingredients.length == 3) {
 			recipe.result = new ItemStack(res, 8);
-			recipe.input = new Object[]{"ABC", Character.valueOf('A'), ingredients[0], Character.valueOf('B'), ingredients[1], Character.valueOf('C'), ingredients[2]};
+			recipe.input = new Object[]{"ABC", 'A', ingredients[0], 'B', ingredients[1], 'C', ingredients[2]};
 
 			pipeRecipes.add(recipe);
 		} else if (ingredients.length == 2) {
