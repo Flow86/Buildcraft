@@ -61,7 +61,9 @@ import buildcraft.core.triggers.DefaultActionProvider;
 import buildcraft.core.triggers.DefaultTriggerProvider;
 import buildcraft.core.triggers.TriggerFluidContainer;
 import buildcraft.core.triggers.TriggerInventory;
+import buildcraft.core.triggers.TriggerInventoryLevel;
 import buildcraft.core.triggers.TriggerMachine;
+import buildcraft.core.utils.BCLog;
 import buildcraft.core.utils.Localization;
 import buildcraft.transport.triggers.TriggerRedstoneInput;
 import cpw.mods.fml.common.FMLLog;
@@ -148,6 +150,10 @@ public class BuildCraftCore {
 	public static BCTrigger triggerFullFluid = new TriggerFluidContainer(DefaultProps.TRIGGER_FULL_LIQUID, TriggerFluidContainer.State.Full);
 	public static BCTrigger triggerRedstoneActive = new TriggerRedstoneInput(DefaultProps.TRIGGER_REDSTONE_ACTIVE, true);
 	public static BCTrigger triggerRedstoneInactive = new TriggerRedstoneInput(DefaultProps.TRIGGER_REDSTONE_INACTIVE, false);
+	
+	public static BCTrigger triggerInventoryBelow25 = new TriggerInventoryLevel(TriggerInventoryLevel.TriggerType.BELOW_25);
+	public static BCTrigger triggerInventoryBelow50 = new TriggerInventoryLevel(TriggerInventoryLevel.TriggerType.BELOW_50);
+	public static BCTrigger triggerInventoryBelow75 = new TriggerInventoryLevel(TriggerInventoryLevel.TriggerType.BELOW_75);
 
 	public static BCAction actionRedstone = new ActionRedstoneOutput(DefaultProps.ACTION_REDSTONE);
 	public static BCAction actionOn = new ActionMachineControl(DefaultProps.ACTION_ON, Mode.On);
@@ -160,18 +166,13 @@ public class BuildCraftCore {
 
 	public static BptItem[] itemBptProps = new BptItem[Item.itemsList.length];
 
-	public static final Logger bcLog = Logger.getLogger("Buildcraft");
-
 	@Instance("BuildCraft|Core")
 	public static BuildCraftCore instance;
 
     @EventHandler
 	public void loadConfiguration(FMLPreInitializationEvent evt) {
 
-		bcLog.setParent(FMLLog.getLogger());
-		bcLog.info("Starting BuildCraft " + Version.getVersion());
-		bcLog.info("Copyright (c) SpaceToad, 2011");
-		bcLog.info("http://www.mod-buildcraft.com");
+		BCLog.initLog();
 		
 		mainConfiguration = new BuildCraftConfiguration(new File(evt.getModConfigurationDirectory(), "buildcraft/main.conf"));
 		try {

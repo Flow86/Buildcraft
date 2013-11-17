@@ -42,7 +42,7 @@ import net.minecraftforge.common.Property;
 @NetworkMod(channels = {DefaultProps.NET_CHANNEL_NAME}, packetHandler = PacketHandlerSilicon.class, clientSideRequired = true, serverSideRequired = true)
 public class BuildCraftSilicon {
 
-	public static Item redstoneChipset;
+	public static ItemRedstoneChipset redstoneChipset;
 	public static BlockLaser laserBlock;
 	public static BlockLaserTable assemblyTableBlock;
 	@Instance("BuildCraft|Silicon")
@@ -70,7 +70,8 @@ public class BuildCraftSilicon {
 
 		redstoneChipset = new ItemRedstoneChipset(redstoneChipsetId.getInt());
 		redstoneChipset.setUnlocalizedName("redstoneChipset");
-
+		CoreProxy.proxy.registerItem(redstoneChipset);
+		redstoneChipset.registerItemStacks();
 	}
 
 	@EventHandler
