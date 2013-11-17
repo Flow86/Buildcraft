@@ -16,6 +16,7 @@ import buildcraft.api.power.PowerHandler;
 import buildcraft.api.power.PowerHandler.PowerReceiver;
 import buildcraft.api.power.PowerHandler.Type;
 import buildcraft.core.BlockIndex;
+import buildcraft.core.CoreConstants;
 import buildcraft.core.EntityBlock;
 import buildcraft.core.IMachine;
 import buildcraft.core.TileBuffer;
@@ -53,7 +54,7 @@ public class TilePump extends TileBuildCraft implements IMachine, IPowerReceptor
 	public static int MAX_LIQUID = FluidContainerRegistry.BUCKET_VOLUME * 16;
 	EntityBlock tube;
 	private TreeMap<Integer, Deque<BlockIndex>> pumpLayerQueues = new TreeMap<Integer, Deque<BlockIndex>>();
-	SingleUseTank tank;
+	SingleUseTank tank = new SingleUseTank("tank", MAX_LIQUID, this);
 	double tubeY = Double.NaN;
 	int aimY = 0;
 	private PowerHandler powerHandler;
@@ -65,7 +66,6 @@ public class TilePump extends TileBuildCraft implements IMachine, IPowerReceptor
 	public TilePump() {
 		powerHandler = new PowerHandler(this, Type.MACHINE);
 		initPowerProvider();
-		tank = new SingleUseTank("tank", MAX_LIQUID);
 	}
 
 	private void initPowerProvider() {
@@ -370,11 +370,11 @@ public class TilePump extends TileBuildCraft implements IMachine, IPowerReceptor
 
 	private void setTubePosition() {
 		if (tube != null) {
-			tube.iSize = Utils.pipeMaxPos - Utils.pipeMinPos;
-			tube.kSize = Utils.pipeMaxPos - Utils.pipeMinPos;
+			tube.iSize = CoreConstants.PIPE_MAX_POS - CoreConstants.PIPE_MIN_POS;
+			tube.kSize = CoreConstants.PIPE_MAX_POS - CoreConstants.PIPE_MIN_POS;
 			tube.jSize = yCoord - tube.posY;
 
-			tube.setPosition(xCoord + Utils.pipeMinPos, tubeY, zCoord + Utils.pipeMinPos);
+			tube.setPosition(xCoord + CoreConstants.PIPE_MIN_POS, tubeY, zCoord + CoreConstants.PIPE_MIN_POS);
 		}
 	}
 
