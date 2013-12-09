@@ -15,6 +15,7 @@ import buildcraft.core.BlockSpring;
 import buildcraft.core.DefaultProps;
 import buildcraft.core.InterModComms;
 import buildcraft.core.Version;
+import buildcraft.core.fluids.BCFluid;
 import buildcraft.core.network.PacketHandler;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.triggers.BCTrigger;
@@ -144,11 +145,12 @@ public class BuildCraftEnergy {
 
 
 		// Oil and fuel
-		buildcraftFluidOil = new Fluid("oil").setDensity(800).setViscosity(1500);
+		buildcraftFluidOil = new BCFluid("oil").setDensity(800).setViscosity(1500);
+		
 		FluidRegistry.registerFluid(buildcraftFluidOil);
 		fluidOil = FluidRegistry.getFluid("oil");
 
-		buildcraftFluidFuel = new Fluid("fuel");
+		buildcraftFluidFuel = new BCFluid("fuel");
 		FluidRegistry.registerFluid(buildcraftFluidFuel);
 		fluidFuel = FluidRegistry.getFluid("fuel");
 
@@ -189,6 +191,7 @@ public class BuildCraftEnergy {
 			bucketOil = new ItemBucketBuildcraft(bucketOilId, blockOil.blockID);
 			bucketOil.setUnlocalizedName("bucketOil").setContainerItem(Item.bucketEmpty);
 			LanguageRegistry.addName(bucketOil, "Oil Bucket");
+			CoreProxy.proxy.registerItem(bucketOil);
 			FluidContainerRegistry.registerFluidContainer(FluidRegistry.getFluidStack("oil", FluidContainerRegistry.BUCKET_VOLUME), new ItemStack(bucketOil), new ItemStack(Item.bucketEmpty));
 		}
 
@@ -196,6 +199,7 @@ public class BuildCraftEnergy {
 			bucketFuel = new ItemBucketBuildcraft(bucketFuelId, blockFuel.blockID);
 			bucketFuel.setUnlocalizedName("bucketFuel").setContainerItem(Item.bucketEmpty);
 			LanguageRegistry.addName(bucketFuel, "Fuel Bucket");
+			CoreProxy.proxy.registerItem(bucketFuel);
 			FluidContainerRegistry.registerFluidContainer(FluidRegistry.getFluidStack("fuel", FluidContainerRegistry.BUCKET_VOLUME), new ItemStack(bucketFuel), new ItemStack(Item.bucketEmpty));
 		}
 

@@ -190,7 +190,7 @@ public abstract class Gate {
 		boolean[] oldBroadcastSignal = broadcastSignal;
 
 		broadcastRedstone = false;
-		broadcastSignal = new boolean[]{false, false, false, false};
+		broadcastSignal = new boolean[4];
 
 		// Tell the gate to prepare for resolving actions. (Disable pulser)
 		startResolution();
@@ -287,6 +287,10 @@ public abstract class Gate {
 	public abstract int getTextureIconIndex(boolean isSignalActive);
 
 	public abstract ResourceLocation getGuiFile();
+
+	public int getGuiHeight() {
+		return 207;
+	}
 
 	public static boolean isGateItem(ItemStack stack) {
 		return stack.itemID == BuildCraftTransport.pipeGate.itemID || stack.itemID == BuildCraftTransport.pipeGateAutarchic.itemID;
