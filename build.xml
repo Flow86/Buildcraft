@@ -119,6 +119,10 @@
 		<!-- Fix executable permissions -->
 		<chmod dir="${forge.dir}" perm="ugo+rx" includes="**.sh"/>
 
+		<echo>${build.dir} -> ${src.dir}/fml.patch</echo>
+		<patch dir="${build.dir}" patchfile="${src.dir}/fml.patch" strip="0" reverse="true" failonerror="false" />
+		<patch dir="${build.dir}" patchfile="${src.dir}/fml.patch" strip="0" reverse="false" failonerror="true" />
+		
 		<!-- Install forge -->
 		<exec dir="${forge.dir}" executable="cmd" osfamily="windows">
 			<arg line="/c"/>
