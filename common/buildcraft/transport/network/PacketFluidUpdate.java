@@ -15,8 +15,13 @@ import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.fluids.FluidStack;
 
 public class PacketFluidUpdate extends PacketCoordinates {
+	
+	public static int FLUID_ID_BIT = 0;
+	public static int FLUID_AMOUNT_BIT = 1;
+	public static int FLUID_DATA_NUM = 2;
 
 	public FluidStack[] renderCache = new FluidStack[ForgeDirection.values().length];
+	public int[] colorRenderCache = new int[ForgeDirection.values().length];
 	public BitSet delta;
 
 	public PacketFluidUpdate(int xCoord, int yCoord, int zCoord) {
@@ -53,19 +58,21 @@ public class PacketFluidUpdate extends PacketCoordinates {
 		PipeTransportFluids transLiq = ((PipeTransportFluids) pipe.pipe.transport);
 
 		renderCache = transLiq.renderCache;
+		colorRenderCache = transLiq.colorRenderCache;
 
-		byte[] dBytes = new byte[3];
+		byte[] dBytes = new byte[2];
 		data.read(dBytes);
 		delta = fromByteArray(dBytes);
 
 		// System.out.printf("read %d, %d, %d = %s, %s%n", posX, posY, posZ, Arrays.toString(dBytes), delta);
 
 		for (ForgeDirection dir : ForgeDirection.values()) {
-			if (delta.get(dir.ordinal() * 3 + 0)) {
+			if (delta.get(dir.ordinal() * FLUID_DATA_NUM + FLUID_ID_BIT)) {
 			    int amt = renderCache[dir.ordinal()] != null ? renderCache[dir.ordinal()].amount : 0;
-				renderCache[dir.ordinal()] = new FluidStack(data.readInt(),amt);
+				renderCache[dir.ordinal()] = new FluidStack(data.readShort(), amt);
+				colorRenderCache[dir.ordinal()] = data.readInt();
 			}
-			if (delta.get(dir.ordinal() * 3 + 2)) {
+			if (delta.get(dir.ordinal() * FLUID_DATA_NUM + FLUID_AMOUNT_BIT)) {
 			    if (renderCache[dir.ordinal()] == null) {
 			        renderCache[dir.ordinal()] = new FluidStack(0,0);
 			    }
@@ -85,14 +92,16 @@ public class PacketFluidUpdate extends PacketCoordinates {
 		for (ForgeDirection dir : ForgeDirection.values()) {
 			FluidStack liquid = renderCache[dir.ordinal()];
 
-			if (delta.get(dir.ordinal() * 3 + 0)) {
+			if (delta.get(dir.ordinal() * FLUID_DATA_NUM + FLUID_ID_BIT)) {
 				if (liquid != null) {
-					data.writeInt(liquid.fluidID);
+					data.writeShort(liquid.fluidID);
+					data.writeInt(colorRenderCache[dir.ordinal()]);
 				} else {
-					data.writeInt(0);
+					data.writeShort(0);
+					data.writeInt(0xFFFFFF);
 				}
 			}
-			if (delta.get(dir.ordinal() * 3 + 2)) {
+			if (delta.get(dir.ordinal() * FLUID_DATA_NUM + FLUID_AMOUNT_BIT)) {
 				if (liquid != null) {
 					data.writeInt(liquid.amount);
 				} else {
@@ -113,7 +122,7 @@ public class PacketFluidUpdate extends PacketCoordinates {
 	}
 
 	public static byte[] toByteArray(BitSet bits) {
-		byte[] bytes = new byte[3];
+		byte[] bytes = new byte[2];
 		for (int i = 0; i < bits.length(); i++) {
 			if (bits.get(i)) {
 				bytes[bytes.length - i / 8 - 1] |= 1 << (i % 8);
